@@ -1,0 +1,115 @@
+﻿fila,codigo_a,item_b,codigo_a_norm,item_b_norm,clave_match,tipo_fila,tipo_ENE,tipo_FEB,formula_ENE,formula_FEB,codigo_a_repetido,codigo_a_repeticiones
+2,,CORPORACIÓN HACIA UN VALLE SOLIDARIO,,CORPORACION HACIA UN VALLE SOLIDARIO,2||CORPORACION HACIA UN VALLE SOLIDARIO,detalle_sin_codigo_o_titulo,value,blank,,,,
+5,,GASTOS DE PERSONAL,,GASTOS DE PERSONAL,5||GASTOS DE PERSONAL,subtotal_o_total,formula,formula,=SUM(C6:C12),=SUM(D6:D12),,
+6,5105,Salarios,5105,SALARIOS,6|5105|SALARIOS,detalle_con_codigo,formula,formula,='[1]Hoja 1'!$I$9-921014+'[2]Hoja 1'!$I$9+'[3]Hoja 1'!$D$8,='[4]Hoja 1'!$L$8-6457629+'[5]Hoja 1'!$I$9+'[6]Hoja 1'!$D$8+'[7]Hoja 1'!$D$10+'[8]Hoja 1'!$I$9,NO,1
+7,,Personal Decreto 1860/21,,PERSONAL DECRETO 1860/21,7||PERSONAL DECRETO 1860/21,detalle_sin_codigo_o_titulo,formula,formula,='[1]Hoja 1'!$I$12,='[4]Hoja 1'!$L$10,,
+8,51055101,Dotacion y Suministro,51055101,DOTACION Y SUMINISTRO,8|51055101|DOTACION Y SUMINISTRO,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$54-225638,='[10]Hoja 1'!$C$54-59862,NO,1
+9,,Bonificaciones,,BONIFICACIONES,9||BONIFICACIONES,detalle_sin_codigo_o_titulo,blank,blank,,,,
+10,51056301,Capacitacion,51056301,CAPACITACION,10|51056301|CAPACITACION,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$56,='[10]Hoja 1'!$C$56,NO,1
+11,51058401,Gastos Medicos,51058401,GASTOS MEDICOS,11|51058401|GASTOS MEDICOS,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$70,='[10]Hoja 1'!$C$70,NO,1
+12,53954002,Incapacidades,53954002,INCAPACIDADES,12|53954002|INCAPACIDADES,detalle_con_codigo,blank,formula,,='[11]Hoja 1'!$C$27,NO,1
+13,,HONORARIOS,,HONORARIOS,13||HONORARIOS,subtotal_o_total,formula,formula,=SUM(C14:C18),=SUM(D14:D18),,
+14,51101001,Revisoria Fiscal,51101001,REVISORIA FISCAL,14|51101001|REVISORIA FISCAL,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$73,='[10]Hoja 1'!$C$73,NO,1
+15,,Avaluos,,AVALUOS,15||AVALUOS,detalle_sin_codigo_o_titulo,blank,blank,,,,
+16,51102001,Asesoria Juridica,51102001,ASESORIA JURIDICA,16|51102001|ASESORIA JURIDICA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$75+'[12]Hoja 1'!$G$13,='[10]Hoja 1'!$C$75+'[13]Hoja 1'!$G$14,NO,1
+17,51103001,Asesoria Financiera,51103001,ASESORIA FINANCIERA,17|51103001|ASESORIA FINANCIERA,detalle_con_codigo,blank,blank,,,NO,1
+18,51103508,Asesoría Técnica,51103508,ASESORIA TECNICA,18|51103508|ASESORIA TECNICA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$77,='[10]Hoja 1'!$C$76,NO,1
+19,,IMPUESTOS,,IMPUESTOS,19||IMPUESTOS,subtotal_o_total,formula,formula,=SUM(C20:C21),=SUM(D20:D21),,
+20,,Predial,,PREDIAL,20||PREDIAL,detalle_sin_codigo_o_titulo,blank,blank,,,,
+21,,Impuestos vehiculos,,IMPUESTOS VEHICULOS,21||IMPUESTOS VEHICULOS,detalle_sin_codigo_o_titulo,value,blank,,,,
+22,,ARRENDAMIENTOS,,ARRENDAMIENTOS,22||ARRENDAMIENTOS,subtotal_o_total,formula,formula,=SUM(C23:C27),=SUM(D23:D27),,
+23,51201001 - 51355001,Construcciones y Edificaciones,51201001 - 51355001,CONSTRUCCIONES Y EDIFICACIONES,23|51201001 - 51355001|CONSTRUCCIONES Y EDIFICACIONES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$85+'[12]Hoja 1'!$G$15+'[12]Hoja 1'!$G$17,='[10]Hoja 1'!$C$84+'[13]Hoja 1'!$G$16+'[13]Hoja 1'!$G$18,NO,1
+24,51201501 - 73201501,Maquinaria y Equipo,51201501 - 73201501,MAQUINARIA Y EQUIPO,24|51201501 - 73201501|MAQUINARIA Y EQUIPO,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$87,='[10]Hoja 1'!$C$86,NO,1
+25,51202001,Equipo de Oficina,51202001,EQUIPO DE OFICINA,25|51202001|EQUIPO DE OFICINA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$89,='[10]Hoja 1'!$C$88,NO,1
+26,,Equipo de Computacion y comunicaciones,,EQUIPO DE COMPUTACION Y COMUNICACIONES,26||EQUIPO DE COMPUTACION Y COMUNICACIONES,detalle_sin_codigo_o_titulo,blank,formula,,='[10]Hoja 1'!$C$90,,
+27,,Flota y Equipo de Transporte,,FLOTA Y EQUIPO DE TRANSPORTE,27||FLOTA Y EQUIPO DE TRANSPORTE,detalle_sin_codigo_o_titulo,blank,blank,,,,
+28,,SEGUROS,,SEGUROS,28||SEGUROS,subtotal_o_total,formula,formula,=SUM(C29:C31),=SUM(D29:D31),,
+29,,Cumplimiento,,CUMPLIMIENTO,29||CUMPLIMIENTO,detalle_sin_codigo_o_titulo,blank,blank,,,,
+30,,Responsabilidad Civil y Extracontractual,,RESPONSABILIDAD CIVIL Y EXTRACONTRACTUAL,30||RESPONSABILIDAD CIVIL Y EXTRACONTRACTUAL,detalle_sin_codigo_o_titulo,blank,blank,,,,
+31,,OTROS - Funerarios,,OTROS - FUNERARIOS,31||OTROS - FUNERARIOS,detalle_sin_codigo_o_titulo,blank,formula,,='[10]Hoja 1'!$C$95,,
+32,,SERVICIOS,,SERVICIOS,32||SERVICIOS,subtotal_o_total,formula,formula,=SUM(C33:C45),=SUM(D33:D45),,
+33,,Aseo y Vigilancia,,ASEO Y VIGILANCIA,33||ASEO Y VIGILANCIA,detalle_sin_codigo_o_titulo,formula,formula,='[12]Hoja 1'!$G$22,='[13]Hoja 1'!$G$23,,
+34,51351001 - 51351004,Temporales,51351001 - 51351004,TEMPORALES,34|51351001 - 51351004|TEMPORALES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$97,='[10]Hoja 1'!$C$99,NO,1
+35,,Comunicaciones,,COMUNICACIONES,35||COMUNICACIONES,detalle_sin_codigo_o_titulo,blank,blank,,,,
+36,51351502,Laboratorio,51351502,LABORATORIO,36|51351502|LABORATORIO,detalle_con_codigo,blank,formula,,='[10]Hoja 1'!C103,NO,1
+37,51351503,Fumigacion,51351503,FUMIGACION,37|51351503|FUMIGACION,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$99,='[10]Hoja 1'!C104,NO,1
+38,51352501,Acueducto y Alcantarillado,51352501,ACUEDUCTO Y ALCANTARILLADO,38|51352501|ACUEDUCTO Y ALCANTARILLADO,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$101,='[10]Hoja 1'!$C$106,NO,1
+39,51353001,Energía Electrica,51353001,ENERGIA ELECTRICA,39|51353001|ENERGIA ELECTRICA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$103,='[10]Hoja 1'!$C$108,NO,1
+40,51353501,Telefono,51353501,TELEFONO,40|51353501|TELEFONO,detalle_con_codigo,formula,formula,='[9]Hoja 1'!C105,='[10]Hoja 1'!C110-98250,NO,1
+41,51353502,Internet,51353502,INTERNET,41|51353502|INTERNET,detalle_con_codigo,formula,formula,='[9]Hoja 1'!C106,='[10]Hoja 1'!C111,NO,1
+42,51354001,"Correo, Portes, telegramas",51354001,"CORREO, PORTES, TELEGRAMAS","42|51354001|CORREO, PORTES, TELEGRAMAS",detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$108,='[10]Hoja 1'!$C$113,NO,1
+43,51355001,"Transporte, fletes y acarreos",51355001,"TRANSPORTE, FLETES Y ACARREOS","43|51355001|TRANSPORTE, FLETES Y ACARREOS",detalle_con_codigo,formula,formula,='[12]Hoja 1'!$G$11,='[13]Hoja 1'!$G$11,NO,1
+44,,Gas,,GAS,44||GAS,detalle_sin_codigo_o_titulo,blank,blank,,,,
+45,51356501,Servicio Web-Hosting-Nube- Licencias Siesa y planeacion,51356501,SERVICIO WEB-HOSTING-NUBE- LICENCIAS SIESA Y PLANEACION,45|51356501|SERVICIO WEB-HOSTING-NUBE- LICENCIAS SIESA Y PLANEACION,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$112+'[14]Hoja 1'!$C$70+'[15]Hoja 1'!$C$109+'[16]Hoja 1'!$D$133+'[17]Hoja 1'!$C$101,='[10]Hoja 1'!$C$117+'[10]Hoja 1'!$C$312+'[18]Hoja 1'!$C$92+'[19]Hoja 1'!$C$89+'[20]Hoja 1'!$C$97,NO,1
+46,,GASTOS LEGALES,,GASTOS LEGALES,46||GASTOS LEGALES,subtotal_o_total,formula,formula,=SUM(C47:C51),=SUM(D47:D51),,
+47,,Notariales,,NOTARIALES,47||NOTARIALES,detalle_sin_codigo_o_titulo,formula,blank,='[9]Hoja 1'!$C$115,,,
+48,,Registro Mercantil y proponentes,,REGISTRO MERCANTIL Y PROPONENTES,48||REGISTRO MERCANTIL Y PROPONENTES,detalle_sin_codigo_o_titulo,blank,formula,,='[10]Hoja 1'!$C$120,,
+49,,Tramites y Licencias,,TRAMITES Y LICENCIAS,49||TRAMITES Y LICENCIAS,detalle_sin_codigo_o_titulo,formula,blank,='[9]Hoja 1'!$C$117,,,
+50,,Servicio de Registro BMC,,SERVICIO DE REGISTRO BMC,50||SERVICIO DE REGISTRO BMC,detalle_sin_codigo_o_titulo,blank,blank,,,,
+51,514095,"Certificados Camara Comercio , proponentes y tradicion, JCC",514095,"CERTIFICADOS CAMARA COMERCIO , PROPONENTES Y TRADICION, JCC","51|514095|CERTIFICADOS CAMARA COMERCIO , PROPONENTES Y TRADICION, JCC",detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$118,='[10]Hoja 1'!$C$121,NO,1
+52,,MANTENIMIENTO Y REPARACIONES,,MANTENIMIENTO Y REPARACIONES,52||MANTENIMIENTO Y REPARACIONES,subtotal_o_total,formula,formula,=SUM(C53:C58),=SUM(D53:D58),,
+53,51451001,Construcciones y Edificaciones,51451001,CONSTRUCCIONES Y EDIFICACIONES,53|51451001|CONSTRUCCIONES Y EDIFICACIONES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$123,='[10]Hoja 1'!$C$126,NO,1
+54,51451501,Maquinaria y Equipo,51451501,MAQUINARIA Y EQUIPO,54|51451501|MAQUINARIA Y EQUIPO,detalle_con_codigo,blank,formula,,='[10]Hoja 1'!$C$128-318000+'[10]Hoja 1'!$C$129,SI,2
+55,,Equipo de Oficina,,EQUIPO DE OFICINA,55||EQUIPO DE OFICINA,detalle_sin_codigo_o_titulo,blank,blank,,,,
+56,51451001 - 51451501,Planta Plan Basico de Saneamiento,51451001 - 51451501,PLANTA PLAN BASICO DE SANEAMIENTO,56|51451001 - 51451501|PLANTA PLAN BASICO DE SANEAMIENTO,detalle_con_codigo,formula,value,='[9]Hoja 1'!$C$158,,NO,1
+57,51452501,Equipo de Computacion y Comunic,51452501,EQUIPO DE COMPUTACION Y COMUNIC,57|51452501|EQUIPO DE COMPUTACION Y COMUNIC,detalle_con_codigo,formula,blank,='[9]Hoja 1'!$C$127,,NO,1
+58,51451501,Plan SST,51451501,PLAN SST,58|51451501|PLAN SST,detalle_con_codigo,formula,blank,='[9]Hoja 1'!$C$125,,SI,2
+59,,ADECUACIONES E INSTALACIONES,,ADECUACIONES E INSTALACIONES,59||ADECUACIONES E INSTALACIONES,subtotal_o_total,formula,formula,=SUM(C60:C61),=SUM(D60:D61),,
+60,,Inversion infraestructura,,INVERSION INFRAESTRUCTURA,60||INVERSION INFRAESTRUCTURA,detalle_sin_codigo_o_titulo,blank,blank,,,,
+61,,Reparaciones Locativas,,REPARACIONES LOCATIVAS,61||REPARACIONES LOCATIVAS,detalle_sin_codigo_o_titulo,blank,blank,,,,
+62,,GASTOS DE VIAJE,,GASTOS DE VIAJE,62||GASTOS DE VIAJE,subtotal_o_total,formula,formula,=SUM(C63:C65),=SUM(D63:D65),,
+63,51550501,Alojamiento y Manutencion,51550501,ALOJAMIENTO Y MANUTENCION,63|51550501|ALOJAMIENTO Y MANUTENCION,detalle_con_codigo,blank,blank,,,NO,1
+64,51551501,Pasajes Aereos,51551501,PASAJES AEREOS,64|51551501|PASAJES AEREOS,detalle_con_codigo,blank,blank,,,NO,1
+65,,Pasajes Terrestres,,PASAJES TERRESTRES,65||PASAJES TERRESTRES,detalle_sin_codigo_o_titulo,blank,blank,,,,
+66,,DIVERSOS,,DIVERSOS,66||DIVERSOS,subtotal_o_total,formula,formula,=SUM(C67:C88),=SUM(D67:D88),,
+67,51951001,"Libros, suscripciones, period",51951001,"LIBROS, SUSCRIPCIONES, PERIOD","67|51951001|LIBROS, SUSCRIPCIONES, PERIOD",detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$133,='[10]Hoja 1'!$C$135,NO,1
+68,,Seguros Funerarios,,SEGUROS FUNERARIOS,68||SEGUROS FUNERARIOS,detalle_sin_codigo_o_titulo,blank,blank,,,,
+69,51952501,Elementos de Aseo y Cafeteria,51952501,ELEMENTOS DE ASEO Y CAFETERIA,69|51952501|ELEMENTOS DE ASEO Y CAFETERIA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$135,='[10]Hoja 1'!$C$137,NO,1
+70,51953001,Papeleria,51953001,PAPELERIA,70|51953001|PAPELERIA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$137+'[9]Hoja 1'!$C$402,='[10]Hoja 1'!$C$139,NO,1
+71,51953002,Fotocopias,51953002,FOTOCOPIAS,71|51953002|FOTOCOPIAS,detalle_con_codigo,blank,blank,,,NO,1
+72,51953501,Combustible y Lubricantes,51953501,COMBUSTIBLE Y LUBRICANTES,72|51953501|COMBUSTIBLE Y LUBRICANTES,detalle_con_codigo,value,value,,,NO,1
+73,51954001 - '71100501,Envases y Empaques,51954001 - '71100501,ENVASES Y EMPAQUES,73|51954001 - '71100501|ENVASES Y EMPAQUES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$141,='[10]Hoja 1'!$C$143,NO,1
+74,51954501,Taxis y Buses,51954501,TAXIS Y BUSES,74|51954501|TAXIS Y BUSES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$143,='[10]Hoja 1'!$C$145,NO,1
+75,51956001,Casino y Restaurante (Refrigerios),51956001,CASINO Y RESTAURANTE (REFRIGERIOS),75|51956001|CASINO Y RESTAURANTE (REFRIGERIOS),detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$145,='[10]Hoja 1'!$C$147,NO,1
+76,51956501,Parqueaderos,51956501,PARQUEADEROS,76|51956501|PARQUEADEROS,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$148,='[10]Hoja 1'!$C$150,NO,1
+77,51956601,Peajes,51956601,PEAJES,77|51956601|PEAJES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$150,='[10]Hoja 1'!$C$152,NO,1
+78,51959501,Otros,51959501,OTROS,78|51959501|OTROS,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$152,='[10]Hoja 1'!$C$154,NO,1
+79,51959502,Compra Equipos de Oficina,51959502,COMPRA EQUIPOS DE OFICINA,79|51959502|COMPRA EQUIPOS DE OFICINA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$153,='[10]Hoja 1'!$C$155,NO,1
+80,51959503,Compra Suministros,51959503,COMPRA SUMINISTROS,80|51959503|COMPRA SUMINISTROS,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$154,='[10]Hoja 1'!$C$156,NO,1
+81,51959510,Herramientas y articulos ferreteria,51959510,HERRAMIENTAS Y ARTICULOS FERRETERIA,81|51959510|HERRAMIENTAS Y ARTICULOS FERRETERIA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$156,='[10]Hoja 1'!$C$159,NO,1
+82,51959512,Reuniones Fiestas y Detalles,51959512,REUNIONES FIESTAS Y DETALLES,82|51959512|REUNIONES FIESTAS Y DETALLES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$157,='[10]Hoja 1'!$C$160,NO,1
+83,51959514,Equipos de Bodega,51959514,EQUIPOS DE BODEGA,83|51959514|EQUIPOS DE BODEGA,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$159,='[10]Hoja 1'!$C$161,NO,1
+84,51959515,Compra Equipos de computo y comunicación,51959515,COMPRA EQUIPOS DE COMPUTO Y COMUNICACION,84|51959515|COMPRA EQUIPOS DE COMPUTO Y COMUNICACION,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$160,='[10]Hoja 1'!$C$162,NO,1
+85,51959504,Cuota de Apoyo y Sostenimiento (SENA),51959504,CUOTA DE APOYO Y SOSTENIMIENTO (SENA),85|51959504|CUOTA DE APOYO Y SOSTENIMIENTO (SENA),detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$155,='[10]Hoja 1'!$C$157,NO,1
+86,,Menaje - Basculas-Canastillas-Estibas,,MENAJE - BASCULAS-CANASTILLAS-ESTIBAS,86||MENAJE - BASCULAS-CANASTILLAS-ESTIBAS,detalle_sin_codigo_o_titulo,blank,blank,,,,
+87,51959518,Compra Mercado IVH,51959518,COMPRA MERCADO IVH,87|51959518|COMPRA MERCADO IVH,detalle_con_codigo,blank,formula,,='[10]Hoja 1'!$C$164,NO,1
+88,51959517,Convenios medicos - EMI,51959517,CONVENIOS MEDICOS - EMI,88|51959517|CONVENIOS MEDICOS - EMI,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$161,='[10]Hoja 1'!$C$163,NO,1
+89,,CASINO,,CASINO,89||CASINO,detalle_sin_codigo_o_titulo,formula,formula,=[21]CASINO!$C$144,=[21]CASINO!$F$144,,
+90,,OTROS GASTOS DIVERSOS,,OTROS GASTOS DIVERSOS,90||OTROS GASTOS DIVERSOS,subtotal_o_total,formula,formula,=SUM(C91:C95),=SUM(D91:D95),,
+91,,Demandas por Incumplimiento de Contrato,,DEMANDAS POR INCUMPLIMIENTO DE CONTRATO,91||DEMANDAS POR INCUMPLIMIENTO DE CONTRATO,detalle_sin_codigo_o_titulo,blank,blank,,,,
+92,,Indemnizaciones,,INDEMNIZACIONES,92||INDEMNIZACIONES,detalle_sin_codigo_o_titulo,blank,blank,,,,
+93,,"Multas, Sanciones y Litigios",,"MULTAS, SANCIONES Y LITIGIOS","93||MULTAS, SANCIONES Y LITIGIOS",detalle_sin_codigo_o_titulo,formula,formula,='[9]Hoja 1'!$C$180,='[10]Hoja 1'!$C$183,,
+94,51956002,Donaciones,51956002,DONACIONES,94|51956002|DONACIONES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$146,='[10]Hoja 1'!$C$148,NO,1
+95,53954001,Ajuste al peso,53954001,AJUSTE AL PESO,95|53954001|AJUSTE AL PESO,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$182,='[10]Hoja 1'!$C$186,NO,1
+96,,TOTAL ADMINISTRATIVOS,,TOTAL ADMINISTRATIVOS,96||TOTAL ADMINISTRATIVOS,detalle_sin_codigo_o_titulo,formula,formula,=C5+C13+C19+C22+C28+C32+C46+C52+C59+C62+C66+C89+C90,=D5+D13+D19+D22+D28+D32+D46+D52+D59+D62+D66+D89+D90,,
+98,,FINANCIEROS,,FINANCIEROS,98||FINANCIEROS,subtotal_o_total,formula,formula,=SUM(C99:C107),=SUM(D99:D107),,
+99,530505,Gastos Bancarios,530505,GASTOS BANCARIOS,99|530505|GASTOS BANCARIOS,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$164,='[10]Hoja 1'!$C$167,NO,1
+100,530515,Comisiones,530515,COMISIONES,100|530515|COMISIONES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$167,='[10]Hoja 1'!$C$170,NO,1
+101,53052001,Intereses Corrientes Obligaciones,53052001,INTERESES CORRIENTES OBLIGACIONES,101|53052001|INTERESES CORRIENTES OBLIGACIONES,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$172,='[10]Hoja 1'!$C$175,NO,1
+102,53052002,Intereses Moratorios,53052002,INTERESES MORATORIOS,102|53052002|INTERESES MORATORIOS,detalle_con_codigo,formula,blank,='[9]Hoja 1'!$C$173,,NO,1
+103,,Intereses Sobregiro,,INTERESES SOBREGIRO,103||INTERESES SOBREGIRO,detalle_sin_codigo_o_titulo,blank,blank,,,,
+104,53052004,Intereses corrientes Leasing,53052004,INTERESES CORRIENTES LEASING,104|53052004|INTERESES CORRIENTES LEASING,detalle_con_codigo,blank,formula,,='[10]Hoja 1'!$C$176,NO,1
+105,53059502,Seguro Credito Leasing,53059502,SEGURO CREDITO LEASING,105|53059502|SEGURO CREDITO LEASING,detalle_con_codigo,blank,blank,,,NO,1
+106,51159502,Gravámen a Movimientos Financieros,51159502,GRAVAMEN A MOVIMIENTOS FINANCIEROS,106|51159502|GRAVAMEN A MOVIMIENTOS FINANCIEROS,detalle_con_codigo,formula,formula,='[9]Hoja 1'!$C$82+'[9]Hoja 1'!$C$175,='[10]Hoja 1'!$C$81+'[10]Hoja 1'!$C$180,NO,1
+107,530595,Otros,530595,OTROS,107|530595|OTROS,detalle_con_codigo,formula,blank,='[9]Hoja 1'!$C$177,,NO,1
+108,,INTERESES SOCIOS,,INTERESES SOCIOS,108||INTERESES SOCIOS,detalle_sin_codigo_o_titulo,formula,formula,=96313193+10045491,=99151187+9611660,,
+109,,TOTAL FINANCIEROS,,TOTAL FINANCIEROS,109||TOTAL FINANCIEROS,detalle_sin_codigo_o_titulo,formula,formula,=C98+C108,=D98+D108,,
+111,,GASTOS DE PERSONAL DIRECTIVO,,GASTOS DE PERSONAL DIRECTIVO,111||GASTOS DE PERSONAL DIRECTIVO,detalle_sin_codigo_o_titulo,blank,blank,,,,
+112,,GASTOS NO OPERACIONALES,,GASTOS NO OPERACIONALES,112||GASTOS NO OPERACIONALES,detalle_sin_codigo_o_titulo,blank,blank,,,,
+113,,COSTO DE FACTURAS,,COSTO DE FACTURAS,113||COSTO DE FACTURAS,detalle_sin_codigo_o_titulo,value,blank,,,,
+114,,RECREARTE,,RECREARTE,114||RECREARTE,detalle_sin_codigo_o_titulo,formula,formula,=[21]RECREARTE!$C$141,=[21]RECREARTE!$F$141,,
+115,,PROVISION 2025 - INDEMNIZACION DE PERSONAL,,PROVISION 2025 - INDEMNIZACION DE PERSONAL,115||PROVISION 2025 - INDEMNIZACION DE PERSONAL,detalle_sin_codigo_o_titulo,blank,blank,,,,
+116,,(-) DESCUENTOS COMERCIALES,,(-) DESCUENTOS COMERCIALES,116||(-) DESCUENTOS COMERCIALES,detalle_sin_codigo_o_titulo,blank,formula,,='[10]Hoja 1'!$E$23,,
+117,,(-) INGRESOS NO OPERACIONALES,,(-) INGRESOS NO OPERACIONALES,117||(-) INGRESOS NO OPERACIONALES,detalle_sin_codigo_o_titulo,blank,formula,,='[10]Hoja 1'!$E$28,,
+118,,(-) INGRESOS INCAPACIDADES,,(-) INGRESOS INCAPACIDADES,118||(-) INGRESOS INCAPACIDADES,detalle_sin_codigo_o_titulo,blank,blank,,,,
+119,,TOTAL GASTOS NO OPERACIONALES,,TOTAL GASTOS NO OPERACIONALES,119||TOTAL GASTOS NO OPERACIONALES,subtotal_o_total,formula,formula,=SUM(C113:C115)-SUM(C116:C118),=SUM(D113:D115)-SUM(D116:D118),,
