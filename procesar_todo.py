@@ -396,8 +396,12 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
                     lineas_comentario.append(f"Op fija: {op} ${val:,.0f}  -> subtotal ${valor_total:,.0f}")
 
             # Buscar fila destino
+            # 1) fila_dest: lookup directo por número de fila (evita colisiones de código duplicado)
+            fila_dest  = item.get('fila_dest')
             buscar_por = item.get('buscar_por', 'A')
-            if buscar_por == 'B':
+            if fila_dest:
+                fila = fila_dest
+            elif buscar_por == 'B':
                 desc_b = normalizar(codigo_a[2:] if codigo_a.startswith('B:') else codigo_a)
                 fila = indice_destino_b.get(desc_b)
             else:

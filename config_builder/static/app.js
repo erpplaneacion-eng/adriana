@@ -71,7 +71,22 @@ function initMappingsFromConfig(config) {
   mappingSheets = {};
   if (!config || !config.items) return;
   for (const item of config.items) {
-    const key = item.buscar_por === 'B' ? `B:${item.codigo_a.replace(/^B:/, '')}` : norm(item.codigo_a);
+    const codeKey = item.buscar_por === 'B'
+      ? `B:${item.codigo_a.replace(/^B:/, '')}`
+      : norm(item.codigo_a);
+    // Si el item tiene fila_dest (nuevo formato) úsala directamente
+    // Si no, busca el número de fila en sheetsData para migrar al nuevo formato
+    let filaNum = item.fila_dest || null;
+    if (!filaNum) {
+      for (const sheet of sheetsData) {
+        const match = sheet.filas.find(f => {
+          const fk = f.tiene_codigo ? norm(f.codigo) : `B:${f.descripcion}`;
+          return fk === codeKey && (!item.hoja || sheet.nombre.trim() === item.hoja.trim());
+        });
+        if (match) { filaNum = match.fila; break; }
+      }
+    }
+    const key = filaNum ? `${codeKey}|${filaNum}` : codeKey;
     mappings[key] = (item.sources || []).map(src => ({
       key       : src.key,
       archivo   : src.key,
@@ -119,7 +134,10 @@ function renderTabs() {
   const nav = document.getElementById('tabs-nav');
   nav.innerHTML = '';
   sheetsData.forEach((sheet, i) => {
-    const configured = sheet.filas.filter(f => (mappings[norm(f.codigo)] || []).length > 0).length;
+    const configured = sheet.filas.filter(f => {
+      const ck = f.tiene_codigo ? norm(f.codigo) : `B:${f.descripcion}`;
+      return (mappings[`${ck}|${f.fila}`] || mappings[ck] || []).length > 0;
+    }).length;
     const btn = document.createElement('button');
     btn.className   = 'tab-btn' + (i === 0 ? ' active' : '');
     btn.textContent = sheet.nombre;
@@ -149,8 +167,9 @@ function renderDestRows() {
   if (!currentSheet) return;
 
   currentSheet.filas.forEach(fila => {
-    // Clave: código si existe, si no "B:<descripcion>"
-    const key = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
+    // Clave única: código (o B:desc) + número de fila para evitar colisiones con códigos duplicados
+    const codeKey = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
+    const key = `${codeKey}|${fila.fila}`;
 
     // Filas con fórmulas internas: siguen siendo configurables, solo se marcan visualmente
     const esFormula = fila.es_formula || false;
@@ -287,12 +306,27 @@ function renderChips(rowKey, sources, container) {
     const codigos = Array.isArray(src.codigos) ? src.codigos.join(', ') : (src.codigo || '');
     const val = src.valor != null ? Number(src.valor) : 0;
     total += val;
-    chip.innerHTML = `
-      <span class="chip-code">${codigos}</span>
-      <span class="chip-file">${src.key || src.archivo}</span>
-      ${val ? `<span class="chip-val">${fmt(val)}</span>` : ''}
-      <span class="chip-remove" onclick="removeSource('${rowKey}', ${idx})">×</span>
-    `;
+    // Usar createElement en lugar de innerHTML para evitar que caracteres especiales
+    // en rowKey (apóstrofes, guiones, etc.) rompan atributos onclick inline
+    const codeSpan = document.createElement('span');
+    codeSpan.className = 'chip-code';
+    codeSpan.textContent = codigos;
+    const fileSpan = document.createElement('span');
+    fileSpan.className = 'chip-file';
+    fileSpan.textContent = src.key || src.archivo;
+    const removeSpan = document.createElement('span');
+    removeSpan.className = 'chip-remove';
+    removeSpan.textContent = '×';
+    removeSpan.addEventListener('click', () => removeSource(rowKey, idx));
+    chip.appendChild(codeSpan);
+    chip.appendChild(fileSpan);
+    if (val) {
+      const valSpan = document.createElement('span');
+      valSpan.className = 'chip-val';
+      valSpan.textContent = fmt(val);
+      chip.appendChild(valSpan);
+    }
+    chip.appendChild(removeSpan);
     container.appendChild(chip);
   });
 
@@ -513,9 +547,13 @@ function buildConfig() {
   }
 
   // Agregar nuevas fuentes de los mappings
-  Object.entries(mappings).forEach(([codigoA, sources]) => {
+  Object.entries(mappings).forEach(([rowKey, sources]) => {
+    // rowKey puede ser "CODIGO|filaNum" o "B:desc|filaNum"
+    const pipIdx  = rowKey.lastIndexOf('|');
+    const codigoA = pipIdx >= 0 ? rowKey.slice(0, pipIdx) : rowKey;
+    const filaNum = pipIdx >= 0 ? parseInt(rowKey.slice(pipIdx + 1)) : null;
+
     const configSources = sources.map(src => {
-      // Asegurar que la clave existe en file_sources
       if (!fileSources[src.key]) {
         fileSources[src.key] = { prefijo: inferPrefijo(src.archivo || src.key), entidad: inferEntidad(src.archivo || src.key) };
       }
@@ -525,9 +563,10 @@ function buildConfig() {
     });
 
     const entry = { codigo_a: codigoA, sources: configSources };
-    if (codigoA.startsWith('B:')) entry.buscar_por = 'B';
-    if (mappingSheets[codigoA])  entry.hoja = mappingSheets[codigoA];
-    if (manualValues[codigoA])   entry.valor_fijo = manualValues[codigoA];
+    if (codigoA.startsWith('B:'))  entry.buscar_por = 'B';
+    if (filaNum)                   entry.fila_dest  = filaNum;
+    if (mappingSheets[rowKey])     entry.hoja       = mappingSheets[rowKey];
+    if (manualValues[rowKey])      entry.valor_fijo = manualValues[rowKey];
     items.push(entry);
   });
 
