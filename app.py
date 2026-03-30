@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore')
 
 BASE         = r'C:\Users\User\OneDrive\Desktop\CHVS\adriana'
 CONFIG_PATH  = os.path.join(BASE, 'config_gastos.json')
-INFORME_PATH = os.path.join(BASE, 'proyectouno', 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
+INFORME_PATH = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 SCRIPT_PATH  = os.path.join(BASE, 'procesar_todo.py')
 
 MES_NOMBRES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
@@ -124,7 +124,10 @@ def api_sheets():
         # Filas a excluir por hoja (col B) — títulos sin valor
         FILAS_EXCLUIR = {
             'GASTOS OPERATIVOS': {
-                'CUOTA DE APOYO Y SOSTENIMIENTO',
+                'CUOTA DE APOYO Y SOSTENIMIENTO',  # título sin valor configurable
+                'GASTOS DE PERSONAL',               # fórmula interna: suma filas 6-10
+                'DIVERSOS',                         # fórmula interna: suma filas 13-16
+                'TOTAL GASTOS',                     # fórmula interna: suma totales
             },
             'CASINO': {
                 'Intereses', 'Descuentos Comerciales', 'otros', 'Flete',

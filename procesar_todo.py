@@ -20,7 +20,7 @@ warnings.filterwarnings('ignore')
 
 # ---------------------------------------------------------------------------
 BASE              = r'C:\Users\User\OneDrive\Desktop\CHVS\adriana'
-ARCHIVO_PRINCIPAL = os.path.join(BASE, 'proyectouno', 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
+ARCHIVO_PRINCIPAL = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 CONFIG_GASTOS     = os.path.join(BASE, 'config_gastos.json')
 CONFIG_5105       = os.path.join(BASE, 'config_5105.json')
 
@@ -495,6 +495,9 @@ def procesar_mes(carpeta_mes):
 
     # Paso 2: Gastos (todas las hojas según config)
     procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
+
+    # Forzar recálculo automático al abrir en Excel
+    wb_dest.calculation.calcMode = 'auto'
 
     print(f"\n{'='*65}")
     try:

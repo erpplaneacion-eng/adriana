@@ -113,19 +113,6 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "7205",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010103           GERENCIA OPERATIVA"
-          ]
-        }
-      ],
-      "fila_dest": 6,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
       "codigo_a": "514095",
       "sources": [
         {
@@ -886,32 +873,6 @@
       "hoja": "GASTOS ADMINISTRATIVOS"
     },
     {
-      "codigo_a": "72055101",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010102           GERENCIA"
-          ]
-        }
-      ],
-      "fila_dest": 9,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "72058401",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010102           GERENCIA"
-          ]
-        }
-      ],
-      "fila_dest": 10,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
       "codigo_a": "73355501",
       "sources": [
         {
@@ -1015,46 +976,6 @@
         }
       ],
       "buscar_por": "B",
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "71101001 - 73952501",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010201           CONTABILIDAD"
-          ]
-        }
-      ],
-      "fila_dest": 13,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "B:Equipos de Bodega",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010201           CONTABILIDAD"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 15,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "51959509 - 71102001",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010303           CASINO EMPLEADOS"
-          ]
-        }
-      ],
-      "fila_dest": 16,
       "hoja": "GASTOS OPERATIVOS"
     },
     {
@@ -2256,6 +2177,98 @@
       ],
       "fila_dest": 58,
       "hoja": "GASTOS ADMINISTRATIVOS"
+    },
+    {
+      "codigo_a": "7205",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 6,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "72055101",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 9,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "72058401",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 10,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "71101001 - 73952501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 13,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "73959504",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 14,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "B:Equipos de Bodega",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 15,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "51959509 - 71102001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 16,
+      "hoja": "GASTOS OPERATIVOS"
     }
   ]
 }
