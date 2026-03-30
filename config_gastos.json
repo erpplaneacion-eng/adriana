@@ -175,13 +175,7 @@
         }
       ],
       "fila_dest": 16,
-      "hoja": "CASINO",
-      "valor_fijo": [
-        {
-          "op": "+",
-          "valor": 1
-        }
-      ]
+      "hoja": "CASINO"
     },
     {
       "codigo_a": "51055101",
@@ -299,32 +293,6 @@
       ],
       "fila_dest": 25,
       "hoja": "GASTOS ADMINISTRATIVOS"
-    },
-    {
-      "codigo_a": "51303501",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "fila_dest": 12,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
-      "codigo_a": "51304001",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "fila_dest": 13,
-      "hoja": "GASTOS VEHICULOS"
     },
     {
       "codigo_a": "51350502",
@@ -899,19 +867,6 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "73959504",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010411           COMUNICACIONES"
-          ]
-        }
-      ],
-      "fila_dest": 142,
-      "hoja": "CASINO"
-    },
-    {
       "codigo_a": "51954001 - '71100501",
       "sources": [
         {
@@ -936,13 +891,7 @@
       ],
       "buscar_por": "B",
       "fila_dest": 58,
-      "hoja": "CASINO",
-      "valor_fijo": [
-        {
-          "op": "+",
-          "valor": 1
-        }
-      ]
+      "hoja": "CASINO"
     },
     {
       "codigo_a": "B:Menaje",
@@ -1043,50 +992,12 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "B:Construcciones y Edificaciones",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010301           TALENTO HUMANO"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010303           CASINO EMPLEADOS"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010401           PLANEACION"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 92,
-      "hoja": "CASINO"
-    },
-    {
       "codigo_a": "B:Maquinaria y Equipo",
       "sources": [
         {
           "key": "5105_CHVS",
           "codes": [
             "99 GENERAL"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010303           CASINO EMPLEADOS"
           ]
         }
       ],
@@ -1319,40 +1230,12 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "B:Libros, suscripciones, period",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010401           PLANEACION"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 127,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Gastos de Representacion y relaciones Pub",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010403           JURIDICA"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 128,
-      "hoja": "CASINO"
-    },
-    {
       "codigo_a": "B:Elementos de Aseo y Cafetería",
       "sources": [
         {
           "key": "5105_CHVS",
           "codes": [
-            "010401           PLANEACION"
+            "99 GENERAL"
           ]
         }
       ],
@@ -1361,129 +1244,17 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "B:Utiles, papelería y fotocopias",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010401           PLANEACION"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 130,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Combustibles y Lubricantes",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010403           JURIDICA"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 131,
-      "hoja": "CASINO"
-    },
-    {
       "codigo_a": "B:Buses y Taxis",
       "sources": [
         {
           "key": "5105_CHVS",
           "codes": [
-            "010411           COMUNICACIONES"
+            "99 GENERAL"
           ]
         }
       ],
       "buscar_por": "B",
       "fila_dest": 132,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Casino y Restaurante",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010411           COMUNICACIONES"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 133,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Parqueaderos",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010403           JURIDICA"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 134,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Peajes",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010411           COMUNICACIONES"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 135,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Averias",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "020199           APRENDICES LOGIST"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 136,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Compra Equipos de Oficina",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010411           COMUNICACIONES"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 137,
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Otros",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "020199           APRENDICES LOGIST"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 138,
       "hoja": "CASINO"
     },
     {
@@ -1498,20 +1269,6 @@
       ],
       "buscar_por": "B",
       "fila_dest": 10,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
-      "codigo_a": "B:Obligatorio Accidente de transito",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 14,
       "hoja": "GASTOS VEHICULOS"
     },
     {
@@ -1540,20 +1297,6 @@
       ],
       "buscar_por": "B",
       "fila_dest": 24,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
-      "codigo_a": "B:GASTOS TOTALES",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 25,
       "hoja": "GASTOS VEHICULOS"
     },
     {
@@ -2123,6 +1866,567 @@
       ],
       "fila_dest": 58,
       "hoja": "GASTOS ADMINISTRATIVOS"
+    },
+    {
+      "codigo_a": "B:Casos Especiales",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 7,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "B:Incapacidades Especiales",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 8,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "72055101",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 9,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "72058401",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 10,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "71101001 - 73952501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 13,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "73959504",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 14,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "B:Equipos de Bodega",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 15,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "51959509 - 71102001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 16,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "7205",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 6,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "72055101",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 7,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Gastos Medicos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 8,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51303501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 12,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51304001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 13,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Obligatorio Accidente de transito",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 14,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51355001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 18,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51953501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 23,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:NOVEDADES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 19,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:COSTOS INDUSTRIALIZADOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 45,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:INSUMOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 46,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "51956001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 62,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Construcciones y Edificaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 92,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Equipo de Oficina",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 94,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Cumplimiento",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 96,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Aseo y Vigilancia",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 99,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Notariales",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 109,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Construcciones y Edificaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 114,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Maquinaria y Equipo",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 115,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Equipo de Oficina",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 117,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Reparaciones Locativas",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 121,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Pasajes Terrestres",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 125,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Libros, suscripciones, period",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 127,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Gastos de Representacion y relaciones Pub",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 128,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Utiles, papelería y fotocopias",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 130,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Combustibles y Lubricantes",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 131,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Casino y Restaurante",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 133,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Parqueaderos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 134,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Peajes",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 135,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Averias",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 136,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Compra Equipos de Oficina",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 137,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Otros",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 138,
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "73959504",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 142,
+      "hoja": "CASINO"
     }
   ]
 }

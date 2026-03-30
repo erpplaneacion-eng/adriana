@@ -301,32 +301,6 @@
       "hoja": "GASTOS ADMINISTRATIVOS"
     },
     {
-      "codigo_a": "51303501",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "fila_dest": 12,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
-      "codigo_a": "51304001",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "fila_dest": 13,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
       "codigo_a": "51350502",
       "sources": [
         {
@@ -925,60 +899,6 @@
       "hoja": "GASTOS ADMINISTRATIVOS"
     },
     {
-      "codigo_a": "B:Casos Especiales",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 7,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "B:CORPORACIÓN HACIA UN VALLE SOLIDARIO",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "5105"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "B:Incapacidades Especiales",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 8,
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
-      "codigo_a": "B:CUOTA DE APOYO Y SOSTENIMIENTO",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010201           CONTABILIDAD"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "hoja": "GASTOS OPERATIVOS"
-    },
-    {
       "codigo_a": "B:Flete Industrializados PROPIOS",
       "sources": [
         {
@@ -1555,20 +1475,6 @@
       "hoja": "GASTOS VEHICULOS"
     },
     {
-      "codigo_a": "B:Obligatorio Accidente de transito",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 14,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
       "codigo_a": "B:Seguridad",
       "sources": [
         {
@@ -1594,20 +1500,6 @@
       ],
       "buscar_por": "B",
       "fila_dest": 24,
-      "hoja": "GASTOS VEHICULOS"
-    },
-    {
-      "codigo_a": "B:GASTOS TOTALES",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 25,
       "hoja": "GASTOS VEHICULOS"
     },
     {
@@ -2179,7 +2071,7 @@
       "hoja": "GASTOS ADMINISTRATIVOS"
     },
     {
-      "codigo_a": "7205",
+      "codigo_a": "B:Casos Especiales",
       "sources": [
         {
           "key": "5105_CHVS",
@@ -2188,7 +2080,22 @@
           ]
         }
       ],
-      "fila_dest": 6,
+      "buscar_por": "B",
+      "fila_dest": 7,
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "B:Incapacidades Especiales",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 8,
       "hoja": "GASTOS OPERATIVOS"
     },
     {
@@ -2269,6 +2176,112 @@
       ],
       "fila_dest": 16,
       "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "7205",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 6,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "72055101",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 7,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Gastos Medicos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 8,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51303501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 12,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51304001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 13,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Obligatorio Accidente de transito",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 14,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51355001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 18,
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51953501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 23,
+      "hoja": "GASTOS VEHICULOS"
     }
   ]
 }
