@@ -3569,6 +3569,46 @@
       "buscar_por": "B",
       "fila_dest": 149,
       "hoja": "CALI"
+    },
+    {
+      "codigo_a": "7105",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 63,
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73355501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 77,
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Manipuladoras",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 79,
+      "hoja": "CALI"
     }
   ]
 }
