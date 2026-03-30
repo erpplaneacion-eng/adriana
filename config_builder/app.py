@@ -112,13 +112,69 @@ def api_sheets():
         sheets = []
         HOJAS_EXCLUIR = {'%DIST C', '%DIST C '}
 
-        # Filas a excluir por hoja (col B)
+        # Filas a excluir en TODAS las hojas
+        FILAS_EXCLUIR_GLOBAL = {
+            'CORPORACIÓN HACIA UN VALLE SOLIDARIO',
+            'CORPORACI\u00d3N HACIA UN VALLE SOLIDARIO ',
+            'DIAS DE ATENCIÓN',
+            'DIAS DE ATENCI\u00d3N',
+            'DIAS DE ATENCI\u00d3N ',
+        }
+
+        # Filas a excluir por hoja (col B) — títulos sin valor
         FILAS_EXCLUIR = {
+            'GASTOS OPERATIVOS': {
+                'CUOTA DE APOYO Y SOSTENIMIENTO',
+            },
             'CASINO': {
                 'Intereses', 'Descuentos Comerciales', 'otros', 'Flete',
                 'Industrializados PROPIOS', 'Flete Industrializados TERCEROS',
                 'Transporte Materia Prima - Cavasa', 'Flete Preparados PROPIOS',
                 'Flete Preparados TERCEROS', 'Material de empaque'
+            },
+            'YUMBO': {
+                # Totales y fórmulas internas
+                'TOTAL RACIONES', 'INGRESOS BRUTOS', 'OPERACIONALES',
+                'INDUSTRIAS MANUFACTURERAS', 'NO OPERACIONALES', 'FINANCIEROS',
+                'DESCUENTOS - GASTO OPERACIONAL', 'OTROS', 'TOTAL INGRESOS NETOS',
+                'COSTOS DE PRODUCCION', 'INSUMOS CI', 'COSTOS PREPARADOS',
+                'INSUMOS CP', 'FLETES CP', 'OTROS COSTOS Y GASTOS INDIRECTOS',
+                'COSTOS DE PERSONAL', 'HONORARIOS', 'SERVICIOS', 'GASTOS LEGALES',
+                'ADECUACIONES E INSTALACIONES', 'DIVERSOS', 'UTILIDAD BRUTA',
+                'GASTOS ADMINISTRATIVOS Y NO OPERACI', 'TOTAL AJUSTES', 'UTILIDAD NETA',
+                'MANO DE OBRA DIRECTA',
+                # Descuentos automáticos por porcentaje
+                'Procultura 0,5%', 'Prohospitales 1%', 'Rete Ica 0,6%',
+                'Adulto Mayor 2%', 'Prodeporte 2,5%', '2% Juzgado de Familia',
+                '0,5% Propacifico',
+                # Cross-sheet: calculadas desde otras hojas del Excel
+                'PREPARADOS PROPIOS', 'Costos Indirectos de Personal',
+                'Gastos Fijos Administracion', 'Gastos financieros',
+                'Gastos No Operacionales',
+                # Sin valor / no configurables
+                'Retefuente', 'COSTOS INDUSTRIALIZADOS',
+                'RACION PARA PREPARAR EN CASA (Ins)', 'REFRIGERIOS (Ins)',
+                'FLETES CI', 'INDUSTRIALIZADOS PROPIOS', 'INDUSTRIALIZADOS TERCEROS',
+            },
+            'CALI': {
+                'TOTAL RACIONES', 'INGRESOS BRUTOS', 'OPERACIONALES',
+                'INDUSTRIAS MANUFACTURERAS', 'NO OPERACIONALES', 'FINANCIEROS',
+                'DESCUENTOS - GASTO OPERACIONAL', 'OTROS', 'TOTAL INGRESOS NETOS',
+                'COSTOS DE PRODUCCION', 'COSTOS INDUSTRIALIZADOS', 'INSUMOS CI',
+                'FLETES CI', 'COSTOS PREPARADOS', 'INSUMOS CP', 'FLETES CP',
+                'OTROS COSTOS Y GASTOS INDIRECTOS', 'COSTOS DE PERSONAL',
+                'HONORARIOS', 'SERVICIOS', 'GASTOS LEGALES',
+                'ADECUACIONES E INSTALACIONES', 'DIVERSOS',
+                'UTILIDAD BRUTA', 'GASTOS ADMINISTRATIVOS Y NO OPERACI',
+                'TOTAL AJUSTES', 'UTILIDAD NETA',
+                'MANO DE OBRA DIRECTA',
+                'PREPARADOS PROPIOS',          # calculado: GASTOS VEHICULOS * %DIST
+                '2% Estampillas Prounivalle',
+                '0,88% Rte Ica',
+                '1% Estampilla Prohospital',
+                '0,5% Propacifico',
+                'Retefuente',
+                '2% Juzgado de Familia',
             }
         }
         for sh_name in wb.sheetnames:
@@ -138,11 +194,9 @@ def api_sheets():
                 if not tiene_codigo and not b:
                     continue  # fila vacía
 
-                # Excluir títulos de sección: col A vacía + col B todo mayúsculas
-                if not tiene_codigo and b == b.upper() and len(b) > 3:
+                # Excluir filas globales y específicas por hoja
+                if b in FILAS_EXCLUIR_GLOBAL:
                     continue
-
-                # Excluir filas específicas por hoja
                 if b in FILAS_EXCLUIR.get(sh_name.strip(), set()):
                     continue
 
@@ -174,7 +228,7 @@ def api_sheets():
                     'descripcion' : b,
                     'fuentes'     : fuentes,
                     'tiene_codigo': tiene_codigo,
-                    'es_formula'  : es_formula,
+                    'es_formula'  : es_formula,   # solo visual — sigue siendo configurable
                 })
 
             if rows:

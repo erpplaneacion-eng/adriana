@@ -24,10 +24,26 @@ ARCHIVO_PRINCIPAL = os.path.join(BASE, 'proyectouno', 'INFORME REAL_2026 - FORMA
 CONFIG_GASTOS     = os.path.join(BASE, 'config_gastos.json')
 CONFIG_5105       = os.path.join(BASE, 'config_5105.json')
 
+# Columna por mes para hojas con 1 col por mes (ENE=3, FEB=4 ...)
 MES_COLUMNA = {
     "ENERO":3,"FEBRERO":4,"MARZO":5,"ABRIL":6,"MAYO":7,"JUNIO":8,
     "JULIO":9,"AGOSTO":10,"SEPTIEMBRE":11,"OCTUBRE":12,"NOVIEMBRE":13,"DICIEMBRE":14
 }
+# Número ordinal del mes (para calcular columna en hojas con estructura diferente)
+MES_NUMERO = {
+    "ENERO":1,"FEBRERO":2,"MARZO":3,"ABRIL":4,"MAYO":5,"JUNIO":6,
+    "JULIO":7,"AGOSTO":8,"SEPTIEMBRE":9,"OCTUBRE":10,"NOVIEMBRE":11,"DICIEMBRE":12
+}
+
+# Hojas con estructura de columnas diferente a la estándar (1 col/mes)
+# Patrón 3 cols/mes: ENE=col3, FEB=col6, MAR=col9... → col = mes_num * 3
+_tres_cols = lambda mes_num: mes_num * 3
+COLUMNA_HOJA = {
+    'CASINO': _tres_cols,
+    'CALI'  : _tres_cols,
+    'YUMBO' : _tres_cols,
+}
+
 MES_ABREV = {
     "ENE":"ENERO","FEB":"FEBRERO","MAR":"MARZO","ABR":"ABRIL",
     "MAY":"MAYO","JUN":"JUNIO","JUL":"JULIO","AGO":"AGOSTO",
@@ -263,7 +279,7 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
 # ---------------------------------------------------------------------------
 # PASO 2: Gastos varios
 # ---------------------------------------------------------------------------
-def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio):
+def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre=None):
     print(f"\n{'='*65}")
     print(f"PASO 2 - GASTOS (todas las hojas)")
     print(f"{'='*65}")
@@ -307,7 +323,15 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio):
             continue
 
         hoja_dest = wb_dest[hoja_nombre]
-        print(f"\n  --- {hoja_nombre} ({len(hoja_items)} items) ---")
+
+        # Calcular columna destino según estructura de la hoja
+        mes_num = MES_NUMERO.get(mes_nombre or '', 0)
+        if hoja_nombre.strip() in COLUMNA_HOJA and mes_num:
+            col_hoja = COLUMNA_HOJA[hoja_nombre.strip()](mes_num)
+        else:
+            col_hoja = columna_xlsx
+
+        print(f"\n  --- {hoja_nombre} ({len(hoja_items)} items) col={col_hoja} ---")
 
         # Construir índices de fila
         indice_destino   = {}
@@ -384,10 +408,10 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio):
                 continue
 
             # Resolver celda real (puede ser merged — solo la top-left es escribible)
-            fila_real, col_real = fila, columna_xlsx
+            fila_real, col_real = fila, col_hoja
             for rango in hoja_dest.merged_cells.ranges:
                 if (rango.min_row <= fila <= rango.max_row and
-                        rango.min_col <= columna_xlsx <= rango.max_col):
+                        rango.min_col <= col_hoja <= rango.max_col):
                     fila_real = rango.min_row
                     col_real  = rango.min_col
                     break
@@ -465,7 +489,7 @@ def procesar_mes(carpeta_mes):
         print("ADVERTENCIA: No se encontro hoja de Gastos Administrativos para 5105.")
 
     # Paso 2: Gastos (todas las hojas según config)
-    procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio)
+    procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
 
     print(f"\n{'='*65}")
     try:

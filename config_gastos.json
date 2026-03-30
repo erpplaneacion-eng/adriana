@@ -41,14 +41,15 @@
           ]
         }
       ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
       "valor_fijo": [
         {
           "op": "+",
-          "valor": 100000
+          "valor": 1
         },
         {
-          "op": "-",
-          "valor": 5
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -113,10 +114,21 @@
       "codigo_a": "514095",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "514095"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -161,13 +173,46 @@
       ]
     },
     {
+      "codigo_a": "51055101",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
       "codigo_a": "51056301",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51056301"
+            "010102           GERENCIA"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -175,10 +220,21 @@
       "codigo_a": "51058401",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51058401"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -186,10 +242,21 @@
       "codigo_a": "51101001",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51101001"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -211,13 +278,46 @@
       ]
     },
     {
+      "codigo_a": "51103001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
       "codigo_a": "51103508",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "511035"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -237,21 +337,79 @@
       "codigo_a": "51202001",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51202001"
+            "99 GENERAL"
           ]
         }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
       ]
+    },
+    {
+      "codigo_a": "51303501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51304001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51350502",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS VEHICULOS"
     },
     {
       "codigo_a": "51351502",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51351502"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -259,10 +417,21 @@
       "codigo_a": "51351503",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51351503"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -270,10 +439,21 @@
       "codigo_a": "51352501",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51352501"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -281,10 +461,21 @@
       "codigo_a": "51353001",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51353001"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -292,10 +483,21 @@
       "codigo_a": "51353501",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51353501"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -303,10 +505,21 @@
       "codigo_a": "51353502",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51353502"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -314,10 +527,21 @@
       "codigo_a": "51354001",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51354001"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -325,10 +549,21 @@
       "codigo_a": "51355001",
       "sources": [
         {
-          "key": "AUX_51355001",
+          "key": "5105_CHVS",
           "codes": [
-            "1069174807"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -336,35 +571,21 @@
       "codigo_a": "51356501",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51356501"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
         },
         {
-          "key": "ER_CHVS",
-          "codes": [
-            "733565"
-          ],
-          "sin_filtro": true
-        },
-        {
-          "key": "ER_YUMBO26",
-          "codes": [
-            "733565"
-          ]
-        },
-        {
-          "key": "ER_BUGA26",
-          "codes": [
-            "733565"
-          ]
-        },
-        {
-          "key": "ER_CALI26",
-          "codes": [
-            "733565"
-          ]
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -383,10 +604,21 @@
       "codigo_a": "51451001",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51451001"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -394,10 +626,111 @@
       "codigo_a": "51451501",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51451501"
+            "99 GENERAL"
           ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51452501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51454001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51454002",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "51550501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51551501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
         }
       ]
     },
@@ -433,6 +766,40 @@
           ]
         }
       ]
+    },
+    {
+      "codigo_a": "51953002",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51953501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS VEHICULOS"
     },
     {
       "codigo_a": "51954501",
@@ -665,12 +1032,59 @@
       "codigo_a": "53954002",
       "sources": [
         {
-          "key": "ER_YUMBO25",
+          "key": "5105_CHVS",
           "codes": [
-            "53954002"
+            "99 GENERAL"
           ]
         }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
       ]
+    },
+    {
+      "codigo_a": "71100501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "71101001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "71101501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
     },
     {
       "codigo_a": "72055101",
@@ -697,6 +1111,54 @@
       "hoja": "GASTOS OPERATIVOS"
     },
     {
+      "codigo_a": "73351502",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73351503",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73352501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73355001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
       "codigo_a": "73355501",
       "sources": [
         {
@@ -707,6 +1169,18 @@
         }
       ],
       "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "73451001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
     },
     {
       "codigo_a": "73451502",
@@ -721,6 +1195,54 @@
       "hoja": "CASINO"
     },
     {
+      "codigo_a": "73953001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73954501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73956001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "73956501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "CALI"
+    },
+    {
       "codigo_a": "73959504",
       "sources": [
         {
@@ -733,46 +1255,28 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "51201001 - 51355001",
+      "codigo_a": "73959508",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51201001"
-          ]
-        },
-        {
-          "key": "AUX_51355001",
-          "codes": [
-            "900051349",
-            "901191316"
+            "99 GENERAL"
           ]
         }
-      ]
+      ],
+      "hoja": "CALI"
     },
     {
-      "codigo_a": "51201501 - 73201501",
+      "codigo_a": "73959512",
       "sources": [
         {
-          "key": "ER_CHVS",
+          "key": "5105_CHVS",
           "codes": [
-            "51201501",
-            "73201501"
+            "99 GENERAL"
           ]
         }
-      ]
-    },
-    {
-      "codigo_a": "51351001 - 51351004",
-      "sources": [
-        {
-          "key": "ER_CHVS",
-          "codes": [
-            "51351001",
-            "51351004"
-          ]
-        }
-      ]
+      ],
+      "hoja": "CALI"
     },
     {
       "codigo_a": "51954001 - '71100501",
@@ -1036,37 +1540,6 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "B:Equipo de Oficina",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010303           CASINO EMPLEADOS"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010401           PLANEACION"
-          ]
-        },
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010403           JURIDICA"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "hoja": "CASINO"
-    },
-    {
       "codigo_a": "B:Cumplimiento",
       "sources": [
         {
@@ -1077,7 +1550,17 @@
         }
       ],
       "buscar_por": "B",
-      "hoja": "CASINO"
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
     },
     {
       "codigo_a": "B:Respomsabilidad Civil Y Extracontractual",
@@ -1103,7 +1586,17 @@
         }
       ],
       "buscar_por": "B",
-      "hoja": "CASINO"
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
     },
     {
       "codigo_a": "B:Temporales",
@@ -1220,7 +1713,17 @@
         }
       ],
       "buscar_por": "B",
-      "hoja": "CASINO"
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
     },
     {
       "codigo_a": "B:Registro Mercantil",
@@ -1288,19 +1791,6 @@
       "hoja": "CASINO"
     },
     {
-      "codigo_a": "B:Reparaciones Locativas",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010403           JURIDICA"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "hoja": "CASINO"
-    },
-    {
       "codigo_a": "B:Alojamiento y Manutención",
       "sources": [
         {
@@ -1320,19 +1810,6 @@
           "key": "5105_CHVS",
           "codes": [
             "010403           JURIDICA"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "hoja": "CASINO"
-    },
-    {
-      "codigo_a": "B:Pasajes Terrestres",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "010401           PLANEACION"
           ]
         }
       ],
@@ -1494,6 +1971,1530 @@
       ],
       "buscar_por": "B",
       "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:GASTOS DE PERSONAL",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Personal Decreto 1860/21",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Bonificaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:HONORARIOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Avaluos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:IMPUESTOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Predial",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Impuestos vehiculos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:ARRENDAMIENTOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51201001 - 51355001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51201501 - 73201501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Equipo de Computacion y comunicaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Flota y Equipo de Transporte",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:SEGUROS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Responsabilidad Civil y Extracontractual",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:OTROS - Funerarios",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:SERVICIOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51351001 - 51351004",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Comunicaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Gas",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:GASTOS LEGALES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Registro Mercantil y proponentes",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Tramites y Licencias",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Servicio de Registro BMC",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:MANTENIMIENTO Y REPARACIONES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Equipo de Oficina",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "51451001 - 51451501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Plan SST",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:ADECUACIONES E INSTALACIONES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Inversion infraestructura",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:Reparaciones Locativas",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:GASTOS DE VIAJE",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS ADMINISTRATIVOS",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 1
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:DIVERSOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "B:TOTAL GASTOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS OPERATIVOS"
+    },
+    {
+      "codigo_a": "B:Impuestos Vehiculo",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Obligatorio Accidente de transito",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Seguridad",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Compra Equipo de Transporte",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:GASTOS TOTALES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "GASTOS VEHICULOS"
+    },
+    {
+      "codigo_a": "B:Cupos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:TOTAL RACIONES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:INGRESOS BRUTOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:OPERACIONALES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:INDUSTRIAS MANUFACTURERAS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:NOVEDADES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:NO OPERACIONALES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:FINANCIEROS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:DESCUENTOS - GASTO OPERACIONAL",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:OTROS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:TOTAL INGRESOS NETOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:COSTOS DE PRODUCCION",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:COSTOS INDUSTRIALIZADOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:INSUMOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        },
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "010201           CONTABILIDAD"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO",
+      "valor_fijo": [
+        {
+          "op": "+",
+          "valor": 0
+        },
+        {
+          "op": "+",
+          "valor": 0
+        }
+      ]
+    },
+    {
+      "codigo_a": "B:COSTOS ALMUERZO",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:MANO DE OBRA DIRECTA",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:OTROS COSTOS Y GASTOS INDIRECTOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:COSTOS DE PERSONAL",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:Pasajes Terrestres",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:TOTAL COSTO",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:COSTO NETO",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CASINO"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO INDUSTRIALIZADO",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO PREPARADO AM",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO PREPARADO PM",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:ALMUERZO JORNADA UNICA",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Descuentos Comerciales",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Intereses",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:otros Fin",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:INDUSTRIALIZADOS PROPIOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:INDUSTRIALIZADOS TERCEROS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:RACION MANIPULADORAS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:MEJORAMIENTO DE MENU",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "010102           GERENCIA"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:REFRIGERIOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "010102           GERENCIA"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Personal Supervisor - Coordinadores",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Temporales MOD",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Asesoría Tecnica/ Capacitaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Responsabilidad Civil Y Extracontractual",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Temporales Serv",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Plan Basico de Saneamiento",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Herramientas y articulos ferreteria",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Reuniones Fiestas y Detalles",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:GASTOS ADMINISTRATIVOS Y NO OPERACIONALES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Gastos Fijos Administracion",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Gastos financieros",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Costo de Facturas",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Gastos No Operacionales",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Novedades",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 1",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 2",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 3",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 4",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 5",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 6",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "hoja": "CALI"
     }
   ]
 }
