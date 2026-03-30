@@ -171,9 +171,6 @@ function renderDestRows() {
     const codeKey = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
     const key = `${codeKey}|${fila.fila}`;
 
-    // Filas con fórmulas internas: siguen siendo configurables, solo se marcan visualmente
-    const esFormula = fila.es_formula || false;
-
     const sources = mappings[key] || [];
     const hasData = sources.length > 0;
 
@@ -185,12 +182,10 @@ function renderDestRows() {
     const codigoLabel = fila.tiene_codigo ? fila.codigo : `— ${fila.descripcion}`;
     const descLabel   = fila.tiene_codigo ? fila.descripcion : '';
 
-    if (esFormula) div.classList.add('formula-row');
-
     div.innerHTML = `
       <div class="dest-row-header">
         <span class="dest-codigo ${fila.tiene_codigo ? '' : 'sin-codigo'}">${codigoLabel}</span>
-        <span class="dest-desc">${descLabel}${esFormula ? ' <small style="color:#b8860b">(Σ)</small>' : ''}</span>
+        <span class="dest-desc">${descLabel}</span>
         <span class="dest-status ${hasData ? 'status-green' : 'status-gray'}"
               data-tip="${hasData ? sources.length + ' fuente(s)' : 'Sin configurar'}"></span>
       </div>

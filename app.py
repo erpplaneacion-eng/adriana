@@ -110,7 +110,10 @@ def api_sheets():
         wb_f = openpyxl.load_workbook(INFORME_PATH, data_only=False)
 
         sheets = []
-        HOJAS_EXCLUIR = {'%DIST C', '%DIST C '}
+        HOJAS_EXCLUIR  = {'%DIST C', '%DIST C '}
+        # Hojas con 3 cols/mes: solo cols 3,6,9,12... son columnas de valor
+        # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fórmula
+        HOJAS_3COL = {'CASINO', 'CALI', 'YUMBO', 'BUGA'}
 
         # Filas a excluir en TODAS las hojas
         FILAS_EXCLUIR_GLOBAL = {
@@ -171,7 +174,12 @@ def api_sheets():
                 'UTILIDAD BRUTA', 'GASTOS ADMINISTRATIVOS Y NO OPERACI',
                 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
-                'PREPARADOS PROPIOS',          # calculado: GASTOS VEHICULOS * %DIST
+                'PREPARADOS PROPIOS',               # calculado: GASTOS VEHICULOS * %DIST
+                # Cross-sheet: se calculan automáticamente desde otras hojas del libro
+                'Costos Indirectos de Personal',
+                'Gastos Fijos Administracion',
+                'Gastos No Operacionales',
+                # Nota: 'Gastos financieros' NO se excluye — necesita configuración manual
                 '2% Estampillas Prounivalle',
                 '0,88% Rte Ica',
                 '1% Estampilla Prohospital',
@@ -233,23 +241,32 @@ def api_sheets():
                 if b in FILAS_EXCLUIR.get(sh_name.strip(), set()):
                     continue
 
-                # Detectar fórmula interna: suma de otras filas de la MISMA hoja
-                # Regla: la fórmula NO tiene referencias externas "[n]" y referencia otras filas
+                # Detectar fórmula interna: referencia otras filas de la MISMA hoja
+                # Solo se revisan las columnas de valor (no las de ratio/presupuesto)
                 es_formula = False
                 current_row = row[0].row
-                for c in row[2:14]:   # cols C a N (meses ENE-DIC)
-                    v = ws_f.cell(row=current_row, column=c.column).value
+                if sh_name.strip() in HOJAS_3COL:
+                    cols_valor = [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36]
+                else:
+                    cols_valor = list(range(3, 15))  # cols C a N (ENE-DIC estándar)
+                for col_num in cols_valor:
+                    v = ws_f.cell(row=current_row, column=col_num).value
                     if not v or not isinstance(v, str) or not v.startswith('='):
                         continue
-                    # Si tiene referencia a libro externo → NO es fórmula interna
-                    if '[' in v:
+                    # Si tiene referencia a libro externo o a otra hoja → NO es fórmula interna
+                    if '[' in v or "'" in v:
                         continue
-                    # Si tiene referencia a otras filas de la misma hoja → SÍ es fórmula interna
+                    # Si referencia otras filas de la misma hoja → SÍ es fórmula interna
                     nums = re.findall(r'\d+', v)
                     otras_filas = [int(n) for n in nums if int(n) != current_row and 1 < int(n) < 500]
                     if otras_filas:
                         es_formula = True
                         break
+
+                # Filas con fórmulas internas o cross-sheet: Excel las calcula solo,
+                # no deben aparecer en la UI para evitar que el usuario las configure.
+                if es_formula:
+                    continue
 
                 # Clave de búsqueda en config: código si existe, si no "B:<descripcion>"
                 clave = re.sub(r'\s+', ' ', a) if tiene_codigo else f'B:{b}'
@@ -261,7 +278,6 @@ def api_sheets():
                     'descripcion' : b,
                     'fuentes'     : fuentes,
                     'tiene_codigo': tiene_codigo,
-                    'es_formula'  : es_formula,   # solo visual — sigue siendo configurable
                 })
 
             if rows:
