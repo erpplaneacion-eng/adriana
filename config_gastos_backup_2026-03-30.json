@@ -3555,6 +3555,20 @@
       "buscar_por": "B",
       "fila_dest": 64,
       "hoja": "CALI"
+    },
+    {
+      "codigo_a": "B:Gastos financieros",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 149,
+      "hoja": "CALI"
     }
   ]
 }

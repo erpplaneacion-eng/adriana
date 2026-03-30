@@ -16,6 +16,23 @@ let folders       = [];
 const fmt = v => v == null ? '' : '$' + Number(v).toLocaleString('es-CO', {maximumFractionDigits: 0});
 const norm = s => s.replace(/\s+/g, ' ').trim();
 
+function makeRowKey(sheetName, codeKey, filaNum) {
+  if (sheetName && filaNum) return `${sheetName}::${codeKey}|${filaNum}`;
+  if (filaNum) return `${codeKey}|${filaNum}`;
+  return codeKey;
+}
+
+function parseRowKey(rowKey) {
+  const hasSheet = rowKey.includes('::');
+  const parts = hasSheet ? rowKey.split('::') : [null, rowKey];
+  const sheetName = hasSheet ? parts[0] : null;
+  const raw = hasSheet ? parts.slice(1).join('::') : parts[1];
+  const pipIdx = raw.lastIndexOf('|');
+  const codigoA = pipIdx >= 0 ? raw.slice(0, pipIdx) : raw;
+  const filaNum = pipIdx >= 0 ? parseInt(raw.slice(pipIdx + 1), 10) : null;
+  return { sheetName, codigoA, filaNum };
+}
+
 function fileKey(filename) {
   // Genera una clave corta a partir del nombre de archivo
   const f = filename.toUpperCase();
@@ -77,23 +94,28 @@ function initMappingsFromConfig(config) {
     // Si el item tiene fila_dest (nuevo formato) úsala directamente
     // Si no, busca el número de fila en sheetsData para migrar al nuevo formato
     let filaNum = item.fila_dest || null;
+    let sheetName = item.hoja || null;
     if (!filaNum) {
       for (const sheet of sheetsData) {
         const match = sheet.filas.find(f => {
           const fk = f.tiene_codigo ? norm(f.codigo) : `B:${f.descripcion}`;
           return fk === codeKey && (!item.hoja || sheet.nombre.trim() === item.hoja.trim());
         });
-        if (match) { filaNum = match.fila; break; }
+        if (match) {
+          filaNum = match.fila;
+          sheetName = sheet.nombre;
+          break;
+        }
       }
     }
-    const key = filaNum ? `${codeKey}|${filaNum}` : codeKey;
+    const key = makeRowKey(sheetName, codeKey, filaNum);
     mappings[key] = (item.sources || []).map(src => ({
       key       : src.key,
       archivo   : src.key,
       codigos   : src.codes || [],
       sin_filtro: src.sin_filtro || false
     }));
-    if (item.hoja) mappingSheets[key] = item.hoja;
+    if (sheetName) mappingSheets[key] = sheetName;
     if (item.valor_fijo != null) {
       const vf = item.valor_fijo;
       if (Array.isArray(vf))           manualValues[key] = vf;
@@ -136,7 +158,8 @@ function renderTabs() {
   sheetsData.forEach((sheet, i) => {
     const configured = sheet.filas.filter(f => {
       const ck = f.tiene_codigo ? norm(f.codigo) : `B:${f.descripcion}`;
-      return (mappings[`${ck}|${f.fila}`] || mappings[ck] || []).length > 0;
+      const key = makeRowKey(sheet.nombre, ck, f.fila);
+      return (mappings[key] || mappings[`${ck}|${f.fila}`] || mappings[ck] || []).length > 0;
     }).length;
     const btn = document.createElement('button');
     btn.className   = 'tab-btn' + (i === 0 ? ' active' : '');
@@ -167,11 +190,11 @@ function renderDestRows() {
   if (!currentSheet) return;
 
   currentSheet.filas.forEach(fila => {
-    // Clave única: código (o B:desc) + número de fila para evitar colisiones con códigos duplicados
+    // Clave única: hoja + código (o B:desc) + número de fila para evitar colisiones entre hojas
     const codeKey = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
-    const key = `${codeKey}|${fila.fila}`;
+    const key = makeRowKey(currentSheet.nombre, codeKey, fila.fila);
 
-    const sources = mappings[key] || [];
+    const sources = mappings[key] || mappings[`${codeKey}|${fila.fila}`] || [];
     const hasData = sources.length > 0;
 
     const div = document.createElement('div');
@@ -543,10 +566,10 @@ function buildConfig() {
 
   // Agregar nuevas fuentes de los mappings
   Object.entries(mappings).forEach(([rowKey, sources]) => {
-    // rowKey puede ser "CODIGO|filaNum" o "B:desc|filaNum"
-    const pipIdx  = rowKey.lastIndexOf('|');
-    const codigoA = pipIdx >= 0 ? rowKey.slice(0, pipIdx) : rowKey;
-    const filaNum = pipIdx >= 0 ? parseInt(rowKey.slice(pipIdx + 1)) : null;
+    // rowKey puede ser "HOJA::CODIGO|filaNum", "CODIGO|filaNum" o "B:desc|filaNum"
+    const parsed  = parseRowKey(rowKey);
+    const codigoA = parsed.codigoA;
+    const filaNum = parsed.filaNum;
 
     const configSources = sources.map(src => {
       if (!fileSources[src.key]) {
@@ -560,7 +583,7 @@ function buildConfig() {
     const entry = { codigo_a: codigoA, sources: configSources };
     if (codigoA.startsWith('B:'))  entry.buscar_por = 'B';
     if (filaNum)                   entry.fila_dest  = filaNum;
-    if (mappingSheets[rowKey])     entry.hoja       = mappingSheets[rowKey];
+    if (mappingSheets[rowKey] || parsed.sheetName) entry.hoja = mappingSheets[rowKey] || parsed.sheetName;
     if (manualValues[rowKey])      entry.valor_fijo = manualValues[rowKey];
     items.push(entry);
   });
