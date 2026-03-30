@@ -52,6 +52,7 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 
 - **Hojas estándar** (GASTOS ADMINISTRATIVOS, GASTOS OPERATIVOS, GASTOS VEHICULOS, etc.): columna = `MES_COLUMNA[mes]` → ENE=3, FEB=4, MAR=5 ... DIC=14
 - **Hojas con 3 cols/mes** (CASINO, CALI, YUMBO, BUGA): columna = `mes_num * 3` → ENE=3, FEB=6, MAR=9...
+  - En estas hojas, las columnas intermedias (4,5,7,8...) son de ratio/presupuesto, NO de valor mensual.
 - Añadir una hoja al patrón 3-cols: agregar en `COLUMNA_HOJA` en `procesar_todo.py` y en `FILAS_EXCLUIR` en `app.py`.
 
 ### config_gastos.json — campos por item
@@ -78,17 +79,55 @@ El key único de cada fila en `mappings` es `"${codeKey}|${fila.fila}"` (incluye
 ### Exclusiones del Config Builder (app.py)
 
 `FILAS_EXCLUIR` define por hoja qué filas NO se muestran en la UI:
-- Fórmulas internas (totales/subtotales que el Excel calcula solo)
+- Fórmulas internas `=SUM(...)` (totales/subtotales que el Excel calcula solo)
 - Porcentajes auto-calculados sobre ingresos
-- Filas cross-sheet (referencian otras hojas del mismo libro)
+- Filas cross-sheet (referencian otras hojas del mismo libro vía `'Hoja'!celda`)
 - Títulos sin valor
+
+La detección automática de fórmulas (`es_formula`) en `app.py` excluye filas cuya columna de valor contiene una fórmula que:
+- NO tiene referencias a libros externos (`[n]`)
+- NO tiene referencias a otras hojas (`'NombreHoja'!`)
+- SÍ referencia otras filas de la misma hoja
+
+Para hojas de 3 cols/mes (CASINO, CALI, YUMBO, BUGA) solo se revisan las columnas de valor (3,6,9,12...), no las intermedias de ratio/presupuesto.
+
+Las filas cross-sheet que deben excluirse pero no son detectadas automáticamente se listan explícitamente en `FILAS_EXCLUIR` por hoja.
 
 `HOJAS_EXCLUIR` = hojas que no se muestran en la UI (`%DIST C`).
 `FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos).
 
+### Fila especial: Gastos financieros (CALI fila 149)
+
+Esta fila tiene fórmula cross-sheet con **constantes hardcodeadas distintas por mes** (`='GASTOS ADMINISTRATIVOS'!C109*'%DIST'!C52+520117.4`). Las fórmulas de MAR-DIC no existen en la plantilla y NO pueden restaurarse automáticamente porque el ajuste mensual varía. Requiere entrada manual en Excel para cada mes. Aparece visible en el Config Builder para que el usuario pueda asignarle un valor fijo o fuente.
+
 ### Celdas fusionadas (merged cells)
 
 En `procesar_gastos`, antes de escribir se detecta si la celda pertenece a un rango fusionado y se redirige a `min_row/min_col` del rango. Esto es necesario en varias hojas del INFORME REAL.
+
+## Estado del INFORME REAL (correcciones aplicadas 2026-03-30)
+
+### Fórmulas restauradas por hoja
+
+Durante la revisión se detectó que el script había sobreescrito fórmulas internas de Excel en varias hojas al procesar MARZO y ABRIL. Se restauraron:
+
+| Hoja | Filas afectadas | Meses restaurados |
+|---|---|---|
+| GASTOS VEHICULOS | 9,11,15,19,22,25 (subtotales) | MAR, ABR |
+| CASINO | 5,12,13,14,15,23,24,28,29,42,44,60,61,78,83,84,88,91,95,98,108,113,119,122,126,140,144 | MAR, ABR |
+| CALI | 85,148,151 (cross-sheet %DIST) | MAR→DIC |
+| YUMBO | 23,85,123,148,151 | OCT→DIC y MAR→DIC según fila |
+| BUGA | 23,73,148,151 | DIC y MAR→DIC según fila |
+
+### Fórmulas cross-sheet en hojas 3-col/mes
+
+Las filas que referencian `'%DIST'` usan un patrón de 2 cols/mes:
+- `%DIST` col par (B,D,F,H...): `chr(64 + 2*mes_num)` → ENE=B, FEB=D, MAR=F...
+- `%DIST` col impar (C,E,G,I...): `chr(65 + 2*mes_num)` → ENE=C, FEB=E, MAR=G...
+- Hoja referenciada (GASTOS ADMIN/OPERATIVOS) usa col estándar: `chr(66 + mes_num)` → ENE=C, FEB=D, MAR=E...
+
+### Filas de título limpiadas
+
+- **GASTOS OPERATIVOS fila 11** (CUOTA DE APOYO Y SOSTENIMIENTO): tenía valores hardcodeados en columnas MAR y ABR. Se limpiaron.
 
 ## Rutas hardcodeadas
 
