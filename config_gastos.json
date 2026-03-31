@@ -4694,6 +4694,1044 @@
       "buscar_por": "B",
       "fila_dest": 160,
       "hoja": "YUMBO"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO INDUSTRIALIZADO (Rac)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 5,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO PREPARADO (Rac)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 6,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:ALMUERZO JORNADA UNICA (Rac)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 7,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:NOVEDADES (Rac)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 8,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:NOVEDADES (Fac)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 20,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:0,5% Impuesto de Timbre",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 38,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO INDUSTRIALIZADO (Ins)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 47,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:NOVEDADES",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 49,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:REFRIGERIOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 52,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:PAQUETES MANIPULADORAS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 53,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:INDUSTRIALIZADOS PROPIOS",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "010102           GERENCIA"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 58,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:COMPLEMENTO PREPARADO (Ins)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 62,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:ALMUERZO JORNADA UNICA (Ins)",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 63,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:MENU ESPECIAL",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 66,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73355001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 74,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Material de empaque",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 75,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "71101501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 76,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73355501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 77,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Manipuladoras",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 79,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Personal Supervisor - Coordinadores",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 80,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "72959501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 81,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "51055101",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 86,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Gastos Medicos",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 87,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "53954002",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 88,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Asesoría Juridica",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 90,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Asesoría Tecnica/Capacitacion",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 91,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Construcciones y Edificaciones",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 93,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Maquinaria y Equipo",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 94,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Equipo de Oficina",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 95,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73301001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 97,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73306001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 98,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Aseo y Vigilancia",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 100,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Temporales Serv",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 101,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Mensajeria",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 102,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73351502",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 103,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73351503",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 104,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73352501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 105,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73353001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 106,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73353501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 107,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73354001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 108,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73400501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 110,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73401001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 111,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73401501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 112,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73409501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 113,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73451001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 115,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73451501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 116,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73451502",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 117,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73452001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 118,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73456001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 119,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73500501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 121,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73501501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 122,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73550501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 124,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73551501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 125,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73552001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 126,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73951001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 128,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73959512",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 129,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73952501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 130,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73953001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 131,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73953501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 132,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73954501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 133,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73956001",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 134,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73956501",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 135,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73956601",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 136,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73959504",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 137,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Compra Equipos de Oficina",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 138,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Herramientas y articulos ferreteria",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 139,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73959511",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 140,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Reuniones Fiestas y Detalles",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 141,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "73959510 - 51959512",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 142,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Costo de Facturas",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 150,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Novedades",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 154,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 1",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 155,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 2",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 156,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 3",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 157,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 4",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 158,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 5",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 159,
+      "hoja": "BUGA"
+    },
+    {
+      "codigo_a": "B:Otros Ajustes 6",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "buscar_por": "B",
+      "fila_dest": 160,
+      "hoja": "BUGA"
     }
   ]
 }
