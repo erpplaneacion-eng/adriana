@@ -39,6 +39,7 @@ header .actions { display: flex; gap: 10px; }
 .btn-danger   { background: #dc3545; color: #fff; }
 .btn-upload   { background: #6f42c1; color: #fff; font-size:.78rem; padding:5px 12px; }
 .btn-download { background: #17a2b8; color: #fff; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
+.btn-replace  { background: #e67e22; color: #fff; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
 .btn-sm       { padding: 3px 10px; font-size: .78rem; }
 
 /* ── Layout principal ── */

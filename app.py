@@ -498,6 +498,19 @@ def api_upload(folder):
     return jsonify({'ok': True, 'saved': saved, 'folder': folder, 'total': len(saved)})
 
 
+@app.route('/api/upload/informe', methods=['POST'])
+def api_upload_informe():
+    """Reemplaza el INFORME REAL base en el volumen con el archivo subido."""
+    f = request.files.get('file')
+    if not f:
+        return jsonify({'error': 'No se recibio ningun archivo'}), 400
+    nombre = f.filename or ''
+    if not nombre.lower().endswith('.xlsx'):
+        return jsonify({'error': 'El archivo debe ser .xlsx'}), 400
+    f.save(INFORME_PATH)
+    return jsonify({'ok': True, 'mensaje': 'INFORME REAL reemplazado correctamente'})
+
+
 @app.route('/api/download/informe')
 def api_download_informe():
     """Descarga el INFORME REAL actualizado."""

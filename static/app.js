@@ -728,6 +728,33 @@ async function uploadFiles() {
   btn.disabled = false;
 }
 
+async function subirInformeBase(input) {
+  if (!input.files.length) return;
+  const archivo = input.files[0];
+  if (!archivo.name.toLowerCase().endsWith('.xlsx')) {
+    alert('El archivo debe ser .xlsx');
+    input.value = '';
+    return;
+  }
+  if (!confirm(`¿Reemplazar el INFORME REAL base con "${archivo.name}"?\nEsto sobreescribirá el archivo actual en el servidor.`)) {
+    input.value = '';
+    return;
+  }
+  const formData = new FormData();
+  formData.append('file', archivo);
+  try {
+    const res = await fetch('/api/upload/informe', { method: 'POST', body: formData }).then(r => r.json());
+    if (res.ok) {
+      alert('✅ ' + res.mensaje);
+    } else {
+      alert('❌ Error: ' + res.error);
+    }
+  } catch (e) {
+    alert('❌ Error de red: ' + e.message);
+  }
+  input.value = '';
+}
+
 // ── Evento cambio de carpeta ─────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   init();
