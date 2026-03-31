@@ -164,6 +164,25 @@ header .actions { display: flex; gap: 10px; }
   user-select: none;
 }
 
+/* Fila con referencia interna al libro (cross-sheet) */
+.interno-row {
+  opacity: .85;
+  border-left: 3px solid #9b59b6;
+  background: #f9f4fe;
+}
+.interno-row .dest-row-header {
+  cursor: default;
+}
+.status-interno {
+  background: #9b59b6 !important;
+}
+.interno-badge {
+  font-size: .72rem;
+  color: #7d3c98;
+  padding: 2px 8px 4px;
+  font-style: italic;
+}
+
 .dest-sources {
   padding: 6px 12px 8px;
   display: flex;

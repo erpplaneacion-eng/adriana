@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE     = os.environ.get('DATA_DIR', _APP_DIR)
 
-# Al arrancar en Railway, copiar la plantilla al volumen si aún no existe allí
+# Al arrancar en Railway, copiar la plantilla al volumen si aÃºn no existe allÃ­
 _TEMPLATE = os.path.join(_APP_DIR, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 _INFORME_EN_BASE = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 if BASE != _APP_DIR and os.path.exists(_TEMPLATE) and not os.path.exists(_INFORME_EN_BASE):
@@ -25,7 +25,7 @@ CONFIG_PATH  = os.path.join(BASE, 'config_gastos.json')
 INFORME_PATH = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 SCRIPT_PATH  = os.path.join(_APP_DIR, 'procesar_todo.py')
 
-# Copiar config al volumen si no existe allí
+# Copiar config al volumen si no existe allÃ­
 for _cfg in ('config_gastos.json', 'config_5105.json'):
     _src = os.path.join(_APP_DIR, _cfg)
     _dst = os.path.join(BASE, _cfg)
@@ -50,7 +50,7 @@ def celda_str(raw):
 def leer_todos_codigos(filepath):
     """
     Extrae TODAS las filas con valor en col A y col J de cualquier archivo XLS.
-    Col A = cÃ³digo, col B = descripciÃ³n, col J (Ã­ndice 9) = valor.
+    Col A = cÃÂ³digo, col B = descripciÃÂ³n, col J (ÃÂ­ndice 9) = valor.
     """
     try:
         import xlrd
@@ -61,7 +61,7 @@ def leer_todos_codigos(filepath):
         col_val = 9
         for r in range(min(25, ws.nrows)):
             for c in range(ws.ncols):
-                txt = str(ws.cell_value(r, c)).lower().replace('Ã©','e').replace('Ã³','o')
+                txt = str(ws.cell_value(r, c)).lower().replace('ÃÂ©','e').replace('ÃÂ³','o')
                 if 'debito' in txt or 'neto' in txt:
                     col_val = c
                     break
@@ -79,7 +79,7 @@ def leer_todos_codigos(filepath):
             if isinstance(raw_a, float) and raw_a == int(raw_a):
                 a_str = str(int(raw_a))
 
-            # DescripciÃ³n: col B (Ã­ndice 1)
+            # DescripciÃÂ³n: col B (ÃÂ­ndice 1)
             desc = ''
             if ws.ncols > 1:
                 raw_b = ws.cell_value(r, 1)
@@ -94,7 +94,7 @@ def leer_todos_codigos(filepath):
                 except (ValueError, TypeError):
                     val = 0.0
 
-            # Solo incluir si hay cÃ³digo no vacÃ­o y (descripciÃ³n o valor)
+            # Solo incluir si hay cÃÂ³digo no vacÃÂ­o y (descripciÃÂ³n o valor)
             if a_str and (desc or val != 0.0):
                 items.append({
                     'codigo'     : a_str,
@@ -125,13 +125,13 @@ def api_sheets():
         config = json.load(open(CONFIG_PATH, encoding='utf-8'))
         config_map = {item['codigo_a']: item['sources'] for item in config['items']}
 
-        # Cargar tambiÃ©n el Excel con fÃ³rmulas para detectar SUMs internos
+        # Cargar tambiÃÂ©n el Excel con fÃÂ³rmulas para detectar SUMs internos
         wb_f = openpyxl.load_workbook(INFORME_PATH, data_only=False)
 
         sheets = []
         HOJAS_EXCLUIR  = {'%DIST C', '%DIST C '}
         # Hojas con 3 cols/mes: solo cols 3,6,9,12... son columnas de valor
-        # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fÃ³rmula
+        # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fÃÂ³rmula
         HOJAS_3COL = {
             'CASINO', 'CALI', 'YUMBO', 'BUGA',
             'COMEDORES CALI', 'COMEDORES PALMIRA', 'COMEDORES VALLE',
@@ -149,10 +149,10 @@ def api_sheets():
         # Filas a excluir por hoja (col B) - titulos sin valor
         FILAS_EXCLUIR = {
             'GASTOS OPERATIVOS': {
-                'CUOTA DE APOYO Y SOSTENIMIENTO',  # tÃ­tulo sin valor configurable
-                'GASTOS DE PERSONAL',               # fÃ³rmula interna: suma filas 6-10
-                'DIVERSOS',                         # fÃ³rmula interna: suma filas 13-16
-                'TOTAL GASTOS',                     # fÃ³rmula interna: suma totales
+                'CUOTA DE APOYO Y SOSTENIMIENTO',  # tÃÂ­tulo sin valor configurable
+                'GASTOS DE PERSONAL',               # fÃÂ³rmula interna: suma filas 6-10
+                'DIVERSOS',                         # fÃÂ³rmula interna: suma filas 13-16
+                'TOTAL GASTOS',                     # fÃÂ³rmula interna: suma totales
             },
             'CASINO': {
                 'Intereses', 'Descuentos Comerciales', 'otros', 'Flete',
@@ -161,7 +161,7 @@ def api_sheets():
                 'Flete Preparados TERCEROS', 'Material de empaque'
             },
             'YUMBO': {
-                # Totales y fÃ³rmulas internas
+                # Totales y fÃÂ³rmulas internas
                 'TOTAL RACIONES', 'INGRESOS BRUTOS', 'OPERACIONALES',
                 'INDUSTRIAS MANUFACTURERAS', 'NO OPERACIONALES', 'FINANCIEROS',
                 'DESCUENTOS - GASTO OPERACIONAL', 'OTROS', 'TOTAL INGRESOS NETOS',
@@ -171,7 +171,7 @@ def api_sheets():
                 'ADECUACIONES E INSTALACIONES', 'DIVERSOS', 'UTILIDAD BRUTA',
                 'GASTOS ADMINISTRATIVOS Y NO OPERACI', 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
-                # Descuentos automÃ¡ticos por porcentaje
+                # Descuentos automÃÂ¡ticos por porcentaje
                 'Procultura 0,5%', 'Prohospitales 1%', 'Rete Ica 0,6%',
                 'Adulto Mayor 2%', 'Prodeporte 2,5%', '2% Juzgado de Familia',
                 '0,5% Propacifico',
@@ -197,11 +197,11 @@ def api_sheets():
                 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
                 'PREPARADOS PROPIOS',               # calculado: GASTOS VEHICULOS * %DIST
-                # Cross-sheet: se calculan automÃ¡ticamente desde otras hojas del libro
+                # Cross-sheet: se calculan automÃÂ¡ticamente desde otras hojas del libro
                 'Costos Indirectos de Personal',
                 'Gastos Fijos Administracion',
                 'Gastos No Operacionales',
-                # Nota: 'Gastos financieros' NO se excluye  necesita configuraciÃ³n manual
+                # Nota: 'Gastos financieros' NO se excluye  necesita configuraciÃÂ³n manual
                 '2% Estampillas Prounivalle',
                 '0,88% Rte Ica',
                 '1% Estampilla Prohospital',
@@ -210,7 +210,7 @@ def api_sheets():
                 '2% Juzgado de Familia',
             },
             'BUGA': {
-                # Totales y fÃ³rmulas internas
+                # Totales y fÃÂ³rmulas internas
                 'TOTAL RACIONES', 'INGRESOS BRUTOS', 'OPERACIONALES',
                 'INDUSTRIAS MANUFACTURERAS', 'NO OPERACIONALES', 'FINANCIEROS',
                 'DESCUENTOS - GASTO OPERACIONAL', 'OTROS', 'TOTAL INGRESOS NETOS',
@@ -223,7 +223,7 @@ def api_sheets():
                 'UTILIDAD BRUTA', 'GASTOS ADMINISTRATIVOS Y NO OPERACIONALES',
                 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
-                # Nota: filas (Fac) visibles para configuraciÃ³n manual en UI
+                # Nota: filas (Fac) visibles para configuraciÃÂ³n manual en UI
                 # Porcentajes auto-calculados sobre ingresos
                 '1% Estampilla Prohospital', '2,5% Estampilla Pro Deporte',
                 '1% Estampilla Pro Univalle', '3% Estampilla Adulto Mayor',
@@ -238,7 +238,7 @@ def api_sheets():
                 'INDUSTRIALIZADOS TERCEROS',
             },
             'RECREARTE': {
-                # Totales y subtotales (fÃ³rmulas internas)
+                # Totales y subtotales (fÃÂ³rmulas internas)
                 'TOTAL RACIONES', 'INGRESOS BRUTOS',
                 'OPERACIONALES', 'INDUSTRIAS MANUFACTURERAS',
                 'NO OPERACIONALES', 'FINANCIEROS',
@@ -253,13 +253,14 @@ def api_sheets():
             }
         }
 
-        # Filas que se muestran como título de sección (separador visual, no editables)
+        # Filas que se muestran como tÃ­tulo de secciÃ³n (separador visual, no editables)
         TITULOS_SECCION = {
             'GASTOS ADMINISTRATIVOS': {
                 'GASTOS DE PERSONAL', 'HONORARIOS', 'IMPUESTOS', 'ARRENDAMIENTOS',
                 'SEGUROS', 'SERVICIOS', 'GASTOS LEGALES', 'MANTENIMIENTO Y REPARACIONES',
                 'ADECUACIONES E INSTALACIONES', 'GASTOS DE VIAJE', 'DIVERSOS',
-                'CASINO', 'OTROS GASTOS DIVERSOS', 'FINANCIEROS',
+                'OTROS GASTOS DIVERSOS', 'FINANCIEROS',
+                # CASINO y RECREARTE son referencias internas, NO tÃ­tulos de secciÃ³n
             },
             'GASTOS VEHICULOS': {
                 'GASTOS DE PERSONAL', 'IMPUESTOS', 'SEGUROS', 'SERVICIOS',
@@ -340,48 +341,53 @@ def api_sheets():
                 a = str(row[0].value or '').strip()
                 b = str(row[1].value or '').strip() if len(row) > 1 else ''
 
-                # Incluir si col A tiene cÃ³digo numÃ©rico O si col B tiene texto descriptivo
+                # Incluir si col A tiene cÃÂ³digo numÃÂ©rico O si col B tiene texto descriptivo
                 tiene_codigo = bool(a and re.match(r'^\d', a))
                 if not tiene_codigo and not b:
-                    continue  # fila vacÃ­a
+                    continue  # fila vacÃÂ­a
 
-                # Excluir filas globales y especÃ­ficas por hoja
+                # Excluir filas globales y especÃÂ­ficas por hoja
                 if b in FILAS_EXCLUIR_GLOBAL:
                     continue
                 hoja_limpia = sh_name.strip()
                 if b in FILAS_EXCLUIR.get(hoja_limpia, set()):
                     continue
 
-                # Detectar fÃ³rmula interna: referencia otras filas de la MISMA hoja
+                # Detectar fÃÂ³rmula interna: referencia otras filas de la MISMA hoja
                 # Solo se revisan las columnas de valor (no las de ratio/presupuesto)
                 es_formula = False
+                es_interno  = False
                 current_row = row[0].row
                 if hoja_limpia in HOJAS_3COL:
                     cols_valor = [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36]
                 else:
-                    cols_valor = list(range(3, 15))  # cols C a N (ENE-DIC estÃ¡ndar)
+                    cols_valor = list(range(3, 15))
                 for col_num in cols_valor:
                     v = ws_f.cell(row=current_row, column=col_num).value
                     if not v or not isinstance(v, str) or not v.startswith('='):
                         continue
-                    # Si tiene referencia a libro externo o a otra hoja  NO es fÃ³rmula interna
+                    # Referencia a libro externo o hoja con comillas: ignorar
                     if '[' in v or "'" in v:
                         continue
-                    # Si referencia otras filas de la misma hoja  SÃ es fÃ³rmula interna
+                    # Referencia interna sin comillas (ej: =CASINO!$C$144)
+                    if '!' in v:
+                        es_interno = True
+                        continue
+                    # Referencia a otras filas de la misma hoja: formula interna
                     nums = re.findall(r'\d+', v)
                     otras_filas = [int(n) for n in nums if int(n) != current_row and 1 < int(n) < 500]
                     if otras_filas:
                         es_formula = True
                         break
 
-                # Títulos de sección: fórmula interna pero se muestran como separador visual
+                # Titulos de seccion: formula interna pero se muestran como separador visual
                 es_titulo = es_formula and b in TITULOS_SECCION.get(hoja_limpia, set())
 
-                # Filas con fórmulas internas: Excel las calcula solo, no se muestran.
+                # Filas con formulas internas: Excel las calcula solo, no se muestran.
                 if es_formula and not es_titulo:
                     continue
 
-                # Clave de búsqueda en config: código si existe, si no "B:<descripcion>"
+                # Clave de busqueda en config
                 clave = re.sub(r'\s+', ' ', a) if tiene_codigo else f'B:{b}'
                 fuentes = config_map.get(clave, config_map.get(a, []))
 
@@ -392,6 +398,7 @@ def api_sheets():
                     'fuentes'     : fuentes,
                     'tiene_codigo': tiene_codigo,
                     'es_titulo'   : es_titulo,
+                    'es_interno'  : es_interno,
                 })
 
             if rows:
@@ -420,7 +427,7 @@ def api_folders():
 
 @app.route('/api/files/<path:folder>')
 def api_files(folder):
-    """Lee todos los XLS de la carpeta y extrae cÃ³digos por archivo."""
+    """Lee todos los XLS de la carpeta y extrae cÃÂ³digos por archivo."""
     carpeta = os.path.join(BASE, folder) if not os.path.isabs(folder) else folder
     if not os.path.isdir(carpeta):
         return jsonify({'error': f'Carpeta no encontrada: {carpeta}'}), 404
@@ -484,7 +491,7 @@ def api_upload(folder):
     """Sube archivos XLS a una carpeta mensual en el servidor."""
     folder_clean = folder.upper().replace('-DL', '').replace('-', '')
     if folder_clean not in MES_NOMBRES:
-        return jsonify({'error': f'Nombre de carpeta inválido: {folder}'}), 400
+        return jsonify({'error': f'Nombre de carpeta invÃ¡lido: {folder}'}), 400
     carpeta = os.path.join(BASE, folder)
     os.makedirs(carpeta, exist_ok=True)
     files = request.files.getlist('files')

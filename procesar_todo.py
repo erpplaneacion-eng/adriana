@@ -502,6 +502,16 @@ def procesar_mes(carpeta_mes):
     # Paso 2: Gastos (todas las hojas según config)
     procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
 
+    # Paso 3: Fórmulas internas cross-sheet en GASTOS ADMINISTRATIVOS
+    # F89  = CASINO!{col_casino}$144  (col_casino = mes_num * 3)
+    # F114 = RECREARTE!{col_recrearte}$141  (col_recrearte = mes_num * 3)
+    mes_num = MES_NUMERO.get(mes_nombre, 0)
+    if mes_num and hoja_admin:
+        col_3 = chr(64 + mes_num * 3)   # columna en hojas de patrón 3-cols/mes
+        hoja_admin.cell(row=89,  column=columna_xlsx).value = f'=CASINO!${col_3}$144'
+        hoja_admin.cell(row=114, column=columna_xlsx).value = f'=RECREARTE!${col_3}$141'
+        print(f"[OK] Fórmulas internas escritas: F89=CASINO!{col_3}144, F114=RECREARTE!{col_3}141")
+
     # Forzar recálculo automático al abrir en Excel
     wb_dest.calculation.calcMode = 'auto'
 

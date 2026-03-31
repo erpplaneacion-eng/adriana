@@ -201,6 +201,24 @@ function renderDestRows() {
       return;
     }
 
+    // Fila con referencia interna (cross-sheet del mismo libro): solo lectura
+    if (fila.es_interno) {
+      const div = document.createElement('div');
+      div.className = 'dest-row interno-row';
+      const codigoLabel = fila.tiene_codigo ? fila.codigo : `— ${fila.descripcion}`;
+      const descLabel   = fila.tiene_codigo ? fila.descripcion : '';
+      div.innerHTML = `
+        <div class="dest-row-header">
+          <span class="dest-codigo ${fila.tiene_codigo ? '' : 'sin-codigo'}">${codigoLabel}</span>
+          <span class="dest-desc">${descLabel}</span>
+          <span class="dest-status status-interno" data-tip="Referencia interna al libro"></span>
+        </div>
+        <div class="interno-badge">Calculado desde otra pestaña del INFORME</div>
+      `;
+      container.appendChild(div);
+      return;
+    }
+
     // Clave única: hoja + código (o B:desc) + número de fila para evitar colisiones entre hojas
     const codeKey = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
     const key = makeRowKey(currentSheet.nombre, codeKey, fila.fila);
