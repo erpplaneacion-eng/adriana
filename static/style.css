@@ -146,6 +146,22 @@ header .actions { display: flex; gap: 10px; }
 .status-green  { background: #28a745; }
 .status-gray   { background: #ccc; }
 
+/* ── Títulos de sección ── */
+.section-title {
+  margin: 14px 0 4px;
+  padding: 5px 14px;
+  background: #e8f0fe;
+  border-left: 4px solid #4a6fa5;
+  border-radius: 3px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #2c3e6b;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
 .dest-sources {
   padding: 6px 12px 8px;
   display: flex;

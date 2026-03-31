@@ -158,6 +158,7 @@ function renderTabs() {
   nav.innerHTML = '';
   sheetsData.forEach((sheet, i) => {
     const configured = sheet.filas.filter(f => {
+      if (f.es_titulo) return false;
       const ck = f.tiene_codigo ? norm(f.codigo) : `B:${f.descripcion}`;
       const key = makeRowKey(sheet.nombre, ck, f.fila);
       return (mappings[key] || mappings[`${ck}|${f.fila}`] || mappings[ck] || []).length > 0;
@@ -191,6 +192,15 @@ function renderDestRows() {
   if (!currentSheet) return;
 
   currentSheet.filas.forEach(fila => {
+    // Título de sección: separador visual, no editable
+    if (fila.es_titulo) {
+      const sep = document.createElement('div');
+      sep.className = 'section-title';
+      sep.textContent = fila.descripcion;
+      container.appendChild(sep);
+      return;
+    }
+
     // Clave única: hoja + código (o B:desc) + número de fila para evitar colisiones entre hojas
     const codeKey = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
     const key = makeRowKey(currentSheet.nombre, codeKey, fila.fila);

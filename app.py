@@ -234,6 +234,16 @@ def api_sheets():
             }
         }
 
+        # Filas que se muestran como título de sección (separador visual, no editables)
+        TITULOS_SECCION = {
+            'GASTOS ADMINISTRATIVOS': {
+                'GASTOS DE PERSONAL', 'HONORARIOS', 'IMPUESTOS', 'ARRENDAMIENTOS',
+                'SEGUROS', 'SERVICIOS', 'GASTOS LEGALES', 'MANTENIMIENTO Y REPARACIONES',
+                'ADECUACIONES E INSTALACIONES', 'GASTOS DE VIAJE', 'DIVERSOS',
+                'CASINO', 'OTROS GASTOS DIVERSOS', 'FINANCIEROS',
+            }
+        }
+
         for sh_name in wb.sheetnames:
             ws      = wb[sh_name]
             ws_f    = wb_f[sh_name]
@@ -280,11 +290,14 @@ def api_sheets():
                         es_formula = True
                         break
 
-                # Filas con fÃ³rmulas internas: Excel las calcula solo, no se muestran.
-                if es_formula:
+                # Títulos de sección: fórmula interna pero se muestran como separador visual
+                es_titulo = es_formula and b in TITULOS_SECCION.get(hoja_limpia, set())
+
+                # Filas con fórmulas internas: Excel las calcula solo, no se muestran.
+                if es_formula and not es_titulo:
                     continue
 
-                # Clave de bÃºsqueda en config: cÃ³digo si existe, si no "B:<descripcion>"
+                # Clave de búsqueda en config: código si existe, si no "B:<descripcion>"
                 clave = re.sub(r'\s+', ' ', a) if tiene_codigo else f'B:{b}'
                 fuentes = config_map.get(clave, config_map.get(a, []))
 
@@ -294,6 +307,7 @@ def api_sheets():
                     'descripcion' : b,
                     'fuentes'     : fuentes,
                     'tiene_codigo': tiene_codigo,
+                    'es_titulo'   : es_titulo,
                 })
 
             if rows:
