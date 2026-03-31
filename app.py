@@ -116,7 +116,7 @@ def api_sheets():
         HOJAS_3COL = {
             'CASINO', 'CALI', 'YUMBO', 'BUGA',
             'COMEDORES CALI', 'COMEDORES PALMIRA', 'COMEDORES VALLE',
-            'CTAS EN PPACION'
+            'CTAS EN PPACION', 'PYG TOTAL', 'RECREARTE'
         }
 
         # Filas a excluir en TODAS las hojas

@@ -47,6 +47,8 @@ COLUMNA_HOJA = {
     'COMEDORES PALMIRA': _tres_cols,
     'COMEDORES VALLE'  : _tres_cols,
     'CTAS EN PPACION'  : _tres_cols,
+    'PYG TOTAL'        : _tres_cols,
+    'RECREARTE'        : _tres_cols,
 }
 
 MES_ABREV = {
