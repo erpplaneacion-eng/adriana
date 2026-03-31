@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    Config Builder — app.js
    Lógica drag & drop + comunicación con Flask API
    ============================================================ */
@@ -31,6 +31,19 @@ function parseRowKey(rowKey) {
   const codigoA = pipIdx >= 0 ? raw.slice(0, pipIdx) : raw;
   const filaNum = pipIdx >= 0 ? parseInt(raw.slice(pipIdx + 1), 10) : null;
   return { sheetName, codigoA, filaNum };
+}
+
+function isGuideRow(sheetName, filaNum) {
+  if (!sheetName || !filaNum) return false;
+  const sheet = sheetsData.find(s => (s.nombre || '').trim() === (sheetName || '').trim());
+  if (!sheet) return false;
+  const fila = sheet.filas.find(f => Number(f.fila) === Number(filaNum));
+  return !!(fila && fila.es_guia);
+}
+
+function isGuideRowKey(rowKey) {
+  const parsed = parseRowKey(rowKey);
+  return isGuideRow(parsed.sheetName, parsed.filaNum);
 }
 
 function fileKey(filename) {
@@ -109,6 +122,7 @@ function initMappingsFromConfig(config) {
       }
     }
     const key = makeRowKey(sheetName, codeKey, filaNum);
+    if (isGuideRow(sheetName, filaNum)) continue;
     mappings[key] = (item.sources || []).map(src => ({
       key       : src.key,
       archivo   : src.key,
@@ -157,6 +171,7 @@ function renderTabs() {
   nav.innerHTML = '';
   sheetsData.forEach((sheet, i) => {
     const configured = sheet.filas.filter(f => {
+      if (f.es_guia) return false;
       const ck = f.tiene_codigo ? norm(f.codigo) : `B:${f.descripcion}`;
       const key = makeRowKey(sheet.nombre, ck, f.fila);
       return (mappings[key] || mappings[`${ck}|${f.fila}`] || mappings[ck] || []).length > 0;
@@ -193,44 +208,53 @@ function renderDestRows() {
     // Clave única: hoja + código (o B:desc) + número de fila para evitar colisiones entre hojas
     const codeKey = fila.tiene_codigo ? norm(fila.codigo) : `B:${fila.descripcion}`;
     const key = makeRowKey(currentSheet.nombre, codeKey, fila.fila);
+    const isGuide = !!fila.es_guia;
 
-    const sources = mappings[key] || mappings[`${codeKey}|${fila.fila}`] || [];
+    const sources = isGuide ? [] : (mappings[key] || mappings[`${codeKey}|${fila.fila}`] || []);
     const hasData = sources.length > 0;
 
     const div = document.createElement('div');
-    div.className   = `dest-row ${hasData ? 'has-sources' : 'no-sources'}`;
+    div.className   = `dest-row ${hasData ? 'has-sources' : 'no-sources'} ${isGuide ? 'guide-row' : ''}`;
     div.dataset.key = key;
+    if (isGuide) div.dataset.guide = '1';
 
     const safeKey     = key.replace(/[^a-z0-9]/gi,'_');
     const codigoLabel = fila.tiene_codigo ? fila.codigo : `— ${fila.descripcion}`;
     const descLabel   = fila.tiene_codigo ? fila.descripcion : '';
+    const statusClass = isGuide ? 'status-guide' : (hasData ? 'status-green' : 'status-gray');
+    const statusTip = isGuide ? 'Fila guía (solo referencia)' : (hasData ? sources.length + ' fuente(s)' : 'Sin configurar');
 
     div.innerHTML = `
       <div class="dest-row-header">
         <span class="dest-codigo ${fila.tiene_codigo ? '' : 'sin-codigo'}">${codigoLabel}</span>
         <span class="dest-desc">${descLabel}</span>
-        <span class="dest-status ${hasData ? 'status-green' : 'status-gray'}"
-              data-tip="${hasData ? sources.length + ' fuente(s)' : 'Sin configurar'}"></span>
+        <span class="dest-status ${statusClass}"
+              data-tip="${statusTip}"></span>
       </div>
       <div class="dest-sources" id="sources-${safeKey}">
-        ${hasData ? '' : '<span class="drop-hint">Arrastra aquí los códigos fuente</span>'}
+        ${isGuide
+          ? '<span class="drop-hint">Fila guía: referencia visual, no editable</span>'
+          : (hasData ? '' : '<span class="drop-hint">Arrastra aquí los códigos fuente</span>')
+        }
       </div>
       <div class="dest-manual" id="manual-${safeKey}"></div>
     `;
 
     // Drag over
     const dropZone = div.querySelector('.dest-sources');
-    dropZone.addEventListener('dragover', e => {
-      e.preventDefault();
-      div.classList.add('drag-over');
-    });
-    dropZone.addEventListener('dragleave', () => div.classList.remove('drag-over'));
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault();
-      div.classList.remove('drag-over');
-      const data = JSON.parse(e.dataTransfer.getData('application/json'));
-      addSourceToRow(key, data);
-    });
+    if (!isGuide) {
+      dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        div.classList.add('drag-over');
+      });
+      dropZone.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        div.classList.remove('drag-over');
+        const data = JSON.parse(e.dataTransfer.getData('application/json'));
+        addSourceToRow(key, data);
+      });
+    }
 
     // Renderizar operaciones fijas
     renderManualOps(key, div.querySelector(`#manual-${safeKey}`));
@@ -244,6 +268,10 @@ function renderDestRows() {
 
 function renderManualOps(rowKey, container) {
   if (!container) return;
+  if (isGuideRowKey(rowKey)) {
+    container.innerHTML = '<div class="guide-note">Cabecera de sección (solo guía)</div>';
+    return;
+  }
   const ops = manualValues[rowKey] || [];
   container.innerHTML = '';
 
@@ -372,6 +400,7 @@ function renderChips(rowKey, sources, container) {
 }
 
 function addSourceToRow(rowKey, chipData) {
+  if (isGuideRowKey(rowKey)) return;
   if (!mappings[rowKey]) mappings[rowKey] = [];
   // Registrar hoja destino
   if (currentSheet) mappingSheets[rowKey] = currentSheet.nombre;
@@ -397,6 +426,7 @@ function addSourceToRow(rowKey, chipData) {
 }
 
 function removeSource(rowKey, idx) {
+  if (isGuideRowKey(rowKey)) return;
   if (!mappings[rowKey]) return;
   mappings[rowKey].splice(idx, 1);
   if (mappings[rowKey].length === 0) delete mappings[rowKey];
@@ -412,16 +442,19 @@ function refreshRow(rowKey) {
   if (!dropZone || !destRow) return;
 
   const sources = mappings[rowKey] || [];
+  const isGuide = isGuideRowKey(rowKey);
   const hasData = sources.length > 0;
-  destRow.className = `dest-row ${hasData ? 'has-sources' : 'no-sources'}`;
+  destRow.className = `dest-row ${hasData ? 'has-sources' : 'no-sources'} ${isGuide ? 'guide-row' : ''}`;
 
   const statusDot = destRow.querySelector('.dest-status');
   if (statusDot) {
-    statusDot.className  = `dest-status ${hasData ? 'status-green' : 'status-gray'}`;
-    statusDot.dataset.tip = hasData ? sources.length + ' fuente(s)' : 'Sin configurar';
+    statusDot.className  = `dest-status ${isGuide ? 'status-guide' : (hasData ? 'status-green' : 'status-gray')}`;
+    statusDot.dataset.tip = isGuide ? 'Fila guía (solo referencia)' : (hasData ? sources.length + ' fuente(s)' : 'Sin configurar');
   }
 
-  if (hasData) {
+  if (isGuide) {
+    dropZone.innerHTML = '<span class="drop-hint">Fila guía: referencia visual, no editable</span>';
+  } else if (hasData) {
     renderChips(rowKey, sources, dropZone);
   } else {
     dropZone.innerHTML = '<span class="drop-hint">Arrastra aquí los códigos fuente</span>';
@@ -566,6 +599,7 @@ function buildConfig() {
 
   // Agregar nuevas fuentes de los mappings
   Object.entries(mappings).forEach(([rowKey, sources]) => {
+    if (isGuideRowKey(rowKey)) return;
     // rowKey puede ser "HOJA::CODIGO|filaNum", "CODIGO|filaNum" o "B:desc|filaNum"
     const parsed  = parseRowKey(rowKey);
     const codigoA = parsed.codigoA;
