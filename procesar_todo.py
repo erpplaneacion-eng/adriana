@@ -15,6 +15,7 @@ import os, re, sys, json, warnings
 from datetime import date
 import xlrd, openpyxl
 from openpyxl.comments import Comment
+from openpyxl.utils import get_column_letter
 
 warnings.filterwarnings('ignore')
 
@@ -55,6 +56,75 @@ MES_ABREV = {
     "ENE":"ENERO","FEB":"FEBRERO","MAR":"MARZO","ABR":"ABRIL",
     "MAY":"MAYO","JUN":"JUNIO","JUL":"JULIO","AGO":"AGOSTO",
     "SEP":"SEPTIEMBRE","OCT":"OCTUBRE","NOV":"NOVIEMBRE","DIC":"DICIEMBRE"
+}
+
+# ---------------------------------------------------------------------------
+# Formulas cross-sheet internas para hojas de patron 3-col/mes (filas 148-151)
+# c   = col GASTOS ADMINISTRATIVOS estandar  (get_column_letter(mes_num+2): ENE=C,FEB=D...)
+# p   = col %DIST par  (get_column_letter(mes_num*2):   ENE=B,FEB=D,MAR=F...)
+# im  = col %DIST impar (get_column_letter(mes_num*2+1): ENE=C,FEB=E,MAR=G...)
+# k3  = col destino 3-col de las hojas referenciadas (get_column_letter(mes_num*3): ENE=C,FEB=F,MAR=I...)
+# None = fila vacia en la plantilla, no se escribe formula
+FORMULAS_CROSS_SHEET = {
+    'CALI': {
+        148: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}96*'%DIST'!{p}36",
+        149: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}109*'%DIST'!{im}52+520117.4",
+        150: None,
+        151: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}119*'%DIST'!{im}52",
+    },
+    'YUMBO': {
+        148: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}96*'%DIST'!{p}37",
+        149: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}109*'%DIST'!{im}53+29230.55+40203.2",
+        150: None,
+        151: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}119*'%DIST'!{im}53",
+    },
+    'BUGA': {
+        148: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}96*'%DIST'!{p}39",
+        149: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}109*'%DIST'!{im}55+79552.5+3501.4",
+        150: None,
+        151: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}119*'%DIST'!{im}55",
+    },
+    'COMEDORES CALI': {
+        148: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}96*'%DIST'!{p}41",
+        149: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}109*'%DIST'!{im}57",
+        150: None,
+        151: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}119*'%DIST'!{im}57",
+    },
+    'COMEDORES PALMIRA': {
+        148: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}96*'%DIST'!{p}43",
+        149: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}109*'%DIST'!{im}59",
+        150: None,
+        151: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}119*'%DIST'!{im}59",
+    },
+    'CTAS EN PPACION': {
+        148: lambda c,p,im,k3: f"='GASTOS ADMINISTRATIVOS'!{c}96*'%DIST'!{p}45",
+        149: None,
+        150: None,
+        151: None,
+    },
+    'PYG TOTAL': {
+        # Suma de todas las unidades; referencia col 3-col (k3) de cada hoja origen
+        148: lambda c,p,im,k3: (
+            f"=CALI!{k3}148+HUNGRIA!{k3}148+YUMBO!{k3}148+'ADULTO MAYOR'!{k3}148"
+            f"+'COMEDORES VALLE'!{k3}148+BUGA!{k3}148+'COMEDORES CALI'!{k3}148"
+            f"+'CTAS EN PPACION'!{k3}148+'COMEDORES PALMIRA'!{k3}148+IMDERTY!{k3}148"
+        ),
+        149: lambda c,p,im,k3: (
+            f"=CALI!{k3}149+HUNGRIA!{k3}149+YUMBO!{k3}149+'ADULTO MAYOR'!{k3}149"
+            f"+'COMEDORES VALLE'!{k3}149+BUGA!{k3}149+'COMEDORES CALI'!{k3}149"
+            f"+'CTAS EN PPACION'!{k3}149+'COMEDORES PALMIRA'!{k3}149+IMDERTY!{k3}149"
+        ),
+        150: lambda c,p,im,k3: (
+            f"=CALI!{k3}150+HUNGRIA!{k3}150+YUMBO!{k3}150+'ADULTO MAYOR'!{k3}150"
+            f"+'COMEDORES VALLE'!{k3}150+BUGA!{k3}150+'COMEDORES CALI'!{k3}150"
+            f"+'CTAS EN PPACION'!{k3}150+'COMEDORES PALMIRA'!{k3}150+IMDERTY!{k3}150"
+        ),
+        151: lambda c,p,im,k3: (
+            f"=CALI!{k3}151+HUNGRIA!{k3}151+YUMBO!{k3}151+'ADULTO MAYOR'!{k3}151"
+            f"+'COMEDORES VALLE'!{k3}151+BUGA!{k3}151+'COMEDORES CALI'!{k3}151"
+            f"+'CTAS EN PPACION'!{k3}151+'COMEDORES PALMIRA'!{k3}151+IMDERTY!{k3}151"
+        ),
+    },
 }
 
 
@@ -510,7 +580,31 @@ def procesar_mes(carpeta_mes):
         col_3 = chr(64 + mes_num * 3)   # columna en hojas de patrón 3-cols/mes
         hoja_admin.cell(row=89,  column=columna_xlsx).value = f'=CASINO!${col_3}$144'
         hoja_admin.cell(row=114, column=columna_xlsx).value = f'=RECREARTE!${col_3}$141'
-        print(f"[OK] Fórmulas internas escritas: F89=CASINO!{col_3}144, F114=RECREARTE!{col_3}141")
+        print(f"[OK] Formulas internas escritas: F89=CASINO!{col_3}144, F114=RECREARTE!{col_3}141")
+
+    # Paso 4: Formulas cross-sheet en hojas 3-col/mes (filas 148-151)
+    # col_adm  = col GASTOS ADMINISTRATIVOS estandar (ENE=C, FEB=D, MAR=E...)
+    # col_par  = col %DIST par   (ENE=B, FEB=D, MAR=F...)
+    # col_imp  = col %DIST impar (ENE=C, FEB=E, MAR=G...)
+    # col3     = col destino 3-col de hojas referenciadas (ENE=C, FEB=F, MAR=I...)
+    # col_dest = numero de columna destino en la hoja (ENE=3, FEB=6, MAR=9...)
+    if mes_num:
+        col_adm  = get_column_letter(mes_num + 2)      # ENE=C, FEB=D, MAR=E...
+        col_par  = get_column_letter(mes_num * 2)      # ENE=B, FEB=D, MAR=F...
+        col_imp  = get_column_letter(mes_num * 2 + 1)  # ENE=C, FEB=E, MAR=G...
+        col3     = get_column_letter(mes_num * 3)      # ENE=C, FEB=F, MAR=I...
+        col_dest = mes_num * 3                         # ENE=3, FEB=6, MAR=9...
+
+        for hoja_nombre, filas_config in FORMULAS_CROSS_SHEET.items():
+            if hoja_nombre not in wb_dest.sheetnames:
+                continue
+            ws = wb_dest[hoja_nombre]
+            for fila, formula_fn in filas_config.items():
+                if formula_fn is None:
+                    continue
+                formula = formula_fn(col_adm, col_par, col_imp, col3)
+                ws.cell(row=fila, column=col_dest).value = formula
+                print(f"[OK] {hoja_nombre} fila {fila} col {col_dest} = {formula}")
 
     # Forzar recálculo automático al abrir en Excel
     wb_dest.calculation.calcMode = 'auto'

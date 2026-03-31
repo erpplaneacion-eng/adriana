@@ -175,10 +175,8 @@ def api_sheets():
                 'Procultura 0,5%', 'Prohospitales 1%', 'Rete Ica 0,6%',
                 'Adulto Mayor 2%', 'Prodeporte 2,5%', '2% Juzgado de Familia',
                 '0,5% Propacifico',
-                # Cross-sheet: calculadas desde otras hojas del Excel
+                # Cross-sheet: se muestran como es_interno en la UI (tarjeta morada)
                 'PREPARADOS PROPIOS', 'Costos Indirectos de Personal',
-                'Gastos Fijos Administracion', 'Gastos financieros',
-                'Gastos No Operacionales',
                 # Sin valor / no configurables
                 'Retefuente', 'COSTOS INDUSTRIALIZADOS',
                 'RACION PARA PREPARAR EN CASA (Ins)', 'REFRIGERIOS (Ins)',
@@ -199,9 +197,7 @@ def api_sheets():
                 'PREPARADOS PROPIOS',               # calculado: GASTOS VEHICULOS * %DIST
                 # Cross-sheet: se calculan automÃÂ¡ticamente desde otras hojas del libro
                 'Costos Indirectos de Personal',
-                'Gastos Fijos Administracion',
-                'Gastos No Operacionales',
-                # Nota: 'Gastos financieros' NO se excluye  necesita configuraciÃÂ³n manual
+                # Cross-sheet: se muestran como es_interno en la UI (tarjeta morada)
                 '2% Estampillas Prounivalle',
                 '0,88% Rte Ica',
                 '1% Estampilla Prohospital',
@@ -229,10 +225,8 @@ def api_sheets():
                 '1% Estampilla Pro Univalle', '3% Estampilla Adulto Mayor',
                 '0,5% Estampilla Universidad del Pacifico',
                 '0,66% Rete Ica', 'Retefuente', '2% Juzgado de Familia',
-                # Cross-sheet: calculadas desde otras hojas del mismo libro
+                # Cross-sheet: se muestran como es_interno en la UI (tarjeta morada)
                 'PREPARADOS PROPIOS',
-                'Gastos Fijos Administracion', 'Gastos financieros',
-                'Gastos No Operacionales',
                 # Sin valor / no configurables
                 'Intereses', 'Descuentos Comerciales', 'otros Fin',
                 'INDUSTRIALIZADOS TERCEROS',
@@ -366,8 +360,8 @@ def api_sheets():
                     v = ws_f.cell(row=current_row, column=col_num).value
                     if not v or not isinstance(v, str) or not v.startswith('='):
                         continue
-                    # Referencia a libro externo o hoja con comillas: ignorar
-                    if '[' in v or "'" in v:
+                    # Referencia a libro externo ([n]): ignorar completamente
+                    if '[' in v:
                         continue
                     # Referencia interna sin comillas (ej: =CASINO!$C$144)
                     if '!' in v:
