@@ -145,15 +145,6 @@ header .actions { display: flex; gap: 10px; }
 }
 .status-green  { background: #28a745; }
 .status-gray   { background: #ccc; }
-.status-guide  { background: #007bff; }
-
-.guide-row .dest-row-header {
-  background: #eef6ff;
-}
-.guide-row .dest-codigo,
-.guide-row .dest-desc {
-  color: #2b4f73;
-}
 
 .dest-sources {
   padding: 6px 12px 8px;
@@ -168,13 +159,6 @@ header .actions { display: flex; gap: 10px; }
   color: #aaa;
   font-style: italic;
   align-self: center;
-}
-
-.guide-note {
-  font-size: .76rem;
-  color: #496b8c;
-  font-style: italic;
-  padding: 2px 0;
 }
 
 /* ── Chips de fuente ── */

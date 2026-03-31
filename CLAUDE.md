@@ -36,8 +36,11 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 |---|---|
 | `app.py` | Flask backend del Config Builder. Sirve la UI y expone `/api/sheets`, `/api/files`, `/api/config/save`, `/api/run` |
 | `procesar_todo.py` | Script principal. Paso 1: salarios (5105). Paso 2: gastos varios (ER + aux). Escribe en el INFORME REAL. |
-| `config_gastos.json` | Mapeo. Cada item: `codigo_a` (fila destino), `sources` (archivos y códigos fuente), `hoja`, `fila_dest`, `buscar_por`, `valor_fijo` |
+| `procesar_gastos.py` | Script standalone de gastos (legado/independiente). Apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
+| `procesar_5105.py` | Script standalone de nómina (legado/independiente). Apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
+| `config_gastos.json` | Mapeo principal. Cada item: `codigo_a`, `sources`, `hoja`, `fila_dest`, `buscar_por`, `valor_fijo`. Se respalda automáticamente al guardar. |
 | `config_5105.json` | Reglas para archivos de nómina 5105 por entidad |
+| `config_gastos_backup_YYYY-MM-DD.json` | Backups automáticos del config al guardar desde la UI. |
 | `static/app.js` | Toda la lógica frontend: drag & drop, `mappings`, `buildConfig`, `renderChips` |
 | `INFORME REAL_2026...xlsx` | Plantilla/destino. **Nunca abrir mientras corre el script.** |
 
@@ -51,9 +54,10 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 ### Estructura de columnas en el INFORME REAL
 
 - **Hojas estándar** (GASTOS ADMINISTRATIVOS, GASTOS OPERATIVOS, GASTOS VEHICULOS, etc.): columna = `MES_COLUMNA[mes]` → ENE=3, FEB=4, MAR=5 ... DIC=14
-- **Hojas con 3 cols/mes** (CASINO, CALI, YUMBO, BUGA): columna = `mes_num * 3` → ENE=3, FEB=6, MAR=9...
+- **Hojas con 3 cols/mes**: columna = `mes_num * 3` → ENE=3, FEB=6, MAR=9...
+  - Lista completa: CASINO, CALI, YUMBO, BUGA, COMEDORES CALI, COMEDORES PALMIRA, COMEDORES VALLE, CTAS EN PPACION, PYG TOTAL, RECREARTE
   - En estas hojas, las columnas intermedias (4,5,7,8...) son de ratio/presupuesto, NO de valor mensual.
-- Añadir una hoja al patrón 3-cols: agregar en `COLUMNA_HOJA` en `procesar_todo.py` y en `FILAS_EXCLUIR` en `app.py`.
+- Añadir una hoja al patrón 3-cols: agregar en `COLUMNA_HOJA` en `procesar_todo.py` y en `HOJAS_3COL` en `app.py`.
 
 ### config_gastos.json — campos por item
 
@@ -89,12 +93,13 @@ La detección automática de fórmulas (`es_formula`) en `app.py` excluye filas 
 - NO tiene referencias a otras hojas (`'NombreHoja'!`)
 - SÍ referencia otras filas de la misma hoja
 
-Para hojas de 3 cols/mes (CASINO, CALI, YUMBO, BUGA) solo se revisan las columnas de valor (3,6,9,12...), no las intermedias de ratio/presupuesto.
+Para hojas de 3 cols/mes (ver lista completa en `HOJAS_3COL`) solo se revisan las columnas de valor (3,6,9,12...), no las intermedias de ratio/presupuesto.
 
 Las filas cross-sheet que deben excluirse pero no son detectadas automáticamente se listan explícitamente en `FILAS_EXCLUIR` por hoja.
 
-`HOJAS_EXCLUIR` = hojas que no se muestran en la UI (`%DIST C`).
-`FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos).
+`HOJAS_EXCLUIR` = hojas que no se muestran en la UI (`%DIST C`, `%DIST C `).
+`FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos: CORPORACIÓN HACIA UN VALLE SOLIDARIO, DIAS DE ATENCIÓN).
+`FILAS_GUIA` = filas visibles en la UI como referencia contextual pero **bloqueadas** (no permiten chips ni operaciones). Actualmente definido solo para la hoja RECREARTE (totales, subtotales e ingresos que se calculan solos).
 
 ### Fila especial: Gastos financieros (CALI fila 149)
 

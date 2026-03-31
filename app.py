@@ -217,12 +217,9 @@ def api_sheets():
                 # Sin valor / no configurables
                 'Intereses', 'Descuentos Comerciales', 'otros Fin',
                 'INDUSTRIALIZADOS TERCEROS',
-            }
-        }
-
-        # Filas guÃ­a: visibles en UI como referencia, pero bloqueadas (sin chips/operaciones)
-        FILAS_GUIA = {
+            },
             'RECREARTE': {
+                # Totales y subtotales (fÃ³rmulas internas)
                 'TOTAL RACIONES', 'INGRESOS BRUTOS',
                 'OPERACIONALES', 'INDUSTRIAS MANUFACTURERAS',
                 'NO OPERACIONALES', 'FINANCIEROS',
@@ -236,6 +233,7 @@ def api_sheets():
                 'GASTOS DE VIAJE', 'DIVERSOS', 'TOTAL GASTOS',
             }
         }
+
         for sh_name in wb.sheetnames:
             ws      = wb[sh_name]
             ws_f    = wb_f[sh_name]
@@ -257,8 +255,7 @@ def api_sheets():
                 if b in FILAS_EXCLUIR_GLOBAL:
                     continue
                 hoja_limpia = sh_name.strip()
-                es_guia = b in FILAS_GUIA.get(hoja_limpia, set())
-                if (not es_guia) and b in FILAS_EXCLUIR.get(hoja_limpia, set()):
+                if b in FILAS_EXCLUIR.get(hoja_limpia, set()):
                     continue
 
                 # Detectar fÃ³rmula interna: referencia otras filas de la MISMA hoja
@@ -283,9 +280,8 @@ def api_sheets():
                         es_formula = True
                         break
 
-                # Filas con fÃ³rmulas internas o cross-sheet: Excel las calcula solo.
-                # Solo se muestran si estÃ¡n marcadas como guÃ­a.
-                if es_formula and not es_guia:
+                # Filas con fÃ³rmulas internas: Excel las calcula solo, no se muestran.
+                if es_formula:
                     continue
 
                 # Clave de bÃºsqueda en config: cÃ³digo si existe, si no "B:<descripcion>"
@@ -298,7 +294,6 @@ def api_sheets():
                     'descripcion' : b,
                     'fuentes'     : fuentes,
                     'tiene_codigo': tiene_codigo,
-                    'es_guia'     : es_guia,
                 })
 
             if rows:
