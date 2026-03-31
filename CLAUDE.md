@@ -99,7 +99,7 @@ Las filas cross-sheet que deben excluirse pero no son detectadas automáticament
 
 `HOJAS_EXCLUIR` = hojas que no se muestran en la UI (`%DIST C`, `%DIST C `).
 `FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos: CORPORACIÓN HACIA UN VALLE SOLIDARIO, DIAS DE ATENCIÓN).
-`FILAS_GUIA` = filas visibles en la UI como referencia contextual pero **bloqueadas** (no permiten chips ni operaciones). Actualmente definido solo para la hoja RECREARTE (totales, subtotales e ingresos que se calculan solos).
+`TITULOS_SECCION` = filas de fórmula que se renderizan como **separador visual de sección** (barra azul con el nombre en mayúsculas, sin chips ni operaciones). Definido para: GASTOS ADMINISTRATIVOS, GASTOS VEHICULOS, CASINO, CALI, YUMBO, COMEDORES CALI, COMEDORES PALMIRA, CTAS EN PPACION, PYG TOTAL. Las filas de totales (TOTAL..., UTILIDAD..., COSTO NETO, etc.) de esas mismas hojas siguen ocultas. Para agregar una hoja: añadir entrada en `TITULOS_SECCION` en `app.py`.
 
 ### Fila especial: Gastos financieros (CALI fila 149)
 
@@ -134,6 +134,62 @@ Las filas que referencian `'%DIST'` usan un patrón de 2 cols/mes:
 
 - **GASTOS OPERATIVOS fila 11** (CUOTA DE APOYO Y SOSTENIMIENTO): tenía valores hardcodeados en columnas MAR y ABR. Se limpiaron.
 
-## Rutas hardcodeadas
+## Rutas — desarrollo vs. Railway
 
-`BASE = r'C:\Users\User\OneDrive\Desktop\CHVS\adriana'` está en `app.py` y `procesar_todo.py`. Si se mueve el proyecto, actualizar en ambos archivos.
+`BASE` ya **no** está hardcodeada. Ambos scripts la resuelven dinámicamente:
+
+| Contexto | Valor de BASE |
+|---|---|
+| Desarrollo local | directorio del script (`os.path.dirname(__file__)`) |
+| Railway (producción) | variable de entorno `DATA_DIR` (volumen persistente) |
+
+En `app.py`: `BASE = os.environ.get('DATA_DIR', _APP_DIR)`
+En `procesar_todo.py`: `BASE = os.environ.get('CHVS_BASE', os.path.dirname(__file__))`
+
+`app.py` pasa `CHVS_BASE=BASE` al subprocess de `procesar_todo.py` para que ambos trabajen sobre el mismo directorio.
+
+## Deploy en Railway
+
+### Archivos de deployment
+
+| Archivo | Propósito |
+|---|---|
+| `requirements.txt` | Dependencias Python (Flask, openpyxl, xlrd, gunicorn) |
+| `Procfile` | Comando de arranque: `gunicorn app:app --bind 0.0.0.0:$PORT` |
+| `.gitignore` | Excluye `__pycache__`, `.env`, backups de config |
+
+### Pasos para hacer deploy
+
+1. En Railway, crear nuevo proyecto desde el repositorio GitHub
+2. Configurar un **volumen persistente** montado en `/data`
+3. Agregar la variable de entorno `DATA_DIR=/data`
+4. Railway detecta automáticamente el `Procfile` y despliega
+
+### Cómo funciona en producción
+
+**En el primer arranque**, `app.py` copia automáticamente al volumen `/data`:
+- `INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx` (plantilla)
+- `config_gastos.json` y `config_5105.json`
+
+**Flujo mensual (ejemplo: ABRIL):**
+
+1. Abrir la app en el navegador (`https://tu-app.railway.app`)
+2. En el panel derecho → **"Subir archivos al servidor"** → escribir `ABRIL` como nombre de carpeta
+3. Seleccionar todos los archivos XLS de abril → clic **Subir archivos**
+   - Los archivos se guardan en `/data/ABRIL/` en el volumen de Railway
+4. Seleccionar `ABRIL` en el selector de carpeta para ver los códigos disponibles
+5. Configurar/verificar los mapeos con drag & drop
+6. Clic **Guardar config**
+7. En el footer → seleccionar `ABRIL` → clic **▶ Ejecutar mes**
+   - El servidor corre `procesar_todo.py ABRIL` y escribe en `/data/INFORME REAL_2026...xlsx`
+8. Clic **⬇ Descargar INFORME REAL** para bajar el Excel actualizado
+
+**El archivo de salida** es siempre `/data/INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx` (el mismo que en desarrollo). Al ejecutar un mes se sobreescribe con los valores de ese mes. Para comparar meses distintos, descarga el archivo antes de procesar el siguiente.
+
+### Variables de entorno en Railway
+
+| Variable | Valor | Obligatoria |
+|---|---|---|
+| `DATA_DIR` | `/data` | Sí (para persistencia) |
+| `PORT` | asignado por Railway | Auto |
+| `RAILWAY_ENVIRONMENT` | asignado por Railway | Auto (desactiva debug mode) |

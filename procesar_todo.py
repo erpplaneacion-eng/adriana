@@ -19,7 +19,7 @@ from openpyxl.comments import Comment
 warnings.filterwarnings('ignore')
 
 # ---------------------------------------------------------------------------
-BASE              = r'C:\Users\User\OneDrive\Desktop\CHVS\adriana'
+BASE              = os.environ.get('CHVS_BASE', os.path.dirname(os.path.abspath(__file__)))
 ARCHIVO_PRINCIPAL = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 CONFIG_GASTOS     = os.path.join(BASE, 'config_gastos.json')
 CONFIG_5105       = os.path.join(BASE, 'config_5105.json')

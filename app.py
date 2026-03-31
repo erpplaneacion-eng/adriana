@@ -2,16 +2,35 @@
 Config Builder - Flask backend
 Interfaz visual drag & drop para configurar config_gastos.json
 """
-import os, re, json, warnings, subprocess, shutil
+import os, re, json, warnings, subprocess, shutil, sys
 from datetime import date
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file
 
 warnings.filterwarnings('ignore')
 
-BASE         = r'C:\Users\User\OneDrive\Desktop\CHVS\adriana'
+# BASE: directorio del script en desarrollo local.
+# En Railway, apunta al volumen persistente via DATA_DIR para que los archivos
+# (INFORME REAL, carpetas mensuales, configs) sobrevivan reinicios y redeploys.
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE     = os.environ.get('DATA_DIR', _APP_DIR)
+
+# Al arrancar en Railway, copiar la plantilla al volumen si aún no existe allí
+_TEMPLATE = os.path.join(_APP_DIR, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
+_INFORME_EN_BASE = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
+if BASE != _APP_DIR and os.path.exists(_TEMPLATE) and not os.path.exists(_INFORME_EN_BASE):
+    os.makedirs(BASE, exist_ok=True)
+    shutil.copy2(_TEMPLATE, _INFORME_EN_BASE)
+
 CONFIG_PATH  = os.path.join(BASE, 'config_gastos.json')
 INFORME_PATH = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
-SCRIPT_PATH  = os.path.join(BASE, 'procesar_todo.py')
+SCRIPT_PATH  = os.path.join(_APP_DIR, 'procesar_todo.py')
+
+# Copiar config al volumen si no existe allí
+for _cfg in ('config_gastos.json', 'config_5105.json'):
+    _src = os.path.join(_APP_DIR, _cfg)
+    _dst = os.path.join(BASE, _cfg)
+    if BASE != _APP_DIR and os.path.exists(_src) and not os.path.exists(_dst):
+        shutil.copy2(_src, _dst)
 
 MES_NOMBRES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
                'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE']
@@ -442,10 +461,12 @@ def api_config_save():
 def api_run(folder):
     """Ejecuta procesar_todo.py para la carpeta indicada."""
     try:
+        env = os.environ.copy()
+        env['CHVS_BASE'] = BASE
         result = subprocess.run(
-            ['py', SCRIPT_PATH, folder],
+            [sys.executable, SCRIPT_PATH, folder],
             capture_output=True, text=True, encoding='utf-8', errors='replace',
-            timeout=300
+            timeout=300, env=env
         )
         return jsonify({
             'ok'    : result.returncode == 0,
@@ -458,10 +479,40 @@ def api_run(folder):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/upload/<folder>', methods=['POST'])
+def api_upload(folder):
+    """Sube archivos XLS a una carpeta mensual en el servidor."""
+    folder_clean = folder.upper().replace('-DL', '').replace('-', '')
+    if folder_clean not in MES_NOMBRES:
+        return jsonify({'error': f'Nombre de carpeta inválido: {folder}'}), 400
+    carpeta = os.path.join(BASE, folder)
+    os.makedirs(carpeta, exist_ok=True)
+    files = request.files.getlist('files')
+    saved = []
+    for f in files:
+        nombre = f.filename
+        if nombre.lower().endswith('.xls') or nombre.lower().endswith('.xlsx'):
+            f.save(os.path.join(carpeta, nombre))
+            saved.append(nombre)
+    return jsonify({'ok': True, 'saved': saved, 'folder': folder, 'total': len(saved)})
+
+
+@app.route('/api/download/informe')
+def api_download_informe():
+    """Descarga el INFORME REAL actualizado."""
+    if not os.path.exists(INFORME_PATH):
+        return jsonify({'error': 'Archivo no encontrado'}), 404
+    return send_file(INFORME_PATH, as_attachment=True,
+                     download_name='INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
+
+
 if __name__ == '__main__':
-    print(f'\n  Config Builder iniciado')
-    print(f'  Abre http://localhost:5000 en tu navegador\n')
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('RAILWAY_ENVIRONMENT') is None  # False en Railway
+    print(f'\n  Config Builder iniciado en puerto {port}')
+    if debug:
+        print(f'  Abre http://localhost:{port} en tu navegador\n')
+    app.run(debug=debug, host='0.0.0.0', port=port)
 
 
 

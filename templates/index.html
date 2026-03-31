@@ -37,6 +37,26 @@
       📂 Archivos fuente por carpeta mensual
     </div>
 
+    <!-- ── Subir archivos al servidor ── -->
+    <div class="upload-section">
+      <div class="upload-header" onclick="toggleUpload()">
+        &#8593; Subir archivos al servidor <span id="upload-arrow">&#9654;</span>
+      </div>
+      <div class="upload-body" id="upload-body" style="display:none">
+        <div class="upload-row">
+          <label>Carpeta mes:</label>
+          <input type="text" id="upload-folder" placeholder="Ej: ABRIL" maxlength="20"
+                 style="width:90px;text-transform:uppercase">
+        </div>
+        <input type="file" id="upload-files" multiple accept=".xls,.xlsx"
+               style="font-size:.78rem;margin:6px 0">
+        <button class="btn btn-upload" id="btn-upload" onclick="uploadFiles()">
+          Subir archivos
+        </button>
+        <div id="upload-status" style="font-size:.75rem;margin-top:4px;color:#555"></div>
+      </div>
+    </div>
+
     <div class="folder-select-wrap">
       <label>Carpeta:</label>
       <select class="folder-select" id="folder-select">
@@ -62,6 +82,9 @@
   <button class="btn btn-success" id="btn-run" onclick="runMes()">
     ▶ Ejecutar mes
   </button>
+  <a class="btn btn-download" id="btn-download" href="/api/download/informe" download>
+    &#11015; Descargar INFORME REAL
+  </a>
   <span class="stats" id="stats">Cargando...</span>
 </div>
 

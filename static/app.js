@@ -663,6 +663,53 @@ function updateStats() {
   if (el) el.textContent = `${configurados} / ${total} ítems configurados`;
 }
 
+// ── Subida de archivos al servidor ──────────────────────────────
+function toggleUpload() {
+  const body  = document.getElementById('upload-body');
+  const arrow = document.getElementById('upload-arrow');
+  const open  = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'flex';
+  arrow.textContent  = open ? '▶' : '▼';
+}
+
+async function uploadFiles() {
+  const folder = document.getElementById('upload-folder').value.trim().toUpperCase();
+  const input  = document.getElementById('upload-files');
+  const status = document.getElementById('upload-status');
+  const btn    = document.getElementById('btn-upload');
+
+  if (!folder) { status.textContent = 'Escribe el nombre de la carpeta (ej: ABRIL)'; return; }
+  if (!input.files.length) { status.textContent = 'Selecciona los archivos XLS primero'; return; }
+
+  btn.disabled = true;
+  status.textContent = 'Subiendo...';
+
+  const formData = new FormData();
+  for (const f of input.files) formData.append('files', f);
+
+  try {
+    const res = await fetch(`/api/upload/${encodeURIComponent(folder)}`, {
+      method: 'POST', body: formData
+    }).then(r => r.json());
+
+    if (res.ok) {
+      status.style.color = '#28a745';
+      status.textContent = `OK: ${res.total} archivo(s) subidos a ${res.folder}/`;
+      input.value = '';
+      const foldersRes = await fetch('/api/folders').then(r => r.json());
+      folders = foldersRes;
+      populateFolderSelects();
+    } else {
+      status.style.color = '#dc3545';
+      status.textContent = `Error: ${res.error}`;
+    }
+  } catch (e) {
+    status.style.color = '#dc3545';
+    status.textContent = `Error de red: ${e.message}`;
+  }
+  btn.disabled = false;
+}
+
 // ── Evento cambio de carpeta ─────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   init();
