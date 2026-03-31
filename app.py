@@ -201,16 +201,14 @@ def api_sheets():
                 'UTILIDAD BRUTA', 'GASTOS ADMINISTRATIVOS Y NO OPERACIONALES',
                 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
-                # Facturación calculada internamente (Rac × precio)
-                'COMPLEMENTO INDUSTRIALIZADO (Fac)', 'COMPLEMENTO PREPARADO (Fac)',
-                'ALMUERZO JORNADA UNICA (Fac)',
+                # Nota: filas (Fac) visibles para configuración manual en UI
                 # Porcentajes auto-calculados sobre ingresos
                 '1% Estampilla Prohospital', '2,5% Estampilla Pro Deporte',
                 '1% Estampilla Pro Univalle', '3% Estampilla Adulto Mayor',
                 '0,5% Estampilla Universidad del Pacifico',
                 '0,66% Rete Ica', 'Retefuente', '2% Juzgado de Familia',
                 # Cross-sheet: calculadas desde otras hojas del mismo libro
-                'PREPARADOS PROPIOS', 'Costos Indirectos de Personal',
+                'PREPARADOS PROPIOS',
                 'Gastos Fijos Administracion', 'Gastos financieros',
                 'Gastos No Operacionales',
                 # Sin valor / no configurables

@@ -5732,62 +5732,6 @@
       "buscar_por": "B",
       "fila_dest": 160,
       "hoja": "BUGA"
-    },
-    {
-      "codigo_a": "B:COMPLEMENTO INDUSTRIALIZADO (Fac)",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 16,
-      "hoja": "BUGA"
-    },
-    {
-      "codigo_a": "B:COMPLEMENTO PREPARADO (Fac)",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 17,
-      "hoja": "BUGA"
-    },
-    {
-      "codigo_a": "B:ALMUERZO JORNADA UNICA (Fac)",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 18,
-      "hoja": "BUGA"
-    },
-    {
-      "codigo_a": "B:Costos Indirectos de Personal",
-      "sources": [
-        {
-          "key": "5105_CHVS",
-          "codes": [
-            "99 GENERAL"
-          ]
-        }
-      ],
-      "buscar_por": "B",
-      "fila_dest": 85,
-      "hoja": "BUGA"
     }
   ]
 }
