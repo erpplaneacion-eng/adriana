@@ -115,7 +115,8 @@ def api_sheets():
         # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fórmula
         HOJAS_3COL = {
             'CASINO', 'CALI', 'YUMBO', 'BUGA',
-            'COMEDORES CALI', 'COMEDORES PALMIRA', 'COMEDORES VALLE'
+            'COMEDORES CALI', 'COMEDORES PALMIRA', 'COMEDORES VALLE',
+            'CTAS EN PPACION'
         }
 
         # Filas a excluir en TODAS las hojas
