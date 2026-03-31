@@ -43,6 +43,9 @@ COLUMNA_HOJA = {
     'CALI'  : _tres_cols,
     'YUMBO' : _tres_cols,
     'BUGA'  : _tres_cols,
+    'COMEDORES CALI'   : _tres_cols,
+    'COMEDORES PALMIRA': _tres_cols,
+    'COMEDORES VALLE'  : _tres_cols,
 }
 
 MES_ABREV = {

@@ -1,5 +1,5 @@
 """
-Config Builder — Flask backend
+Config Builder - Flask backend
 Interfaz visual drag & drop para configurar config_gastos.json
 """
 import os, re, json, warnings, subprocess, shutil
@@ -38,7 +38,7 @@ def leer_todos_codigos(filepath):
         wb = xlrd.open_workbook(filepath)
         ws = wb.sheet_by_name('Hoja 1')
 
-        # Detectar columna J (valor) — forzar índice 9 si no se detecta encabezado
+        # Detectar columna J (valor) - forzar indice 9 si no se detecta encabezado
         col_val = 9
         for r in range(min(25, ws.nrows)):
             for c in range(ws.ncols):
@@ -56,7 +56,7 @@ def leer_todos_codigos(filepath):
             if not a_str or a_str in ('None', '0.0', '0'):
                 continue
 
-            # Convertir float sin decimales (ej: 51055101.0 → "51055101")
+            # Convertir float sin decimales (ej: 51055101.0 -> "51055101")
             if isinstance(raw_a, float) and raw_a == int(raw_a):
                 a_str = str(int(raw_a))
 
@@ -113,18 +113,20 @@ def api_sheets():
         HOJAS_EXCLUIR  = {'%DIST C', '%DIST C '}
         # Hojas con 3 cols/mes: solo cols 3,6,9,12... son columnas de valor
         # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fórmula
-        HOJAS_3COL = {'CASINO', 'CALI', 'YUMBO', 'BUGA'}
+        HOJAS_3COL = {
+            'CASINO', 'CALI', 'YUMBO', 'BUGA',
+            'COMEDORES CALI', 'COMEDORES PALMIRA', 'COMEDORES VALLE'
+        }
 
         # Filas a excluir en TODAS las hojas
         FILAS_EXCLUIR_GLOBAL = {
-            'CORPORACIÓN HACIA UN VALLE SOLIDARIO',
+            'CORPORACI\u00d3N HACIA UN VALLE SOLIDARIO',
             'CORPORACI\u00d3N HACIA UN VALLE SOLIDARIO ',
-            'DIAS DE ATENCIÓN',
             'DIAS DE ATENCI\u00d3N',
             'DIAS DE ATENCI\u00d3N ',
         }
 
-        # Filas a excluir por hoja (col B) — títulos sin valor
+        # Filas a excluir por hoja (col B) - titulos sin valor
         FILAS_EXCLUIR = {
             'GASTOS OPERATIVOS': {
                 'CUOTA DE APOYO Y SOSTENIMIENTO',  # título sin valor configurable
@@ -179,7 +181,7 @@ def api_sheets():
                 'Costos Indirectos de Personal',
                 'Gastos Fijos Administracion',
                 'Gastos No Operacionales',
-                # Nota: 'Gastos financieros' NO se excluye — necesita configuración manual
+                # Nota: 'Gastos financieros' NO se excluye  necesita configuración manual
                 '2% Estampillas Prounivalle',
                 '0,88% Rte Ica',
                 '1% Estampilla Prohospital',
@@ -251,10 +253,10 @@ def api_sheets():
                     v = ws_f.cell(row=current_row, column=col_num).value
                     if not v or not isinstance(v, str) or not v.startswith('='):
                         continue
-                    # Si tiene referencia a libro externo o a otra hoja → NO es fórmula interna
+                    # Si tiene referencia a libro externo o a otra hoja  NO es fórmula interna
                     if '[' in v or "'" in v:
                         continue
-                    # Si referencia otras filas de la misma hoja → SÍ es fórmula interna
+                    # Si referencia otras filas de la misma hoja  SÍ es fórmula interna
                     nums = re.findall(r'\d+', v)
                     otras_filas = [int(n) for n in nums if int(n) != current_row and 1 < int(n) < 500]
                     if otras_filas:
@@ -356,7 +358,7 @@ def api_run(folder):
             'stderr': result.stderr
         })
     except subprocess.TimeoutExpired:
-        return jsonify({'error': 'Timeout — el script tardó más de 5 minutos'}), 500
+        return jsonify({'error': 'Timeout - el script tardo mas de 5 minutos'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -365,3 +367,4 @@ if __name__ == '__main__':
     print(f'\n  Config Builder iniciado')
     print(f'  Abre http://localhost:5000 en tu navegador\n')
     app.run(debug=True, port=5000)
+
