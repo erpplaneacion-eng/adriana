@@ -11366,6 +11366,19 @@
       ],
       "fila_dest": 139,
       "hoja": "RECREARTE"
+    },
+    {
+      "codigo_a": "7205",
+      "sources": [
+        {
+          "key": "5105_CHVS",
+          "codes": [
+            "99 GENERAL"
+          ]
+        }
+      ],
+      "fila_dest": 6,
+      "hoja": "GASTOS OPERATIVOS"
     }
   ]
 }
