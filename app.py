@@ -488,6 +488,10 @@ def api_upload(folder):
         return jsonify({'error': f'Nombre de carpeta invÃ¡lido: {folder}'}), 400
     carpeta = os.path.join(BASE, folder)
     os.makedirs(carpeta, exist_ok=True)
+    # Limpiar archivos XLS previos para evitar mezclar con carga anterior
+    for existing in os.listdir(carpeta):
+        if existing.lower().endswith('.xls') or existing.lower().endswith('.xlsx'):
+            os.remove(os.path.join(carpeta, existing))
     files = request.files.getlist('files')
     saved = []
     for f in files:

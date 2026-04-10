@@ -10,7 +10,6 @@ Sistema para llenar automáticamente el **INFORME REAL_2026 - FORMATO VERSION OR
 
 ```bash
 # Iniciar Config Builder (UI web para configurar mapeos)
-cd C:\Users\User\OneDrive\Desktop\CHVS\adriana
 py app.py
 # Abre http://localhost:5000
 
@@ -34,15 +33,28 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 
 | Archivo | Rol |
 |---|---|
-| `app.py` | Flask backend del Config Builder. Sirve la UI y expone `/api/sheets`, `/api/files`, `/api/config/save`, `/api/run` |
-| `procesar_todo.py` | Script principal. Paso 1: salarios (5105). Paso 2: gastos varios (ER + aux). Escribe en el INFORME REAL. |
-| `procesar_gastos.py` | Script standalone de gastos (legado/independiente). Apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
-| `procesar_5105.py` | Script standalone de nómina (legado/independiente). Apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
+| `app.py` | Flask backend del Config Builder. Sirve la UI y expone los endpoints API. |
+| `procesar_todo.py` | Script principal. 4 pasos: salarios (5105), gastos (ER + aux), fórmulas cross-sheet en GASTOS ADMIN, fórmulas cross-sheet en hojas 3-col/mes. |
+| `procesar_gastos.py` | Script standalone de gastos (**legado**). BASE hardcodeada, apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
+| `procesar_5105.py` | Script standalone de nómina (**legado**). BASE hardcodeada. |
 | `config_gastos.json` | Mapeo principal. Cada item: `codigo_a`, `sources`, `hoja`, `fila_dest`, `buscar_por`, `valor_fijo`. Se respalda automáticamente al guardar. |
 | `config_5105.json` | Reglas para archivos de nómina 5105 por entidad |
-| `config_gastos_backup_YYYY-MM-DD.json` | Backups automáticos del config al guardar desde la UI. |
 | `static/app.js` | Toda la lógica frontend: drag & drop, `mappings`, `buildConfig`, `renderChips` |
 | `INFORME REAL_2026...xlsx` | Plantilla/destino. **Nunca abrir mientras corre el script.** |
+
+### Endpoints API (app.py)
+
+| Endpoint | Método | Descripción |
+|---|---|---|
+| `/api/sheets` | GET | Hojas del INFORME REAL con filas (col A + B), filtrando fórmulas internas |
+| `/api/folders` | GET | Carpetas mensuales disponibles en BASE con conteo de XLS |
+| `/api/files/<folder>` | GET | Códigos extraídos de todos los XLS en la carpeta |
+| `/api/config` | GET | Lee config_gastos.json |
+| `/api/config/save` | POST | Guarda config (hace backup automático por fecha) |
+| `/api/run/<folder>` | POST | Ejecuta procesar_todo.py para la carpeta indicada |
+| `/api/upload/<folder>` | POST | Sube archivos XLS a una carpeta mensual en el servidor |
+| `/api/upload/informe` | POST | Reemplaza el INFORME REAL base con el archivo subido |
+| `/api/download/informe` | GET | Descarga el INFORME REAL actualizado |
 
 ### Tipos de archivos XLS fuente (en carpetas mensuales)
 
@@ -78,7 +90,7 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 
 ### rowKey en el frontend (app.js)
 
-El key único de cada fila en `mappings` es `"${codeKey}|${fila.fila}"` (incluye número de fila Excel para evitar colisiones cuando el mismo código aparece en dos filas). Al guardar, el `|filaNum` se extrae y se guarda como `fila_dest`.
+El key único de cada fila en `mappings` es `"${sheetName}::${codeKey}|${filaNum}"`. Al guardar, el nombre de hoja y `|filaNum` se extraen para guardar como `hoja` y `fila_dest` respectivamente. La función `parseRowKey()` hace el parsing inverso.
 
 ### Exclusiones del Config Builder (app.py)
 
@@ -99,40 +111,24 @@ Las filas cross-sheet que deben excluirse pero no son detectadas automáticament
 
 `HOJAS_EXCLUIR` = hojas que no se muestran en la UI (`%DIST C`, `%DIST C `).
 `FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos: CORPORACIÓN HACIA UN VALLE SOLIDARIO, DIAS DE ATENCIÓN).
-`TITULOS_SECCION` = filas de fórmula que se renderizan como **separador visual de sección** (barra azul con el nombre en mayúsculas, sin chips ni operaciones). Definido para: GASTOS ADMINISTRATIVOS, GASTOS VEHICULOS, CASINO, CALI, YUMBO, COMEDORES CALI, COMEDORES PALMIRA, CTAS EN PPACION, PYG TOTAL. Las filas de totales (TOTAL..., UTILIDAD..., COSTO NETO, etc.) de esas mismas hojas siguen ocultas. Para agregar una hoja: añadir entrada en `TITULOS_SECCION` en `app.py`.
+`TITULOS_SECCION` = filas de fórmula que se renderizan como **separador visual de sección** (barra azul con el nombre en mayúsculas, sin chips ni operaciones). Las filas de totales (TOTAL..., UTILIDAD..., COSTO NETO, etc.) de esas mismas hojas siguen ocultas. Para agregar una hoja: añadir entrada en `TITULOS_SECCION` en `app.py`.
 
-### Fila especial: Gastos financieros (CALI fila 149)
+### Fórmulas cross-sheet escritas por procesar_todo.py
 
-Esta fila tiene fórmula cross-sheet con **constantes hardcodeadas distintas por mes** (`='GASTOS ADMINISTRATIVOS'!C109*'%DIST'!C52+520117.4`). Las fórmulas de MAR-DIC no existen en la plantilla y NO pueden restaurarse automáticamente porque el ajuste mensual varía. Requiere entrada manual en Excel para cada mes. Aparece visible en el Config Builder para que el usuario pueda asignarle un valor fijo o fuente.
+Además de los valores numéricos, `procesar_mes()` escribe fórmulas directamente:
+
+- **GASTOS ADMINISTRATIVOS fila 89**: `=CASINO!${col_3}$144` (ref a Casino)
+- **GASTOS ADMINISTRATIVOS fila 114**: `=RECREARTE!${col_3}$141` (ref a Recrearte)
+- **Hojas 3-col/mes filas 148-151**: fórmulas cross-sheet hacia `%DIST` y `GASTOS ADMINISTRATIVOS`, definidas en `FORMULAS_CROSS_SHEET`. Ver fila 149 de CALI como caso especial: contiene constantes hardcodeadas distintas por mes que no pueden restaurarse automáticamente.
+
+Las columnas en estas fórmulas usan tres patrones distintos:
+- `%DIST` col par: `chr(64 + 2*mes_num)` → ENE=B, FEB=D, MAR=F...
+- `%DIST` col impar: `chr(65 + 2*mes_num)` → ENE=C, FEB=E, MAR=G...
+- GASTOS ADMIN col estándar: `chr(66 + mes_num)` → ENE=C, FEB=D, MAR=E...
 
 ### Celdas fusionadas (merged cells)
 
-En `procesar_gastos`, antes de escribir se detecta si la celda pertenece a un rango fusionado y se redirige a `min_row/min_col` del rango. Esto es necesario en varias hojas del INFORME REAL.
-
-## Estado del INFORME REAL (correcciones aplicadas 2026-03-30)
-
-### Fórmulas restauradas por hoja
-
-Durante la revisión se detectó que el script había sobreescrito fórmulas internas de Excel en varias hojas al procesar MARZO y ABRIL. Se restauraron:
-
-| Hoja | Filas afectadas | Meses restaurados |
-|---|---|---|
-| GASTOS VEHICULOS | 9,11,15,19,22,25 (subtotales) | MAR, ABR |
-| CASINO | 5,12,13,14,15,23,24,28,29,42,44,60,61,78,83,84,88,91,95,98,108,113,119,122,126,140,144 | MAR, ABR |
-| CALI | 85,148,151 (cross-sheet %DIST) | MAR→DIC |
-| YUMBO | 23,85,123,148,151 | OCT→DIC y MAR→DIC según fila |
-| BUGA | 23,73,148,151 | DIC y MAR→DIC según fila |
-
-### Fórmulas cross-sheet en hojas 3-col/mes
-
-Las filas que referencian `'%DIST'` usan un patrón de 2 cols/mes:
-- `%DIST` col par (B,D,F,H...): `chr(64 + 2*mes_num)` → ENE=B, FEB=D, MAR=F...
-- `%DIST` col impar (C,E,G,I...): `chr(65 + 2*mes_num)` → ENE=C, FEB=E, MAR=G...
-- Hoja referenciada (GASTOS ADMIN/OPERATIVOS) usa col estándar: `chr(66 + mes_num)` → ENE=C, FEB=D, MAR=E...
-
-### Filas de título limpiadas
-
-- **GASTOS OPERATIVOS fila 11** (CUOTA DE APOYO Y SOSTENIMIENTO): tenía valores hardcodeados en columnas MAR y ABR. Se limpiaron.
+En `procesar_gastos` y `procesar_5105`, antes de escribir se detecta si la celda pertenece a un rango fusionado y se redirige a `min_row/min_col` del rango.
 
 ## Rutas — desarrollo vs. Railway
 
@@ -147,6 +143,8 @@ En `app.py`: `BASE = os.environ.get('DATA_DIR', _APP_DIR)`
 En `procesar_todo.py`: `BASE = os.environ.get('CHVS_BASE', os.path.dirname(__file__))`
 
 `app.py` pasa `CHVS_BASE=BASE` al subprocess de `procesar_todo.py` para que ambos trabajen sobre el mismo directorio.
+
+**Nota**: `procesar_gastos.py` y `procesar_5105.py` (scripts legado) aún tienen `BASE` hardcodeada y apuntan a un archivo diferente. No usar en Railway.
 
 ## Deploy en Railway
 
