@@ -380,26 +380,30 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
     def normalizar(texto):
         return re.sub(r'\s+', ' ', str(texto).strip())
 
-    # Agrupar items por hoja destino
+    # Índice de hojas: nombre normalizado (sin espacios) → nombre real en el libro
+    hojas_idx = {sh.strip(): sh for sh in wb_dest.sheetnames}
+
+    # Agrupar items por hoja destino (siempre con nombre normalizado como clave)
     from collections import defaultdict
     items_por_hoja = defaultdict(list)
     for item in items:
-        hoja_nombre = item.get('hoja', '')
+        hoja_nombre = item.get('hoja', '').strip()
         if not hoja_nombre:
             # Compatibilidad: items sin hoja → GASTOS ADMINISTRATIVOS
             hoja_nombre = next(
-                (sh for sh in wb_dest.sheetnames if 'GASTO' in sh.upper() and 'ADMIN' in sh.upper()),
-                wb_dest.sheetnames[0]
+                (sh.strip() for sh in wb_dest.sheetnames if 'GASTO' in sh.upper() and 'ADMIN' in sh.upper()),
+                wb_dest.sheetnames[0].strip()
             )
         items_por_hoja[hoja_nombre].append(item)
 
     # Procesar cada hoja
     for hoja_nombre, hoja_items in items_por_hoja.items():
-        if hoja_nombre not in wb_dest.sheetnames:
+        hoja_real = hojas_idx.get(hoja_nombre)
+        if hoja_real is None:
             print(f"  [ADVERTENCIA] Hoja no encontrada: {hoja_nombre}")
             continue
 
-        hoja_dest = wb_dest[hoja_nombre]
+        hoja_dest = wb_dest[hoja_real]
 
         # Calcular columna destino según estructura de la hoja
         mes_num = MES_NUMERO.get(mes_nombre or '', 0)
@@ -408,7 +412,7 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
         else:
             col_hoja = columna_xlsx
 
-        print(f"\n  --- {hoja_nombre} ({len(hoja_items)} items) col={col_hoja} ---")
+        print(f"\n  --- {hoja_real.strip()} ({len(hoja_items)} items) col={col_hoja} ---")
 
         # Construir índices de fila
         indice_destino   = {}
