@@ -430,6 +430,38 @@ header .actions { display: flex; gap: 10px; }
 .draggable-chip .dc-desc { color: #555; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .draggable-chip .dc-val  { color: #28a745; font-weight: 600; }
 
+.draggable-chip.chip-selected {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,.3);
+}
+.draggable-chip.chip-selected .dc-code { color: #1d4ed8; }
+
+/* Barra de selección múltiple */
+.selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 6px;
+  font-size: .78rem;
+  color: #1d4ed8;
+}
+.selection-bar .sel-count { font-weight: 600; }
+.btn-sel-clear {
+  background: none;
+  border: 1px solid #93c5fd;
+  border-radius: 4px;
+  color: #1d4ed8;
+  font-size: .72rem;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.btn-sel-clear:hover { background: #dbeafe; }
+
 /* Buscador en acordeón */
 .chip-search {
   width: 100%;

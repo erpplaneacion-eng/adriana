@@ -11,6 +11,7 @@ let mappingSheets = {};   // { key: 'GASTOS OPERATIVOS' }  — hoja destino de c
 let filesData     = {};   // { nombre_archivo: { tipo, items } }
 let configRaw     = null; // config_gastos.json completo
 let folders       = [];
+let selectedChips = new Map(); // chipId → dragData (selección múltiple)
 
 // ── Utilidades ──────────────────────────────────────────────
 const fmt = v => v == null ? '' : '$' + Number(v).toLocaleString('es-CO', {maximumFractionDigits: 0});
@@ -50,6 +51,23 @@ function fileKey(filename) {
     return m ? '5105_' + m[1].replace(/\s+/g,'_') : '5105';
   }
   return filename.split('.')[0].replace(/\s+/g,'_');
+}
+
+// ── Selección múltiple de chips ──────────────────────────────
+function updateSelectionBar() {
+  const bar = document.getElementById('selection-bar');
+  if (!bar) return;
+  const n = selectedChips.size;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  bar.querySelector('.sel-count').textContent =
+    `${n} chip${n !== 1 ? 's' : ''} seleccionado${n !== 1 ? 's' : ''} — arrastra cualquiera al destino`;
+}
+
+function clearChipSelection() {
+  selectedChips.clear();
+  document.querySelectorAll('.draggable-chip.chip-selected')
+    .forEach(c => c.classList.remove('chip-selected'));
+  updateSelectionBar();
 }
 
 // ── Inicialización ───────────────────────────────────────────
@@ -259,8 +277,13 @@ function renderDestRows() {
     dropZone.addEventListener('drop', e => {
       e.preventDefault();
       div.classList.remove('drag-over');
-      const data = JSON.parse(e.dataTransfer.getData('application/json'));
-      addSourceToRow(key, data);
+      const raw = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (Array.isArray(raw)) {
+        raw.forEach(data => addSourceToRow(key, data));
+        clearChipSelection();
+      } else {
+        addSourceToRow(key, raw);
+      }
     });
 
     // Renderizar operaciones fijas
@@ -464,6 +487,7 @@ function refreshRow(rowKey) {
 // ── Panel derecho: acordeón de archivos ──────────────────────
 async function loadFolder(folderName) {
   if (!folderName) return;
+  clearChipSelection();
   const accordion = document.getElementById('accordion-wrap');
   accordion.innerHTML = '<p style="padding:20px;color:#888;font-size:.85rem;">Cargando archivos...</p>';
 
@@ -561,7 +585,7 @@ function buildAccordionItem(nombre, info) {
 
 function renderDraggableChips(container, nombreArchivo, info) {
   container.innerHTML = '';
-  const key = fileKey(nombreArchivo);
+  const fk = fileKey(nombreArchivo);
 
   info.items.forEach(item => {
     if (item.error) return;
@@ -575,7 +599,7 @@ function renderDraggableChips(container, nombreArchivo, info) {
     `;
 
     const dragData = {
-      key     : key,
+      key     : fk,
       archivo : nombreArchivo,
       codigos : [item.codigo],
       codigo  : item.codigo,
@@ -584,8 +608,37 @@ function renderDraggableChips(container, nombreArchivo, info) {
       celda   : item.celda
     };
 
+    const chipId = `${fk}::${item.codigo}`;
+
+    // Click → seleccionar/deseleccionar sin iniciar drag
+    chip.addEventListener('click', () => {
+      if (selectedChips.has(chipId)) {
+        selectedChips.delete(chipId);
+        chip.classList.remove('chip-selected');
+      } else {
+        selectedChips.set(chipId, dragData);
+        chip.classList.add('chip-selected');
+      }
+      updateSelectionBar();
+    });
+
     chip.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+      let payload;
+      if (selectedChips.size > 0 && selectedChips.has(chipId)) {
+        // Arrastrar todos los chips seleccionados
+        payload = Array.from(selectedChips.values());
+        // Ghost con conteo
+        const ghost = document.createElement('div');
+        ghost.textContent = `${payload.length} chips`;
+        ghost.style.cssText = 'background:#3b82f6;color:#fff;padding:5px 12px;border-radius:12px;font-size:.8rem;position:fixed;top:-200px;left:-200px';
+        document.body.appendChild(ghost);
+        e.dataTransfer.setDragImage(ghost, 0, 0);
+        setTimeout(() => ghost.remove(), 0);
+      } else {
+        // Chip suelto (no estaba seleccionado)
+        payload = dragData;
+      }
+      e.dataTransfer.setData('application/json', JSON.stringify(payload));
       e.dataTransfer.effectAllowed = 'copy';
     });
 
