@@ -386,6 +386,12 @@ function renderChips(rowKey, sources, container) {
     const fileSpan = document.createElement('span');
     fileSpan.className = 'chip-file';
     fileSpan.textContent = src.key || src.archivo;
+    if (src.seccion) {
+      const secSpan = document.createElement('span');
+      secSpan.className = 'chip-sec';
+      secSpan.textContent = src.seccion;
+      fileSpan.appendChild(secSpan);
+    }
     const removeSpan = document.createElement('span');
     removeSpan.className = 'chip-remove';
     removeSpan.textContent = '×';
@@ -430,10 +436,11 @@ function addSourceToRow(rowKey, chipData) {
   // Registrar hoja destino
   if (currentSheet) mappingSheets[rowKey] = currentSheet.nombre;
 
-  // Evitar duplicado exacto
+  // Evitar duplicado exacto (mismo archivo + mismo codigo + misma sección)
   const existe = mappings[rowKey].some(s =>
     (s.codigos || []).join(',') === (chipData.codigos || [chipData.codigo]).join(',') &&
-    s.key === chipData.key
+    s.key === chipData.key &&
+    (s.seccion || null) === (chipData.seccion || null)
   );
   if (existe) return;
 
@@ -675,10 +682,11 @@ function renderDraggableChips(container, nombreArchivo, info) {
       codigo     : item.codigo,
       descripcion: item.descripcion,
       valor      : item.valor,
-      celda      : item.celda
+      celda      : item.celda,
+      seccion    : item.seccion || null
     };
 
-    const chipId = `${fk}::${item.codigo}`;
+    const chipId = `${fk}::${item.seccion || ''}::${item.codigo}`;
 
     // Click → seleccionar/deseleccionar
     row.addEventListener('click', () => {

@@ -101,12 +101,14 @@ def leer_todos_codigos(filepath):
                         secciones_5105.add(r)
                         en_5105 = False  # reiniciar para detectar el siguiente bloque
 
-        items = []
+        items        = []
+        seccion_actual = None  # sección activa (None = sección inicial del archivo)
 
         for r in range(inicio, ws.nrows):
             # Insertar separador de seccion para archivos 5105 y saltar la fila como dato
             if es_5105 and r in secciones_5105:
                 a_sep = str(ws.cell_value(r, 0)).strip()
+                seccion_actual = a_sep  # actualizar sección activa
                 items.append({
                     'codigo'     : '',
                     'descripcion': a_sep,
@@ -191,6 +193,7 @@ def leer_todos_codigos(filepath):
                     'celda'      : f'{col_letra}{r + 1}',
                     'negrita'    : negrita,
                     'indent'     : indent,
+                    'seccion'    : seccion_actual,
                 })
 
         return items

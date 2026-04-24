@@ -479,6 +479,18 @@ header .actions { display: flex; gap: 10px; }
 }
 
 /* Separador de sección dentro de tabla fuente */
+/* Badge de sección en chip del panel izquierdo */
+.chip-sec {
+  display: block;
+  font-size: .62rem;
+  color: #6366f1;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
 .source-row-sep {
   padding: 4px 8px;
   background: #e0e7ff;
