@@ -5,7 +5,8 @@
       "Bash(py _analizar_config.py)",
       "Bash(py procesar_todo.py MARZO)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(py)"
     ]
   }
 }
