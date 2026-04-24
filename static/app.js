@@ -543,15 +543,27 @@ function buildAccordionItem(nombre, info) {
   const wrapper = document.createElement('div');
   wrapper.className = 'accordion-item';
 
+  const nTotal   = info.items.filter(i => !i.error && i.negrita).length;
+  const nDetalle = info.items.filter(i => !i.error && !i.negrita).length;
+
   const header = document.createElement('div');
   header.className = 'accordion-header';
   header.innerHTML = `
     <span>${nombre}</span>
-    <span style="font-size:.75rem;color:#666;">${info.items.length} códigos &nbsp;<span class="arrow">▶</span></span>
+    <span style="font-size:.75rem;color:#666;">${info.items.length} filas &nbsp;<span class="arrow">▶</span></span>
   `;
 
   const body = document.createElement('div');
   body.className = 'accordion-body';
+
+  // Filtros: Todos / Solo detalle / Solo totales
+  const filterBar = document.createElement('div');
+  filterBar.className = 'chip-filter-bar';
+  filterBar.innerHTML = `
+    <button class="chip-filter active" data-filter="all">Todos (${info.items.length})</button>
+    <button class="chip-filter" data-filter="detalle">Detalle (${nDetalle})</button>
+    <button class="chip-filter" data-filter="total">Totales (${nTotal})</button>
+  `;
 
   // Buscador
   const search = document.createElement('input');
@@ -562,14 +574,30 @@ function buildAccordionItem(nombre, info) {
   const chipsWrap = document.createElement('div');
   renderDraggableChips(chipsWrap, nombre, info);
 
-  search.addEventListener('input', () => {
-    const q = search.value.toLowerCase();
+  function applyFilters() {
+    const q      = search.value.toLowerCase();
+    const active = filterBar.querySelector('.chip-filter.active').dataset.filter;
     chipsWrap.querySelectorAll('.draggable-chip').forEach(chip => {
-      const txt = chip.textContent.toLowerCase();
-      chip.style.display = txt.includes(q) ? '' : 'none';
+      const esTotal    = chip.dataset.negrita === 'true';
+      const matchFilter = active === 'all'
+        || (active === 'total'   &&  esTotal)
+        || (active === 'detalle' && !esTotal);
+      const matchSearch = !q || chip.textContent.toLowerCase().includes(q);
+      chip.style.display = matchFilter && matchSearch ? '' : 'none';
+    });
+  }
+
+  filterBar.querySelectorAll('.chip-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBar.querySelectorAll('.chip-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
     });
   });
 
+  search.addEventListener('input', applyFilters);
+
+  body.appendChild(filterBar);
   body.appendChild(search);
   body.appendChild(chipsWrap);
 
@@ -589,8 +617,10 @@ function renderDraggableChips(container, nombreArchivo, info) {
 
   info.items.forEach(item => {
     if (item.error) return;
+    const esTotal = item.negrita === true;
     const chip = document.createElement('div');
-    chip.className = 'draggable-chip';
+    chip.className   = 'draggable-chip' + (esTotal ? ' chip-total' : '');
+    chip.dataset.negrita = String(esTotal);
     chip.draggable = true;
     chip.innerHTML = `
       <span class="dc-code">${item.codigo}</span>

@@ -430,12 +430,46 @@ header .actions { display: flex; gap: 10px; }
 .draggable-chip .dc-desc { color: #555; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .draggable-chip .dc-val  { color: #28a745; font-weight: 600; }
 
+/* Chip total (negrita en el Excel) */
+.draggable-chip.chip-total {
+  background: #fef3c7;
+  border-color: #d97706;
+}
+.draggable-chip.chip-total .dc-code { color: #92400e; font-weight: 800; }
+.draggable-chip.chip-total .dc-val  { color: #b45309; }
+.draggable-chip.chip-total:hover    { background: #fde68a; }
+
 .draggable-chip.chip-selected {
   background: #dbeafe;
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59,130,246,.3);
 }
 .draggable-chip.chip-selected .dc-code { color: #1d4ed8; }
+
+/* Filtros de total/detalle en acordeón */
+.chip-filter-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.chip-filter {
+  border: 1px solid #dde;
+  background: #f5f5fa;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: .72rem;
+  cursor: pointer;
+  color: #555;
+  white-space: nowrap;
+}
+.chip-filter.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+}
+.chip-filter:hover:not(.active) { background: #e8e8f5; }
 
 /* Barra de selección múltiple */
 .selection-bar {

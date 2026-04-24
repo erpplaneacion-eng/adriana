@@ -54,7 +54,7 @@ def leer_todos_codigos(filepath):
     """
     try:
         import xlrd
-        wb = xlrd.open_workbook(filepath)
+        wb = xlrd.open_workbook(filepath, formatting_info=True)
         ws = wb.sheet_by_name('Hoja 1')
 
         # Detectar columna J (valor) - forzar indice 9 si no se detecta encabezado
@@ -94,13 +94,23 @@ def leer_todos_codigos(filepath):
                 except (ValueError, TypeError):
                     val = 0.0
 
-            # Solo incluir si hay cÃÂ³digo no vacÃÂ­o y (descripciÃÂ³n o valor)
+            # Detectar negrita en col A (indica fila total/agregado)
+            negrita = False
+            try:
+                xf_idx  = ws.cell_xf_index(r, 0)
+                xf      = wb.xf_list[xf_idx]
+                font    = wb.font_list[xf.font_index]
+                negrita = bool(font.bold)
+            except Exception:
+                pass
+
             if a_str and (desc or val != 0.0):
                 items.append({
                     'codigo'     : a_str,
                     'descripcion': desc[:70],
                     'valor'      : val,
-                    'celda'      : f'{col_letra}{r + 1}'
+                    'celda'      : f'{col_letra}{r + 1}',
+                    'negrita'    : negrita,
                 })
 
         return items
