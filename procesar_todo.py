@@ -562,19 +562,20 @@ def procesar_mes(carpeta_mes):
 
     wb_dest   = openpyxl.load_workbook(ARCHIVO_PRINCIPAL)
 
-    # Paso 1: Salarios 5105 → siempre a hoja Gastos Administrativos
     hoja_admin = next(
         (wb_dest[sh] for sh in wb_dest.sheetnames
          if 'GASTO' in sh.upper() and 'ADMIN' in sh.upper()),
         None
     )
+
+    # Paso 1: Gastos (todas las hojas según config)
+    procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
+
+    # Paso 2: Salarios 5105 → corre DESPUÉS de gastos para no ser pisado por items del config
     if hoja_admin:
         procesar_5105(carpeta_mes, hoja_admin, columna_xlsx, mes_nombre)
     else:
         print("ADVERTENCIA: No se encontro hoja de Gastos Administrativos para 5105.")
-
-    # Paso 2: Gastos (todas las hojas según config)
-    procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
 
     # Paso 3: Fórmulas internas cross-sheet en GASTOS ADMINISTRATIVOS
     # F89  = CASINO!{col_casino}$144  (col_casino = mes_num * 3)
