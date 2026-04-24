@@ -469,8 +469,11 @@ async function loadFolder(folderName) {
 
   const data = await fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json());
   filesData  = data;
-  accordion.innerHTML = '';
 
+  // Actualizar src.valor en los mappings guardados usando los datos recién cargados
+  actualizarValoresEnMappings(data);
+
+  accordion.innerHTML = '';
   Object.entries(data).forEach(([nombre, info]) => {
     const item = buildAccordionItem(nombre, info);
     accordion.appendChild(item);
@@ -479,6 +482,37 @@ async function loadFolder(folderName) {
   if (Object.keys(data).length === 0) {
     accordion.innerHTML = '<p style="padding:20px;color:#888;font-size:.85rem;">No se encontraron archivos procesables.</p>';
   }
+}
+
+function actualizarValoresEnMappings(data) {
+  // Construir lookup: { fileKey: { codigo: valor } }
+  const lookup = {};
+  Object.entries(data).forEach(([nombre, info]) => {
+    const fk = fileKey(nombre);
+    if (!lookup[fk]) lookup[fk] = {};
+    (info.items || []).forEach(item => {
+      if (!item.error) lookup[fk][String(item.codigo).trim()] = item.valor;
+    });
+  });
+
+  // Para cada source en todos los mappings, calcular el valor sumando los códigos
+  Object.values(mappings).forEach(sources => {
+    sources.forEach(src => {
+      const fileData = lookup[src.key];
+      if (!fileData) return; // archivo no está en esta carpeta, no tocar
+      if (src.sin_filtro) {
+        src.valor = Object.values(fileData).reduce((a, v) => a + (Number(v) || 0), 0);
+      } else {
+        src.valor = (src.codigos || []).reduce((sum, cod) => {
+          const v = fileData[String(cod).trim()];
+          return sum + (v != null ? Number(v) : 0);
+        }, 0);
+      }
+    });
+  });
+
+  // Re-renderizar la hoja activa para mostrar los valores/totales actualizados
+  if (currentSheet) renderDestRows();
 }
 
 function buildAccordionItem(nombre, info) {
