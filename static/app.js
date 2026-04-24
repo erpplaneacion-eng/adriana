@@ -132,7 +132,8 @@ function initMappingsFromConfig(config) {
       key       : src.key,
       archivo   : src.key,
       codigos   : src.codes || [],
-      sin_filtro: src.sin_filtro || false
+      sin_filtro: src.sin_filtro || false,
+      seccion   : src.seccion   || null
     }));
     if (sheetName) mappingSheets[key] = sheetName;
     if (item.valor_fijo != null) {
@@ -536,7 +537,14 @@ function actualizarValoresEnMappings(data) {
         src.valor = Object.values(fileData).reduce((a, v) => a + (Number(v) || 0), 0);
       } else {
         src.valor = (src.codigos || []).reduce((sum, cod) => {
-          const v = fileData[String(cod).trim()];
+          const codStr = String(cod).trim();
+          let v = fileData[codStr];
+          // Retrocompatibilidad: si el código guardado tiene el formato antiguo
+          // "010102           GERENCIA", extraer solo la parte numérica
+          if (v == null) {
+            const numPart = codStr.match(/^(\d+)/);
+            if (numPart) v = fileData[numPart[1]];
+          }
           return sum + (v != null ? Number(v) : 0);
         }, 0);
       }
@@ -770,6 +778,7 @@ function buildConfig() {
       }
       const entry = { key: src.key, codes: src.codigos || [src.codigo] };
       if (src.sin_filtro) entry.sin_filtro = true;
+      if (src.seccion)    entry.seccion    = src.seccion;
       return entry;
     });
 

@@ -92,6 +92,45 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 
 El key único de cada fila en `mappings` es `"${sheetName}::${codeKey}|${filaNum}"`. Al guardar, el nombre de hoja y `|filaNum` se extraen para guardar como `hoja` y `fila_dest` respectivamente. La función `parseRowKey()` hace el parsing inverso.
 
+### Panel derecho — tabla de filas fuente (app.js)
+
+El acordeón del panel derecho muestra los archivos XLS como una tabla con columnas **Código | Descripción | Valor**, respetando el orden y la indentación del Excel original.
+
+- `renderDraggableChips(container, nombreArchivo, info)` — construye la tabla de filas `.source-row`.
+- Filas en **negrita** (totales) → clase `.chip-total` (fondo ámbar).
+- Filas normales (detalle) → fondo blanco.
+- Barra de filtros: **Todos / Detalle / Totales** + buscador de texto.
+- Selección múltiple: clic en filas las agrega a `selectedChips (Map)`. Arrastrar cualquier fila seleccionada envía el array completo como payload.
+- `chipId = \`${fk}::${item.seccion || ''}::${item.codigo}\`` — clave única que incluye la sección para permitir que dos filas con el mismo código pero distinta unidad de negocio sean independientes.
+
+### Archivos 5105 — secciones por unidad de negocio (app.py)
+
+`leer_todos_codigos()` en `app.py` detecta secciones (unidades de negocio) dentro del archivo 5105:
+- Busca filas sin código numérico dentro del bloque `5105` → se tratan como separadores de sección (`separador: true`).
+- Cada ítem resultante lleva el campo `seccion` con el nombre de la unidad a la que pertenece (ej. `"99 GENERAL"`, `"PAEBUGA08 CONTRATO UT BUGA 2026"`).
+- En el panel derecho, los separadores se renderizan como barras azules (`.source-row-sep`).
+- Esto permite que dos filas con el mismo código (ej. `010304 APRENDICES TALENTO`) de unidades distintas sean ambas arrastrables e independientes.
+
+### Persistencia de valores y sección en mappings (app.js)
+
+`actualizarValoresEnMappings(data)` — se llama al cargar una carpeta. Cruza los datos XLS cargados con los `mappings` existentes para poblar `src.valor` sin necesidad de reconfigurar:
+- Retrocompatibilidad: si el código guardado en config tiene formato antiguo combinado (`"010102           GERENCIA"`), extrae la parte numérica con regex antes de buscar en el lookup.
+- Para `sin_filtro: true` suma todos los valores del archivo.
+
+`buildConfig()` — al guardar, persiste el campo `seccion` de cada source entry en el JSON.
+
+`initMappingsFromConfig()` — al cargar, restaura el campo `seccion` desde el JSON, lo que permite que el badge de unidad de negocio (`.chip-sec`, cursiva morada) aparezca en los chips del panel izquierdo tras reabrir la app.
+
+### config_gastos.json — campo seccion en sources
+
+```json
+"sources": [
+  { "key": "5105_CHVS", "codes": ["010304"], "seccion": "PAEBUGA08 CONTRATO UT BUGA 2026" }
+]
+```
+
+El campo `seccion` es opcional. Solo se graba cuando el chip proviene de una sección secundaria del archivo 5105. Sin él, el chip se asume de la sección principal.
+
 ### Exclusiones del Config Builder (app.py)
 
 `FILAS_EXCLUIR` define por hoja qué filas NO se muestran en la UI:
