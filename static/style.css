@@ -400,14 +400,85 @@ header .actions { display: flex; gap: 10px; }
 .accordion-header.open .arrow { transform: rotate(90deg); }
 .accordion-body {
   display: none;
-  padding: 6px 10px 10px;
+  padding: 6px 8px 10px;
   background: white;
-  max-height: 320px;
+  max-height: 420px;
   overflow-y: auto;
 }
 .accordion-body.open { display: block; }
 
-/* ── Chips arrastrables (derecha) ── */
+/* ── Tabla de filas fuente (panel derecho) ── */
+.source-rows-wrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: .76rem;
+}
+.source-row-header {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 700;
+  font-size: .7rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  user-select: none;
+}
+.source-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: grab;
+  transition: background .1s;
+  gap: 6px;
+}
+.source-row:last-child  { border-bottom: none; }
+.source-row:hover       { background: #fffbeb; }
+.source-row:active      { cursor: grabbing; }
+
+/* Fila total/negrita */
+.source-row.chip-total            { background: #fffdf4; }
+.source-row.chip-total .sr-code   { color: #92400e; font-weight: 800; }
+.source-row.chip-total .sr-val    { color: #b45309; }
+.source-row.chip-total .sr-desc   { font-weight: 600; color: #374151; }
+.source-row.chip-total:hover      { background: #fef9ee; }
+
+/* Fila seleccionada */
+.source-row.chip-selected         { background: #dbeafe !important; outline: 1px solid #3b82f6; }
+.source-row.chip-selected .sr-code { color: #1d4ed8; }
+
+/* Columnas */
+.sr-code {
+  font-family: monospace;
+  font-size: .73rem;
+  color: #374151;
+  min-width: 68px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.sr-desc {
+  flex: 1;
+  color: #4b5563;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.sr-val {
+  text-align: right;
+  color: #16a34a;
+  font-weight: 600;
+  font-size: .72rem;
+  white-space: nowrap;
+  min-width: 88px;
+  flex-shrink: 0;
+}
+
+/* Chips arrastrables legacy (se mantiene para compatibilidad) */
 .draggable-chip {
   display: inline-flex;
   align-items: center;
@@ -421,23 +492,11 @@ header .actions { display: flex; gap: 10px; }
   cursor: grab;
   transition: background .15s, box-shadow .15s;
 }
-.draggable-chip:hover {
-  background: #fff3b0;
-  box-shadow: 0 2px 8px rgba(0,0,0,.12);
-}
+.draggable-chip:hover { background: #fff3b0; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
 .draggable-chip:active { cursor: grabbing; }
 .draggable-chip .dc-code { font-weight: 700; font-family: monospace; color: #333; }
 .draggable-chip .dc-desc { color: #555; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .draggable-chip .dc-val  { color: #28a745; font-weight: 600; }
-
-/* Chip total (negrita en el Excel) */
-.draggable-chip.chip-total {
-  background: #fef3c7;
-  border-color: #d97706;
-}
-.draggable-chip.chip-total .dc-code { color: #92400e; font-weight: 800; }
-.draggable-chip.chip-total .dc-val  { color: #b45309; }
-.draggable-chip.chip-total:hover    { background: #fde68a; }
 
 .draggable-chip.chip-selected {
   background: #dbeafe;

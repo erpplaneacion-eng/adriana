@@ -94,6 +94,17 @@ def leer_todos_codigos(filepath):
                 except (ValueError, TypeError):
                     val = 0.0
 
+            # Detectar sangria/indentacion: espacios iniciales o formato XL
+            leading = len(str(raw_a)) - len(str(raw_a).lstrip(' '))
+            indent  = 0
+            try:
+                xf_ind = wb.xf_list[ws.cell_xf_index(r, 0)]
+                indent = int(xf_ind.alignment.indent_level or 0)
+            except Exception:
+                pass
+            if indent == 0 and leading > 0:
+                indent = 1
+
             # Detectar negrita en col A (indica fila total/agregado)
             negrita = False
             try:
@@ -111,6 +122,7 @@ def leer_todos_codigos(filepath):
                     'valor'      : val,
                     'celda'      : f'{col_letra}{r + 1}',
                     'negrita'    : negrita,
+                    'indent'     : indent,
                 })
 
         return items

@@ -65,7 +65,7 @@ function updateSelectionBar() {
 
 function clearChipSelection() {
   selectedChips.clear();
-  document.querySelectorAll('.draggable-chip.chip-selected')
+  document.querySelectorAll('.source-row.chip-selected, .draggable-chip.chip-selected')
     .forEach(c => c.classList.remove('chip-selected'));
   updateSelectionBar();
 }
@@ -572,18 +572,19 @@ function buildAccordionItem(nombre, info) {
   search.className   = 'chip-search';
 
   const chipsWrap = document.createElement('div');
+  chipsWrap.className = 'source-rows-wrap';
   renderDraggableChips(chipsWrap, nombre, info);
 
   function applyFilters() {
     const q      = search.value.toLowerCase();
     const active = filterBar.querySelector('.chip-filter.active').dataset.filter;
-    chipsWrap.querySelectorAll('.draggable-chip').forEach(chip => {
-      const esTotal    = chip.dataset.negrita === 'true';
+    chipsWrap.querySelectorAll('.source-row').forEach(row => {
+      const esTotal    = row.dataset.negrita === 'true';
       const matchFilter = active === 'all'
         || (active === 'total'   &&  esTotal)
         || (active === 'detalle' && !esTotal);
-      const matchSearch = !q || chip.textContent.toLowerCase().includes(q);
-      chip.style.display = matchFilter && matchSearch ? '' : 'none';
+      const matchSearch = !q || row.textContent.toLowerCase().includes(q);
+      row.style.display = matchFilter && matchSearch ? '' : 'none';
     });
   }
 
@@ -615,64 +616,85 @@ function renderDraggableChips(container, nombreArchivo, info) {
   container.innerHTML = '';
   const fk = fileKey(nombreArchivo);
 
+  // Cabecera de tabla
+  const hdr = document.createElement('div');
+  hdr.className = 'source-row-header';
+  hdr.innerHTML = `
+    <span class="sr-code">Código</span>
+    <span class="sr-desc">Descripción</span>
+    <span class="sr-val">Valor</span>
+  `;
+  container.appendChild(hdr);
+
   info.items.forEach(item => {
     if (item.error) return;
-    const esTotal = item.negrita === true;
-    const chip = document.createElement('div');
-    chip.className   = 'draggable-chip' + (esTotal ? ' chip-total' : '');
-    chip.dataset.negrita = String(esTotal);
-    chip.draggable = true;
-    chip.innerHTML = `
-      <span class="dc-code">${item.codigo}</span>
-      <span class="dc-desc">${item.descripcion || ''}</span>
-      <span class="dc-val">${fmt(item.valor)}</span>
-    `;
+    const esTotal  = item.negrita === true;
+    const indentPx = 8 + (item.indent || 0) * 14;
+
+    const row = document.createElement('div');
+    row.className        = 'source-row' + (esTotal ? ' chip-total' : '');
+    row.dataset.negrita  = String(esTotal);
+    row.draggable        = true;
+    row.style.paddingLeft = `${indentPx}px`;
+
+    const codeEl = document.createElement('span');
+    codeEl.className   = 'sr-code';
+    codeEl.textContent = item.codigo;
+
+    const descEl = document.createElement('span');
+    descEl.className   = 'sr-desc';
+    descEl.textContent = item.descripcion || '';
+
+    const valEl = document.createElement('span');
+    valEl.className   = 'sr-val';
+    valEl.textContent = fmt(item.valor);
+
+    row.appendChild(codeEl);
+    row.appendChild(descEl);
+    row.appendChild(valEl);
 
     const dragData = {
-      key     : fk,
-      archivo : nombreArchivo,
-      codigos : [item.codigo],
-      codigo  : item.codigo,
+      key        : fk,
+      archivo    : nombreArchivo,
+      codigos    : [item.codigo],
+      codigo     : item.codigo,
       descripcion: item.descripcion,
-      valor   : item.valor,
-      celda   : item.celda
+      valor      : item.valor,
+      celda      : item.celda
     };
 
     const chipId = `${fk}::${item.codigo}`;
 
-    // Click → seleccionar/deseleccionar sin iniciar drag
-    chip.addEventListener('click', () => {
+    // Click → seleccionar/deseleccionar
+    row.addEventListener('click', () => {
       if (selectedChips.has(chipId)) {
         selectedChips.delete(chipId);
-        chip.classList.remove('chip-selected');
+        row.classList.remove('chip-selected');
       } else {
         selectedChips.set(chipId, dragData);
-        chip.classList.add('chip-selected');
+        row.classList.add('chip-selected');
       }
       updateSelectionBar();
     });
 
-    chip.addEventListener('dragstart', e => {
+    row.addEventListener('dragstart', e => {
       let payload;
       if (selectedChips.size > 0 && selectedChips.has(chipId)) {
-        // Arrastrar todos los chips seleccionados
         payload = Array.from(selectedChips.values());
-        // Ghost con conteo
         const ghost = document.createElement('div');
-        ghost.textContent = `${payload.length} chips`;
+        ghost.textContent = `${payload.length} filas`;
         ghost.style.cssText = 'background:#3b82f6;color:#fff;padding:5px 12px;border-radius:12px;font-size:.8rem;position:fixed;top:-200px;left:-200px';
         document.body.appendChild(ghost);
         e.dataTransfer.setDragImage(ghost, 0, 0);
         setTimeout(() => ghost.remove(), 0);
       } else {
-        // Chip suelto (no estaba seleccionado)
         payload = dragData;
       }
       e.dataTransfer.setData('application/json', JSON.stringify(payload));
       e.dataTransfer.effectAllowed = 'copy';
     });
 
-    container.appendChild(chip);
+    container.appendChild(row);
   });
 }
 
