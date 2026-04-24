@@ -515,7 +515,8 @@ function actualizarValoresEnMappings(data) {
     const fk = fileKey(nombre);
     if (!lookup[fk]) lookup[fk] = {};
     (info.items || []).forEach(item => {
-      if (!item.error) lookup[fk][String(item.codigo).trim()] = item.valor;
+      if (!item.error && !item.separador && item.codigo)
+        lookup[fk][String(item.codigo).trim()] = item.valor;
     });
   });
 
@@ -586,6 +587,10 @@ function buildAccordionItem(nombre, info) {
       const matchSearch = !q || row.textContent.toLowerCase().includes(q);
       row.style.display = matchFilter && matchSearch ? '' : 'none';
     });
+    // Los separadores siempre visibles (no son filas de datos)
+    chipsWrap.querySelectorAll('.source-row-sep').forEach(sep => {
+      sep.style.display = '';
+    });
   }
 
   filterBar.querySelectorAll('.chip-filter').forEach(btn => {
@@ -628,6 +633,16 @@ function renderDraggableChips(container, nombreArchivo, info) {
 
   info.items.forEach(item => {
     if (item.error) return;
+
+    // Fila separador de sección (ej: "PAEBUGA08 CONTRATO UT BUGA 2026")
+    if (item.separador) {
+      const sep = document.createElement('div');
+      sep.className = 'source-row-sep';
+      sep.textContent = item.descripcion;
+      container.appendChild(sep);
+      return;
+    }
+
     const esTotal  = item.negrita === true;
     const indentPx = 8 + (item.indent || 0) * 14;
 

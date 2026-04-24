@@ -478,6 +478,20 @@ header .actions { display: flex; gap: 10px; }
   flex-shrink: 0;
 }
 
+/* Separador de sección dentro de tabla fuente */
+.source-row-sep {
+  padding: 4px 8px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  border-top: 1px solid #c7d2fe;
+  border-bottom: 1px solid #c7d2fe;
+  text-transform: uppercase;
+  user-select: none;
+}
+
 /* Chips arrastrables legacy (se mantiene para compatibilidad) */
 .draggable-chip {
   display: inline-flex;

@@ -49,43 +49,85 @@ def celda_str(raw):
 
 def leer_todos_codigos(filepath):
     """
-    Extrae TODAS las filas con valor en col A y col J de cualquier archivo XLS.
-    Col A = cÃÂ³digo, col B = descripciÃÂ³n, col J (ÃÂ­ndice 9) = valor.
+    Extrae filas con codigo y valor de archivos XLS fuente.
+    - Archivos 5105: solo muestra la seccion 99 GENERAL (ignora secciones PAEBUGA, etc.)
+    - Archivos ESTADO DE RESULTADOS: solo muestra la seccion 99 GENERAL
+    - Otros archivos: lee todas las filas
+    Parsea el formato combinado "codigo + espacios + descripcion" en col A de archivos 5105.
     """
     try:
-        import xlrd
+        import xlrd, re as _re
+        nombre = os.path.basename(filepath).upper()
         wb = xlrd.open_workbook(filepath, formatting_info=True)
         ws = wb.sheet_by_name('Hoja 1')
 
-        # Detectar columna J (valor) - forzar indice 9 si no se detecta encabezado
+        es_5105 = nombre.startswith('5105_')
+        es_er   = nombre.startswith('ESTADO DE RESULTADOS')
+
+        # Detectar columna de valor (Debitos/Neto)
         col_val = 9
         for r in range(min(25, ws.nrows)):
             for c in range(ws.ncols):
-                txt = str(ws.cell_value(r, c)).lower().replace('ÃÂ©','e').replace('ÃÂ³','o')
+                txt = str(ws.cell_value(r, c)).lower()
                 if 'debito' in txt or 'neto' in txt:
                     col_val = c
                     break
-
         col_letra = chr(65 + col_val)
+
+        # Inicio: primera fila con valor != 0 (salta filas de encabezado del reporte)
+        inicio = 0
+        for r in range(ws.nrows):
+            try:
+                if float(ws.cell_value(r, col_val) or 0) != 0:
+                    inicio = r
+                    break
+            except Exception:
+                pass
+
+        # Para archivos 5105: detectar filas que son cabecera de nueva seccion
+        # (ej: "PAEBUGA08 CONTRATO UT BUGA 2026") para insertar separadores visuales
+        secciones_5105 = set()
+        if es_5105:
+            en_5105 = False
+            for r in range(ws.nrows):
+                a_raw = str(ws.cell_value(r, 0))
+                a     = a_raw.strip()
+                if a == '5105':
+                    en_5105 = True
+                    continue
+                if en_5105:
+                    stripped = a_raw.lstrip(' ')
+                    if stripped and not _re.match(r'\d', stripped):
+                        secciones_5105.add(r)
+                        en_5105 = False  # reiniciar para detectar el siguiente bloque
+
         items = []
 
-        for r in range(ws.nrows):
-            raw_a = ws.cell_value(r, 0)
-            a_str = str(raw_a).strip()
+        for r in range(inicio, ws.nrows):
+            # Insertar separador de seccion para archivos 5105 y saltar la fila como dato
+            if es_5105 and r in secciones_5105:
+                a_sep = str(ws.cell_value(r, 0)).strip()
+                items.append({
+                    'codigo'     : '',
+                    'descripcion': a_sep,
+                    'valor'      : 0,
+                    'celda'      : '',
+                    'negrita'    : False,
+                    'indent'     : 0,
+                    'separador'  : True,
+                })
+                continue  # la fila cabecera solo se muestra como separador, no como dato
+
+            raw_a     = ws.cell_value(r, 0)
+            raw_a_str = str(raw_a)
+            a_str     = raw_a_str.strip()
+
             if not a_str or a_str in ('None', '0.0', '0'):
                 continue
-
-            # Convertir float sin decimales (ej: 51055101.0 -> "51055101")
             if isinstance(raw_a, float) and raw_a == int(raw_a):
                 a_str = str(int(raw_a))
 
-            # DescripciÃÂ³n: col B (ÃÂ­ndice 1)
-            desc = ''
-            if ws.ncols > 1:
-                raw_b = ws.cell_value(r, 1)
-                desc  = str(raw_b).strip() if raw_b else ''
-
-            # Valor col J
+            # Valor
             val = 0.0
             if ws.ncols > col_val:
                 raw_j = ws.cell_value(r, col_val)
@@ -94,8 +136,34 @@ def leer_todos_codigos(filepath):
                 except (ValueError, TypeError):
                     val = 0.0
 
-            # Detectar sangria/indentacion: espacios iniciales o formato XL
-            leading = len(str(raw_a)) - len(str(raw_a).lstrip(' '))
+            # Codigo y descripcion
+            # Archivos 5105: col A puede ser " 010102           GERENCIA" (todo junto)
+            codigo = a_str
+            desc   = ''
+            if es_5105:
+                m = _re.match(r'^(\d{3,8})\s{2,}(.+)', a_str)
+                if m:
+                    # Fila detalle: codigo y descripcion separados por 2+ espacios
+                    codigo = m.group(1)
+                    desc   = m.group(2).strip()
+                else:
+                    # Fila total (ej: "5105") o encabezado (ej: "99 GENERAL")
+                    if ws.ncols > 1:
+                        raw_b = ws.cell_value(r, 1)
+                        desc  = str(raw_b).strip() if raw_b else ''
+                    if not desc:
+                        # "001 PRINCIPAL" o "99 GENERAL" viene todo en col A
+                        parts = a_str.split(' ', 1)
+                        if len(parts) == 2 and not parts[0].isdigit() is False:
+                            codigo = parts[0]
+                            desc   = parts[1]
+            else:
+                if ws.ncols > 1:
+                    raw_b = ws.cell_value(r, 1)
+                    desc  = str(raw_b).strip() if raw_b else ''
+
+            # Indentacion: espacios iniciales en col A o nivel de sangria XL
+            leading = len(raw_a_str) - len(raw_a_str.lstrip(' '))
             indent  = 0
             try:
                 xf_ind = wb.xf_list[ws.cell_xf_index(r, 0)]
@@ -105,7 +173,7 @@ def leer_todos_codigos(filepath):
             if indent == 0 and leading > 0:
                 indent = 1
 
-            # Detectar negrita en col A (indica fila total/agregado)
+            # Negrita en col A
             negrita = False
             try:
                 xf_idx  = ws.cell_xf_index(r, 0)
@@ -115,9 +183,9 @@ def leer_todos_codigos(filepath):
             except Exception:
                 pass
 
-            if a_str and (desc or val != 0.0):
+            if codigo and (desc or val != 0.0):
                 items.append({
-                    'codigo'     : a_str,
+                    'codigo'     : codigo,
                     'descripcion': desc[:70],
                     'valor'      : val,
                     'celda'      : f'{col_letra}{r + 1}',
