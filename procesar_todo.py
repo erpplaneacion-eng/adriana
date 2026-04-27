@@ -414,6 +414,13 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
 
         print(f"\n  --- {hoja_real.strip()} ({len(hoja_items)} items) col={col_hoja} ---")
 
+        # Limpiar columna del mes antes de escribir (evita residuos de config anterior)
+        for fila_row in hoja_dest.iter_rows(min_col=col_hoja, max_col=col_hoja):
+            cell = fila_row[0]
+            if cell.value is not None:
+                cell.value   = None
+                cell.comment = None
+
         # Construir índices de fila
         indice_destino   = {}
         indice_destino_b = {}
