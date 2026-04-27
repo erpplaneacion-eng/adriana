@@ -159,7 +159,7 @@ def leer_todos_codigos(filepath):
             if isinstance(raw_a, float) and raw_a == int(raw_a):
                 a_str = str(int(raw_a))
 
-            # Valor
+            # Valor: J - K (créditos en col siguiente cuando existan)
             val = 0.0
             if ws.ncols > col_val:
                 raw_j = ws.cell_value(r, col_val)
@@ -167,6 +167,12 @@ def leer_todos_codigos(filepath):
                     val = float(raw_j) if raw_j else 0.0
                 except (ValueError, TypeError):
                     val = 0.0
+                if ws.ncols > col_val + 1:
+                    try:
+                        k = float(ws.cell_value(r, col_val + 1) or 0)
+                        val -= k
+                    except (ValueError, TypeError):
+                        pass
 
             # Codigo y descripcion
             # Archivos 5105: col A puede ser " 010102           GERENCIA" (todo junto)

@@ -194,8 +194,9 @@ def leer_er(filepath, codigos_buscar, sin_filtro=False):
     celdas    = []
     for r in range(inicio_99, fin_99):
         if celda_str(ws.cell_value(r, 0)) in codigos_buscar:
-            v = ws.cell_value(r, col_val)
-            total += float(v) if v else 0.0
+            v    = float(ws.cell_value(r, col_val) or 0)
+            k    = float(ws.cell_value(r, col_val + 1) or 0) if ws.ncols > col_val + 1 else 0.0
+            total += v - k
             celdas.append(f"{col_letra}{r + 1}")
     return total, celdas
 
@@ -253,8 +254,9 @@ def leer_aux(filepath, codigos_buscar, seccion=None):
             for code in codigos_buscar
         )
         if matched:
-            v = ws.cell_value(r, col_val)
-            total += float(v) if v else 0.0
+            v    = float(ws.cell_value(r, col_val) or 0)
+            k    = float(ws.cell_value(r, col_val + 1) or 0) if ws.ncols > col_val + 1 else 0.0
+            total += v - k
             celdas.append(f"{col_letra}{r + 1}")
     return total, celdas
 
