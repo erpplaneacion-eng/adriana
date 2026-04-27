@@ -450,7 +450,8 @@ function addSourceToRow(rowKey, chipData) {
     archivo: chipData.archivo,
     codigos: chipData.codigos || [chipData.codigo],
     valor  : chipData.valor,
-    celda  : chipData.celda
+    celda  : chipData.celda,
+    seccion: chipData.seccion || null
   });
 
   // Re-renderizar la fila

@@ -6,7 +6,8 @@
       "Bash(py procesar_todo.py MARZO)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(py)"
+      "Bash(py)",
+      "Bash(py -c ' *)"
     ]
   }
 }
