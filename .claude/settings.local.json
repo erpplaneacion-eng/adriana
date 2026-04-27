@@ -8,7 +8,9 @@
       "Bash(git commit -m ' *)",
       "Bash(py)",
       "Bash(py -c ' *)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(dir /b *.xls)",
+      "Bash(ls *.xls)"
     ]
   }
 }

@@ -214,13 +214,13 @@ def leer_aux(filepath, codigos_buscar, seccion=None):
     ws = wb.sheet_by_name('Hoja 1')
     col_val = detectar_col_debitos(ws)
 
-    nombre   = os.path.basename(filepath).upper()
-    es_7205  = nombre.startswith('7205_')
+    nombre       = os.path.basename(filepath).upper()
+    es_seccionado = nombre.startswith('7205_') or nombre.startswith('7105_')
 
     # Rango de filas a buscar (todo el archivo por defecto)
     fila_min, fila_max = 0, ws.nrows
 
-    if seccion and es_7205:
+    if seccion and es_seccionado:
         # Localizar el inicio de la sección y el inicio de la siguiente
         en_seccion = False
         fila_min   = ws.nrows  # se actualiza al encontrar la sección

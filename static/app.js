@@ -50,6 +50,14 @@ function fileKey(filename) {
     const m = f.match(/5105_(.+?)_[A-Z]{3}_/);
     return m ? '5105_' + m[1].replace(/\s+/g,'_') : '5105';
   }
+  if (f.startsWith('7205')) {
+    const m = f.match(/7205_(.+?)_[A-Z]{3}_/);
+    return m ? '7205_' + m[1].replace(/\s+/g,'_') : '7205';
+  }
+  if (f.startsWith('7105')) {
+    const m = f.match(/7105_(.+?)_[A-Z]{3}_/);
+    return m ? '7105_' + m[1].replace(/\s+/g,'_') : '7105';
+  }
   return filename.split('.')[0].replace(/\s+/g,'_');
 }
 
@@ -824,6 +832,8 @@ function inferPrefijo(archivo) {
   if (f.startsWith('ESTADO DE RESULTADOS')) return 'ESTADO DE RESULTADOS';
   if (f.startsWith('51355001'))              return '51355001';
   if (f.startsWith('5105'))                  return '5105';
+  if (f.startsWith('7205'))                  return '7205';
+  if (f.startsWith('7105'))                  return '7105';
   return archivo.split('_')[0];
 }
 

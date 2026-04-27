@@ -61,9 +61,11 @@ def leer_todos_codigos(filepath):
         wb = xlrd.open_workbook(filepath, formatting_info=True)
         ws = wb.sheet_by_name('Hoja 1')
 
-        es_5105 = nombre.startswith('5105_')
-        es_er   = nombre.startswith('ESTADO DE RESULTADOS')
-        es_7205 = nombre.startswith('7205_')
+        es_5105      = nombre.startswith('5105_')
+        es_er        = nombre.startswith('ESTADO DE RESULTADOS')
+        es_7205      = nombre.startswith('7205_')
+        es_7105      = nombre.startswith('7105_')
+        es_seccionado = es_7205 or es_7105  # misma estructura de secciones por contrato
 
         # Detectar columna de valor (Debitos/Neto)
         col_val = 9
@@ -102,24 +104,24 @@ def leer_todos_codigos(filepath):
                         secciones_5105.add(r)
                         en_5105 = False  # reiniciar para detectar el siguiente bloque
 
-        # Para archivos 7205: detectar secciones por contrato.
+        # Para archivos 7205 y 7105: detectar secciones por contrato.
         # Cabeceras de sección: filas sin espacio inicial en col A que no son un código
         # puro de dígitos (ej: "99 GENERAL", "PAECAL20 CONTR. CONSORCIO...").
-        secciones_7205 = set()
-        if es_7205:
+        secciones_seccionado = set()
+        if es_seccionado:
             for r in range(ws.nrows):
                 a_raw = str(ws.cell_value(r, 0))
                 a_str = a_raw.strip()
                 if (a_raw and not a_raw[0].isspace() and a_str
                         and not _re.match(r'^\d{3,8}$', a_str)):
-                    secciones_7205.add(r)
+                    secciones_seccionado.add(r)
 
         items        = []
         seccion_actual = None  # sección activa (None = sección inicial del archivo)
 
         for r in range(inicio, ws.nrows):
-            # Insertar separador de sección para archivos 7205
-            if es_7205 and r in secciones_7205:
+            # Insertar separador de sección para archivos 7205/7105
+            if es_seccionado and r in secciones_seccionado:
                 a_sep = str(ws.cell_value(r, 0)).strip()
                 seccion_actual = a_sep
                 items.append({
