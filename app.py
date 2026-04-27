@@ -63,6 +63,7 @@ def leer_todos_codigos(filepath):
 
         es_5105 = nombre.startswith('5105_')
         es_er   = nombre.startswith('ESTADO DE RESULTADOS')
+        es_7205 = nombre.startswith('7205_')
 
         # Detectar columna de valor (Debitos/Neto)
         col_val = 9
@@ -101,10 +102,37 @@ def leer_todos_codigos(filepath):
                         secciones_5105.add(r)
                         en_5105 = False  # reiniciar para detectar el siguiente bloque
 
+        # Para archivos 7205: detectar secciones por contrato.
+        # Cabeceras de sección: filas sin espacio inicial en col A que no son un código
+        # puro de dígitos (ej: "99 GENERAL", "PAECAL20 CONTR. CONSORCIO...").
+        secciones_7205 = set()
+        if es_7205:
+            for r in range(ws.nrows):
+                a_raw = str(ws.cell_value(r, 0))
+                a_str = a_raw.strip()
+                if (a_raw and not a_raw[0].isspace() and a_str
+                        and not _re.match(r'^\d{3,8}$', a_str)):
+                    secciones_7205.add(r)
+
         items        = []
         seccion_actual = None  # sección activa (None = sección inicial del archivo)
 
         for r in range(inicio, ws.nrows):
+            # Insertar separador de sección para archivos 7205
+            if es_7205 and r in secciones_7205:
+                a_sep = str(ws.cell_value(r, 0)).strip()
+                seccion_actual = a_sep
+                items.append({
+                    'codigo'     : '',
+                    'descripcion': a_sep,
+                    'valor'      : 0,
+                    'celda'      : '',
+                    'negrita'    : False,
+                    'indent'     : 0,
+                    'separador'  : True,
+                })
+                continue
+
             # Insertar separador de seccion para archivos 5105 y saltar la fila como dato
             if es_5105 and r in secciones_5105:
                 a_sep = str(ws.cell_value(r, 0)).strip()

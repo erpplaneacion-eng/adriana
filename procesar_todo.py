@@ -203,19 +203,45 @@ def leer_er(filepath, codigos_buscar, sin_filtro=False):
 # ---------------------------------------------------------------------------
 # Lectura archivos auxiliares (51355001)
 # ---------------------------------------------------------------------------
-def leer_aux(filepath, codigos_buscar):
+def leer_aux(filepath, codigos_buscar, seccion=None):
     """
     Suma debitos de filas cuya col A coincida exactamente con el codigo
     o comience con el codigo seguido de espacio (filas NIT + nombre).
+    Si seccion no es None y el archivo es un 7205, busca solo dentro
+    de esa sección (entre su cabecera y la siguiente cabecera de sección).
     """
     wb = xlrd.open_workbook(filepath)
     ws = wb.sheet_by_name('Hoja 1')
     col_val = detectar_col_debitos(ws)
 
+    nombre   = os.path.basename(filepath).upper()
+    es_7205  = nombre.startswith('7205_')
+
+    # Rango de filas a buscar (todo el archivo por defecto)
+    fila_min, fila_max = 0, ws.nrows
+
+    if seccion and es_7205:
+        # Localizar el inicio de la sección y el inicio de la siguiente
+        en_seccion = False
+        fila_min   = ws.nrows  # se actualiza al encontrar la sección
+        for r in range(ws.nrows):
+            a_raw = str(ws.cell_value(r, 0))
+            a_str = a_raw.strip()
+            if a_str == seccion:
+                fila_min   = r + 1
+                en_seccion = True
+                continue
+            if en_seccion:
+                # Nueva cabecera de sección: sin espacio inicial, no es código puro
+                if (a_raw and not a_raw[0].isspace() and a_str
+                        and not re.match(r'^\d{3,8}$', a_str)):
+                    fila_max = r
+                    break
+
     col_letra = chr(65 + col_val)
     total     = 0.0
     celdas    = []
-    for r in range(ws.nrows):
+    for r in range(fila_min, fila_max):
         a_val = celda_str(ws.cell_value(r, 0))
         # Códigos con descripción (contienen espacio): solo exact match.
         # Códigos puramente numéricos: también acepta startswith para capturar
@@ -477,7 +503,7 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
                     if prefijo == 'ESTADO DE RESULTADOS':
                         v, celdas = leer_er(ruta, set(codes), sin_filtro=src.get('sin_filtro', False))
                     else:
-                        v, celdas = leer_aux(ruta, set(codes))
+                        v, celdas = leer_aux(ruta, set(codes), seccion=src.get('seccion'))
                     op_src = src.get('op', '+')
                     if   op_src == '+': valor_total += v
                     elif op_src == '-': valor_total -= v
