@@ -262,6 +262,17 @@ header .actions { display: flex; gap: 10px; }
 .chip-op-btn.op-minus { background: #f8d7da; color: #721c24; }
 .chip-op-btn:hover { filter: brightness(0.88); }
 
+.chip-creditos {
+  font-size: .65rem;
+  font-weight: 600;
+  color: #856404;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 1px 4px;
+  white-space: nowrap;
+}
+
 .dest-manual {
   padding: 4px 12px 6px;
   background: #fafafa;
@@ -496,6 +507,20 @@ header .actions { display: flex; gap: 10px; }
   white-space: nowrap;
   min-width: 88px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: flex-end;
+}
+.sr-creditos {
+  font-size: .6rem;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 3px;
+  padding: 0 3px;
+  cursor: help;
 }
 
 /* Separador de sección dentro de tabla fuente */

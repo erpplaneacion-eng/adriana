@@ -59,9 +59,22 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 ### Tipos de archivos XLS fuente (en carpetas mensuales)
 
 - `ESTADO DE RESULTADOS_<entidad>_<mes>_<año>.xls` — estado de resultados por unidad. Se lee con `leer_er()`: busca códigos en sección "99 GENERAL".
-- `51355001_<entidad>_<mes>_<año>.xls` — auxiliar de proveedores. Se lee con `leer_aux()`.
-- `5105_<entidad>_<mes>_<año>.xls` — nómina. Se lee con `leer_5105()`.
-- `7205_<entidad>_<mes>_<año>.xls` — también auxiliar, se lee con `leer_aux()`.
+- `51355001_<entidad>_<mes>_<año>.xls` — auxiliar de proveedores. Se lee con `leer_aux()`. Sin secciones (NITs planos).
+- `5105_<entidad>_<mes>_<año>.xls` — nómina. Se lee con `leer_5105()`. Tiene secciones por contrato.
+- `7205_<entidad>_<mes>_<año>.xls` — costos de personal auxiliar, se lee con `leer_aux()`. Tiene secciones por contrato.
+- `7105_<entidad>_<mes>_<año>.xls` — costos de raciones/alimentos, se lee con `leer_aux()`. Tiene secciones por contrato (misma estructura que 7205).
+
+### Estructura de columnas en archivos XLS fuente
+
+Todos los archivos auxiliares (7205, 7105, 51355001) tienen 4 columnas de valor:
+- **Col I** (idx 8): Saldo inicial
+- **Col J** (idx 9): Débitos ← columna principal (`col_val`)
+- **Col K** (idx 10): Créditos — cuando es distinto de cero, el valor neto es **J − K**
+- **Col L** (idx 11): Saldo final
+
+`leer_aux()` y `leer_er()` calculan siempre `J − K`. Los archivos ER y 51355001 tienen K=0, por lo que no se ven afectados.
+
+Los chips en la UI muestran el valor neto (J−K). Cuando K>0 aparece un badge naranja **`−K $X`** tanto en la tabla del panel derecho como en el chip configurado, indicando que el valor ya tiene créditos descontados.
 
 ### Estructura de columnas en el INFORME REAL
 
@@ -80,13 +93,25 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
   "buscar_por": "B",            // "A" (default) o "B" (buscar por col B cuando no hay código)
   "hoja": "GASTOS ADMINISTRATIVOS", // hoja destino
   "sources": [
-    { "key": "ER_CHVS", "codes": ["51055101"] }
+    {
+      "key": "ER_CHVS",
+      "codes": ["51055101"],
+      "op": "-",          // opcional: "+" (default) o "-" para restar este chip al total
+      "seccion": "PAECAL20 CONTR. CONSORCIO ALIMENTANDO  CALI 2026"  // opcional: sección del archivo
+    }
   ],
   "valor_fijo": [{ "op": "+", "valor": 500000 }]  // operaciones hardcodeadas opcionales
 }
 ```
 
 `file_sources` mapea cada `key` a `{ "prefijo": "ESTADO DE RESULTADOS", "entidad": "CHVS" }` para que `encontrar_archivo()` localice el XLS en la carpeta del mes.
+
+**Claves `key` generadas por `fileKey()` en app.js:**
+- `ER_<ENTIDAD>` → archivos ESTADO DE RESULTADOS
+- `AUX_<ENTIDAD>` → archivos 51355001
+- `5105_<ENTIDAD>` → archivos 5105
+- `7205_<ENTIDAD>` → archivos 7205
+- `7105_<ENTIDAD>` → archivos 7105
 
 ### rowKey en el frontend (app.js)
 
@@ -103,13 +128,36 @@ El acordeón del panel derecho muestra los archivos XLS como una tabla con colum
 - Selección múltiple: clic en filas las agrega a `selectedChips (Map)`. Arrastrar cualquier fila seleccionada envía el array completo como payload.
 - `chipId = \`${fk}::${item.seccion || ''}::${item.codigo}\`` — clave única que incluye la sección para permitir que dos filas con el mismo código pero distinta unidad de negocio sean independientes.
 
-### Archivos 5105 — secciones por unidad de negocio (app.py)
+### Secciones por contrato en archivos fuente (app.py)
 
-`leer_todos_codigos()` en `app.py` detecta secciones (unidades de negocio) dentro del archivo 5105:
-- Busca filas sin código numérico dentro del bloque `5105` → se tratan como separadores de sección (`separador: true`).
-- Cada ítem resultante lleva el campo `seccion` con el nombre de la unidad a la que pertenece (ej. `"99 GENERAL"`, `"PAEBUGA08 CONTRATO UT BUGA 2026"`).
-- En el panel derecho, los separadores se renderizan como barras azules (`.source-row-sep`).
-- Esto permite que dos filas con el mismo código (ej. `010304 APRENDICES TALENTO`) de unidades distintas sean ambas arrastrables e independientes.
+`leer_todos_codigos()` detecta secciones en tres tipos de archivos:
+
+**Archivos 5105:** busca filas sin código numérico dentro del bloque `5105` → separadores de sección.
+
+**Archivos 7205 y 7105 (`es_seccionado`):** detecta cabeceras de sección como filas que:
+- No tienen espacio inicial en col A
+- No son un código puro de dígitos (`^\d{3,8}$`)
+- Ejemplos: `99 GENERAL`, `PAECAL20 CONTR. CONSORCIO...`, `COMCAL2025-VI...`
+
+En todos los casos:
+- Cada ítem lleva el campo `seccion` con el nombre del contrato al que pertenece.
+- Los separadores se renderizan como barras azules (`.source-row-sep`) en el panel derecho.
+- Permite que el mismo código (ej. `029903 CASOS ESPECIALES`) aparezca en dos secciones distintas y sea arrastrable de forma independiente.
+
+`leer_aux()` en `procesar_todo.py` respeta el campo `seccion`: cuando está presente y el archivo es 7205 o 7105, restringe la búsqueda solo a las filas de esa sección (entre su cabecera y la siguiente).
+
+**Regla de matching en `leer_aux()`:**
+- Códigos **con descripción** (contienen espacios): solo exact match → evita capturar filas de detalle por NIT.
+- Códigos **puramente numéricos** (sin espacios): también acepta `startswith` → captura filas `"029903 NIT12345"` cuando el código buscado es `"029903"`.
+
+### Operaciones entre chips (campo `op` en sources)
+
+Cada chip en el panel izquierdo tiene un botón `+` (verde) o `−` (rojo). Al hacer clic alterna entre sumar y restar ese chip al total de la fila.
+
+- El campo `op` se guarda en `config_gastos.json` dentro de cada source (solo se escribe si es `"-"`; el `"+"` es el default para no inflar el JSON).
+- `procesar_todo.py` aplica el `op` de cada source al calcular `valor_total`.
+- El `Σ` del total en la UI refleja las restas en tiempo real.
+- Retrocompatibilidad: sources sin campo `op` se tratan como `"+"`.
 
 ### Persistencia de valores y sección en mappings (app.js)
 
@@ -125,11 +173,13 @@ El acordeón del panel derecho muestra los archivos XLS como una tabla con colum
 
 ```json
 "sources": [
-  { "key": "5105_CHVS", "codes": ["010304"], "seccion": "PAEBUGA08 CONTRATO UT BUGA 2026" }
+  { "key": "5105_CHVS",  "codes": ["010304"], "seccion": "PAEBUGA08 CONTRATO UT BUGA 2026" },
+  { "key": "7205_CHVS",  "codes": ["029903           CASOS ESPECIALES"], "seccion": "99 GENERAL" },
+  { "key": "7205_CHVS",  "codes": ["029903           CASOS ESPECIALES"], "seccion": "PAECAL20 CONTR. CONSORCIO ALIMENTANDO  CALI 2026" }
 ]
 ```
 
-El campo `seccion` es opcional. Solo se graba cuando el chip proviene de una sección secundaria del archivo 5105. Sin él, el chip se asume de la sección principal.
+El campo `seccion` es opcional. Se graba cuando el chip proviene de una sección específica de archivos 5105, 7205 o 7105. Sin él, `leer_aux` busca en todo el archivo.
 
 ### Exclusiones del Config Builder (app.py)
 

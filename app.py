@@ -160,7 +160,8 @@ def leer_todos_codigos(filepath):
                 a_str = str(int(raw_a))
 
             # Valor: J - K (créditos en col siguiente cuando existan)
-            val = 0.0
+            val       = 0.0
+            creditos  = 0.0
             if ws.ncols > col_val:
                 raw_j = ws.cell_value(r, col_val)
                 try:
@@ -169,8 +170,8 @@ def leer_todos_codigos(filepath):
                     val = 0.0
                 if ws.ncols > col_val + 1:
                     try:
-                        k = float(ws.cell_value(r, col_val + 1) or 0)
-                        val -= k
+                        creditos = float(ws.cell_value(r, col_val + 1) or 0)
+                        val -= creditos
                     except (ValueError, TypeError):
                         pass
 
@@ -226,6 +227,7 @@ def leer_todos_codigos(filepath):
                     'codigo'     : codigo,
                     'descripcion': desc[:70],
                     'valor'      : val,
+                    'creditos'   : creditos,
                     'celda'      : f'{col_letra}{r + 1}',
                     'negrita'    : negrita,
                     'indent'     : indent,
