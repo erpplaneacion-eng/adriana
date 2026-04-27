@@ -432,14 +432,6 @@ function renderChips(rowKey, sources, container) {
       valSpan.textContent = fmt(val);
       chip.appendChild(valSpan);
     }
-    // Badge de créditos: indica que el valor ya es J-K
-    if (src.creditos) {
-      const credSpan = document.createElement('span');
-      credSpan.className = 'chip-creditos';
-      credSpan.textContent = `−K ${fmt(src.creditos)}`;
-      credSpan.title = `Créditos restados: ${fmt(src.creditos)}`;
-      chip.appendChild(credSpan);
-    }
     chip.appendChild(removeSpan);
     container.appendChild(chip);
   });
@@ -485,7 +477,7 @@ function addSourceToRow(rowKey, chipData) {
     archivo : chipData.archivo,
     codigos : chipData.codigos || [chipData.codigo],
     valor   : chipData.valor,
-    creditos: chipData.creditos || 0,
+
     celda   : chipData.celda,
     seccion : chipData.seccion || null,
     op      : '+'
@@ -730,14 +722,6 @@ function renderDraggableChips(container, nombreArchivo, info) {
     const valEl = document.createElement('span');
     valEl.className   = 'sr-val';
     valEl.textContent = fmt(item.valor);
-    if (item.creditos) {
-      const kBadge = document.createElement('span');
-      kBadge.className   = 'sr-creditos';
-      kBadge.textContent = '−K';
-      kBadge.title       = `Créditos: ${fmt(item.creditos)} ya restados`;
-      valEl.appendChild(kBadge);
-    }
-
     row.appendChild(codeEl);
     row.appendChild(descEl);
     row.appendChild(valEl);
@@ -749,7 +733,7 @@ function renderDraggableChips(container, nombreArchivo, info) {
       codigo     : item.codigo,
       descripcion: item.descripcion,
       valor      : item.valor,
-      creditos   : item.creditos || 0,
+
       celda      : item.celda,
       seccion    : item.seccion || null
     };
