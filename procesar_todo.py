@@ -396,6 +396,29 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
             )
         items_por_hoja[hoja_nombre].append(item)
 
+    # Limpiar columna del mes en TODAS las hojas antes de escribir.
+    # Así, si una hoja queda sin items en el config (cero chips), su columna
+    # también se limpia y no quedan residuos de ejecuciones anteriores.
+    # Solo borra valores numéricos y fórmulas cross-sheet (contienen '!').
+    # Las fórmulas internas de totales (=SUM(...)) se preservan.
+    mes_num_global = MES_NUMERO.get(mes_nombre or '', 0)
+    for hoja_real_all in wb_dest.sheetnames:
+        ws_clear = wb_dest[hoja_real_all]
+        hoja_norm_all = hoja_real_all.strip()
+        if hoja_norm_all in COLUMNA_HOJA and mes_num_global:
+            col_clear = COLUMNA_HOJA[hoja_norm_all](mes_num_global)
+        else:
+            col_clear = columna_xlsx
+        for fila_row in ws_clear.iter_rows(min_col=col_clear, max_col=col_clear):
+            cell = fila_row[0]
+            if cell.value is None:
+                continue
+            es_numero  = isinstance(cell.value, (int, float))
+            es_cs_form = isinstance(cell.value, str) and cell.value.startswith('=') and '!' in cell.value
+            if es_numero or es_cs_form:
+                cell.value   = None
+                cell.comment = None
+
     # Procesar cada hoja
     for hoja_nombre, hoja_items in items_por_hoja.items():
         hoja_real = hojas_idx.get(hoja_nombre)
@@ -413,19 +436,6 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
             col_hoja = columna_xlsx
 
         print(f"\n  --- {hoja_real.strip()} ({len(hoja_items)} items) col={col_hoja} ---")
-
-        # Limpiar columna del mes antes de escribir (evita residuos de config anterior).
-        # Solo borra valores numéricos y fórmulas cross-sheet escritas por el script (contienen '!').
-        # Las fórmulas internas de totales (=SUM(...), =E5+E13+...) se preservan.
-        for fila_row in hoja_dest.iter_rows(min_col=col_hoja, max_col=col_hoja):
-            cell = fila_row[0]
-            if cell.value is None:
-                continue
-            es_numero  = isinstance(cell.value, (int, float))
-            es_cs_form = isinstance(cell.value, str) and cell.value.startswith('=') and '!' in cell.value
-            if es_numero or es_cs_form:
-                cell.value   = None
-                cell.comment = None
 
         # Construir índices de fila
         indice_destino   = {}
