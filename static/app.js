@@ -133,7 +133,8 @@ function initMappingsFromConfig(config) {
       archivo   : src.key,
       codigos   : src.codes || [],
       sin_filtro: src.sin_filtro || false,
-      seccion   : src.seccion   || null
+      seccion   : src.seccion   || null,
+      op        : src.op        || '+'
     }));
     if (sheetName) mappingSheets[key] = sheetName;
     if (item.valor_fijo != null) {
@@ -374,13 +375,29 @@ function renderChips(rowKey, sources, container) {
   container.innerHTML = '';
   let total = 0;
   sources.forEach((src, idx) => {
+    const op  = src.op || '+';
+    const val = src.valor != null ? Number(src.valor) : 0;
+    if      (op === '+') total += val;
+    else if (op === '-') total -= val;
+    else if (op === '*') total *= val;
+    else if (op === '/') total = val !== 0 ? total / val : total;
+
     const chip = document.createElement('span');
     chip.className = 'source-chip';
     const codigos = Array.isArray(src.codigos) ? src.codigos.join(', ') : (src.codigo || '');
-    const val = src.valor != null ? Number(src.valor) : 0;
-    total += val;
-    // Usar createElement en lugar de innerHTML para evitar que caracteres especiales
-    // en rowKey (apóstrofes, guiones, etc.) rompan atributos onclick inline
+
+    // Botón de operador (+/−) — solo visible si hay más de un chip o si ya es −
+    const opBtn = document.createElement('button');
+    opBtn.className = `chip-op-btn ${op === '-' ? 'op-minus' : 'op-plus'}`;
+    opBtn.textContent = op === '-' ? '−' : '+';
+    opBtn.title = 'Clic para cambiar a ' + (op === '-' ? 'suma' : 'resta');
+    opBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      mappings[rowKey][idx].op = op === '-' ? '+' : '-';
+      refreshRow(rowKey);
+      updateStats();
+    });
+
     const codeSpan = document.createElement('span');
     codeSpan.className = 'chip-code';
     codeSpan.textContent = codigos;
@@ -397,6 +414,8 @@ function renderChips(rowKey, sources, container) {
     removeSpan.className = 'chip-remove';
     removeSpan.textContent = '×';
     removeSpan.addEventListener('click', () => removeSource(rowKey, idx));
+
+    chip.appendChild(opBtn);
     chip.appendChild(codeSpan);
     chip.appendChild(fileSpan);
     if (val) {
@@ -451,7 +470,8 @@ function addSourceToRow(rowKey, chipData) {
     codigos: chipData.codigos || [chipData.codigo],
     valor  : chipData.valor,
     celda  : chipData.celda,
-    seccion: chipData.seccion || null
+    seccion: chipData.seccion || null,
+    op     : '+'
   });
 
   // Re-renderizar la fila
@@ -778,8 +798,9 @@ function buildConfig() {
         fileSources[src.key] = { prefijo: inferPrefijo(src.archivo || src.key), entidad: inferEntidad(src.archivo || src.key) };
       }
       const entry = { key: src.key, codes: src.codigos || [src.codigo] };
-      if (src.sin_filtro) entry.sin_filtro = true;
-      if (src.seccion)    entry.seccion    = src.seccion;
+      if (src.sin_filtro)           entry.sin_filtro = true;
+      if (src.seccion)              entry.seccion    = src.seccion;
+      if (src.op && src.op !== '+') entry.op         = src.op;
       return entry;
     });
 

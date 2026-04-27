@@ -217,8 +217,13 @@ def leer_aux(filepath, codigos_buscar):
     celdas    = []
     for r in range(ws.nrows):
         a_val = celda_str(ws.cell_value(r, 0))
+        # Códigos con descripción (contienen espacio): solo exact match.
+        # Códigos puramente numéricos: también acepta startswith para capturar
+        # filas del tipo "029903 NIT12345" cuando el código buscado es "029903".
         matched = a_val in codigos_buscar or any(
-            a_val.startswith(code + ' ') or a_val.startswith(code + '\t')
+            (' ' not in code) and (
+                a_val.startswith(code + ' ') or a_val.startswith(code + '\t')
+            )
             for code in codigos_buscar
         )
         if matched:
@@ -473,9 +478,14 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
                         v, celdas = leer_er(ruta, set(codes), sin_filtro=src.get('sin_filtro', False))
                     else:
                         v, celdas = leer_aux(ruta, set(codes))
-                    valor_total += v
+                    op_src = src.get('op', '+')
+                    if   op_src == '+': valor_total += v
+                    elif op_src == '-': valor_total -= v
+                    elif op_src == '*': valor_total *= v
+                    elif op_src == '/': valor_total = valor_total / v if v != 0 else valor_total
                     lineas_comentario.append(
                         f"Archivo: {os.path.basename(ruta)}\n"
+                        f"  Op:      {op_src}\n"
                         f"  Codigos: {', '.join(codes)}\n"
                         f"  Celdas:  {', '.join(celdas) if celdas else 'no encontrado'}\n"
                         f"  Valor:   ${v:,.0f}"
