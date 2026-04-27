@@ -202,6 +202,17 @@ Las filas cross-sheet que deben excluirse pero no son detectadas automáticament
 `FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos: CORPORACIÓN HACIA UN VALLE SOLIDARIO, DIAS DE ATENCIÓN).
 `TITULOS_SECCION` = filas de fórmula que se renderizan como **separador visual de sección** (barra azul con el nombre en mayúsculas, sin chips ni operaciones). Las filas de totales (TOTAL..., UTILIDAD..., COSTO NETO, etc.) de esas mismas hojas siguen ocultas. Para agregar una hoja: añadir entrada en `TITULOS_SECCION` en `app.py`.
 
+### Limpieza de columna antes de escribir (procesar_todo.py)
+
+Antes de escribir valores, `procesar_gastos()` limpia la columna del mes en **todas las hojas del libro** (no solo las que tienen items en el config). Esto evita residuos cuando una hoja pierde todos sus chips entre ejecuciones.
+
+Solo se borran:
+- Valores numéricos (escritos por el script en ejecuciones anteriores)
+- Fórmulas cross-sheet que contienen `!` (escritas por el script)
+
+Se preservan:
+- Fórmulas internas de totales (`=SUM(...)`, `=E5+E13+...`) — no contienen `!`
+
 ### Fórmulas cross-sheet escritas por procesar_todo.py
 
 Además de los valores numéricos, `procesar_mes()` escribe fórmulas directamente:
