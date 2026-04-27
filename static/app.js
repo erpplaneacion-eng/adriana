@@ -555,14 +555,22 @@ async function loadFolder(folderName) {
 }
 
 function actualizarValoresEnMappings(data) {
-  // Construir lookup: { fileKey: { codigo: valor } }
+  // lookup simple: { fileKey: { codigo: valor } } — primera aparición gana (evita sobrescritura entre secciones)
+  // lookupSec: { fileKey: { "seccion::codigo": valor } } — valor exacto por sección
   const lookup = {};
+  const lookupSec = {};
   Object.entries(data).forEach(([nombre, info]) => {
     const fk = fileKey(nombre);
     if (!lookup[fk]) lookup[fk] = {};
+    if (!lookupSec[fk]) lookupSec[fk] = {};
     (info.items || []).forEach(item => {
-      if (!item.error && !item.separador && item.codigo)
-        lookup[fk][String(item.codigo).trim()] = item.valor;
+      if (!item.error && !item.separador && item.codigo) {
+        const cod = String(item.codigo).trim();
+        // Simple: primera ocurrencia gana (99 GENERAL aparece primero en el archivo)
+        if (!(cod in lookup[fk])) lookup[fk][cod] = item.valor;
+        // Con sección: siempre guardar para acceso preciso
+        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = item.valor;
+      }
     });
   });
 
@@ -574,14 +582,20 @@ function actualizarValoresEnMappings(data) {
       if (src.sin_filtro) {
         src.valor = Object.values(fileData).reduce((a, v) => a + (Number(v) || 0), 0);
       } else {
+        const fileDataSec = lookupSec[src.key] || {};
         src.valor = (src.codigos || []).reduce((sum, cod) => {
           const codStr = String(cod).trim();
-          let v = fileData[codStr];
-          // Retrocompatibilidad: si el código guardado tiene el formato antiguo
-          // "010102           GERENCIA", extraer solo la parte numérica
+          let v;
+          // Prioridad: sección específica > código simple (evita colisión entre secciones)
+          if (src.seccion) v = fileDataSec[`${src.seccion}::${codStr}`];
+          if (v == null) v = fileData[codStr];
+          // Retrocompatibilidad: código con formato antiguo "010102           GERENCIA"
           if (v == null) {
             const numPart = codStr.match(/^(\d+)/);
-            if (numPart) v = fileData[numPart[1]];
+            if (numPart) {
+              if (src.seccion) v = fileDataSec[`${src.seccion}::${numPart[1]}`];
+              if (v == null) v = fileData[numPart[1]];
+            }
           }
           return sum + (v != null ? Number(v) : 0);
         }, 0);
