@@ -414,10 +414,16 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
 
         print(f"\n  --- {hoja_real.strip()} ({len(hoja_items)} items) col={col_hoja} ---")
 
-        # Limpiar columna del mes antes de escribir (evita residuos de config anterior)
+        # Limpiar columna del mes antes de escribir (evita residuos de config anterior).
+        # Solo borra valores numéricos y fórmulas cross-sheet escritas por el script (contienen '!').
+        # Las fórmulas internas de totales (=SUM(...), =E5+E13+...) se preservan.
         for fila_row in hoja_dest.iter_rows(min_col=col_hoja, max_col=col_hoja):
             cell = fila_row[0]
-            if cell.value is not None:
+            if cell.value is None:
+                continue
+            es_numero  = isinstance(cell.value, (int, float))
+            es_cs_form = isinstance(cell.value, str) and cell.value.startswith('=') and '!' in cell.value
+            if es_numero or es_cs_form:
                 cell.value   = None
                 cell.comment = None
 
