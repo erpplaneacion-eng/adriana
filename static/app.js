@@ -734,6 +734,14 @@ function renderDraggableChips(container, nombreArchivo, info) {
     const valEl = document.createElement('span');
     valEl.className   = 'sr-val';
     valEl.textContent = fmt(item.valor);
+    if (item.op_jk) {
+      const opBadge = document.createElement('span');
+      opBadge.className = 'sr-creditos';
+      const c = Number(item.credito || 0);
+      opBadge.textContent = c ? `J-K (${fmt(c)})` : 'J-K';
+      opBadge.title = 'Valor calculado como Debitos - Creditos';
+      valEl.appendChild(opBadge);
+    }
     row.appendChild(codeEl);
     row.appendChild(descEl);
     row.appendChild(valEl);
