@@ -432,6 +432,15 @@ function renderChips(rowKey, sources, container) {
       valSpan.textContent = fmt(val);
       chip.appendChild(valSpan);
     }
+    if (src.op_jk) {
+      const opSpan = document.createElement('span');
+      opSpan.className = 'chip-creditos';
+      const c = Number(src.credito || 0);
+      opSpan.textContent = c
+        ? `J-K (${fmt(src.debito || 0)} - ${fmt(c)})`
+        : 'J-K';
+      chip.appendChild(opSpan);
+    }
     chip.appendChild(removeSpan);
     container.appendChild(chip);
   });
@@ -477,6 +486,9 @@ function addSourceToRow(rowKey, chipData) {
     archivo : chipData.archivo,
     codigos : chipData.codigos || [chipData.codigo],
     valor   : chipData.valor,
+    op_jk   : !!chipData.op_jk,
+    debito  : chipData.debito,
+    credito : chipData.credito,
 
     celda   : chipData.celda,
     seccion : chipData.seccion || null,
@@ -733,6 +745,9 @@ function renderDraggableChips(container, nombreArchivo, info) {
       codigo     : item.codigo,
       descripcion: item.descripcion,
       valor      : item.valor,
+      op_jk      : !!item.op_jk,
+      debito     : item.debito,
+      credito    : item.credito,
 
       celda      : item.celda,
       seccion    : item.seccion || null

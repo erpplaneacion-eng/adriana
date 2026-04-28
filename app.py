@@ -67,8 +67,9 @@ def leer_todos_codigos(filepath):
         es_7105      = nombre.startswith('7105_')
         es_seccionado = es_7205 or es_7105  # misma estructura de secciones por contrato
 
-        # Detectar columna de valor (Debitos/Neto)
+        # Detectar columna de valor (Debitos/Neto) y columna de Creditos
         col_val = 9
+        col_credito = None
         _found_col = False
         for r in range(min(25, ws.nrows)):
             for c in range(ws.ncols):
@@ -76,7 +77,8 @@ def leer_todos_codigos(filepath):
                 if 'debito' in txt or 'netos' in txt:
                     col_val = c
                     _found_col = True
-                    break
+                if 'credito' in txt:
+                    col_credito = c
             if _found_col:
                 break
         col_letra = chr(65 + col_val)
@@ -163,14 +165,22 @@ def leer_todos_codigos(filepath):
             if isinstance(raw_a, float) and raw_a == int(raw_a):
                 a_str = str(int(raw_a))
 
-            # Valor: columna J (débitos)
-            val = 0.0
+            # Valor neto por fila: Debitos (J) - Creditos (K)
+            debito = 0.0
+            credito = 0.0
             if ws.ncols > col_val:
                 raw_j = ws.cell_value(r, col_val)
                 try:
-                    val = float(raw_j) if raw_j else 0.0
+                    debito = float(raw_j) if raw_j else 0.0
                 except (ValueError, TypeError):
-                    val = 0.0
+                    debito = 0.0
+            if col_credito is not None and ws.ncols > col_credito:
+                raw_k = ws.cell_value(r, col_credito)
+                try:
+                    credito = float(raw_k) if raw_k else 0.0
+                except (ValueError, TypeError):
+                    credito = 0.0
+            val = debito - credito
 
             # Codigo y descripcion
             # Archivos 5105: col A puede ser " 010102           GERENCIA" (todo junto)
@@ -224,6 +234,9 @@ def leer_todos_codigos(filepath):
                     'codigo'     : codigo,
                     'descripcion': desc[:70],
                     'valor'      : val,
+                    'debito'     : debito,
+                    'credito'    : credito,
+                    'op_jk'      : abs(credito) > 0,
 
                     'celda'      : f'{col_letra}{r + 1}',
                     'negrita'    : negrita,
