@@ -11,7 +11,7 @@ Uso:
     py procesar_todo.py C:\\ruta\\MARZO-DL # ruta absoluta
 """
 
-import os, re, sys, json, warnings
+import os, re, sys, json, warnings, unicodedata
 from datetime import date
 import xlrd, openpyxl
 from openpyxl.comments import Comment
@@ -138,6 +138,13 @@ def celda_str(raw):
     return str(raw).strip()
 
 
+def norm_text(s):
+    """Normaliza texto para detección robusta de encabezados."""
+    t = str(s or '').lower().replace('ã©', 'e')
+    t = unicodedata.normalize('NFKD', t)
+    return ''.join(ch for ch in t if not unicodedata.combining(ch))
+
+
 def encontrar_archivo(carpeta, prefijo, entidad, mes_abrev, anio):
     """Busca archivo con patron: {prefijo}_{entidad}_{mes}_{anio}*.xls"""
     patron = re.compile(
@@ -154,17 +161,36 @@ def detectar_col_debitos(ws, max_filas=25):
     """Detecta la columna Debitos buscando el encabezado en las primeras filas."""
     for r in range(min(max_filas, ws.nrows)):
         for c in range(ws.ncols):
-            txt = str(ws.cell_value(r, c)).lower()
+            txt = norm_text(ws.cell_value(r, c))
             if 'netos' in txt or 'debito' in txt:
                 return c
     return 9  # fallback columna J
+
+
+def detectar_col_valor(ws, max_filas=25):
+    """
+    Retorna (columna, modo):
+      - modo='debito' cuando encuentra encabezado Debitos
+      - modo='netos'  cuando encuentra Netos y no hay Debitos
+    """
+    col_netos = None
+    for r in range(min(max_filas, ws.nrows)):
+        for c in range(ws.ncols):
+            txt = norm_text(ws.cell_value(r, c))
+            if 'debito' in txt:
+                return c, 'debito'
+            if 'netos' in txt and col_netos is None:
+                col_netos = c
+    if col_netos is not None:
+        return col_netos, 'netos'
+    return 9, 'debito'
 
 
 def detectar_col_creditos(ws, max_filas=25):
     """Detecta la columna Creditos buscando el encabezado en las primeras filas."""
     for r in range(min(max_filas, ws.nrows)):
         for c in range(ws.ncols):
-            txt = str(ws.cell_value(r, c)).lower().replace('é', 'e')
+            txt = norm_text(ws.cell_value(r, c))
             if 'credito' in txt:
                 return c
     return None
@@ -180,7 +206,7 @@ def leer_er(filepath, codigos_buscar, sin_filtro=False):
     """
     wb = xlrd.open_workbook(filepath)
     ws = wb.sheet_by_name('Hoja 1')
-    col_val = detectar_col_debitos(ws)
+    col_val, modo_valor = detectar_col_valor(ws)
     col_credito = detectar_col_creditos(ws)
 
     inicio_99 = None
@@ -206,8 +232,9 @@ def leer_er(filepath, codigos_buscar, sin_filtro=False):
     for r in range(inicio_99, fin_99):
         if celda_str(ws.cell_value(r, 0)) in codigos_buscar:
             deb = float(ws.cell_value(r, col_val) or 0)
-            cre = float(ws.cell_value(r, col_credito) or 0) if col_credito is not None else 0.0
-            v = deb - cre
+            usa_resta_jk = (modo_valor == 'debito' and col_credito is not None)
+            cre = float(ws.cell_value(r, col_credito) or 0) if usa_resta_jk else 0.0
+            v = (deb - cre) if usa_resta_jk else deb
             total += v
             celdas.append(f"{col_letra}{r + 1}")
     return total, celdas
@@ -225,7 +252,7 @@ def leer_aux(filepath, codigos_buscar, seccion=None):
     """
     wb = xlrd.open_workbook(filepath)
     ws = wb.sheet_by_name('Hoja 1')
-    col_val = detectar_col_debitos(ws)
+    col_val, modo_valor = detectar_col_valor(ws)
     col_credito = detectar_col_creditos(ws)
 
     nombre       = os.path.basename(filepath).upper()
@@ -268,8 +295,9 @@ def leer_aux(filepath, codigos_buscar, seccion=None):
         )
         if matched:
             deb = float(ws.cell_value(r, col_val) or 0)
-            cre = float(ws.cell_value(r, col_credito) or 0) if col_credito is not None else 0.0
-            v = deb - cre
+            usa_resta_jk = (modo_valor == 'debito' and col_credito is not None)
+            cre = float(ws.cell_value(r, col_credito) or 0) if usa_resta_jk else 0.0
+            v = (deb - cre) if usa_resta_jk else deb
             total += v
             celdas.append(f"{col_letra}{r + 1}")
     return total, celdas
@@ -286,8 +314,9 @@ def leer_5105(filepath, reglas):
     """
     wb = xlrd.open_workbook(filepath)
     ws = wb.sheet_by_name('Hoja 1')
-    col_debitos = detectar_col_debitos(ws, max_filas=ws.nrows)
+    col_debitos, modo_valor = detectar_col_valor(ws, max_filas=ws.nrows)
     col_creditos = detectar_col_creditos(ws, max_filas=ws.nrows)
+    usa_resta_jk = (modo_valor == 'debito' and col_creditos is not None)
 
     en_seccion_99 = False
     fila_total    = None
@@ -323,21 +352,21 @@ def leer_5105(filepath, reglas):
         if codigo in filas_codigos:
             r = filas_codigos[codigo]
             v = (ws.cell_value(r, col_debitos) or 0) - (
-                (ws.cell_value(r, col_creditos) or 0) if col_creditos is not None else 0
+                (ws.cell_value(r, col_creditos) or 0) if usa_resta_jk else 0
             )
             detalle = [f"  Codigo {codigo}: ${v:,.0f}  (celda {col_letra}{r+1})"]
             return v, detalle
         return 0, []
 
     total = (ws.cell_value(fila_total, col_debitos) or 0) - (
-        (ws.cell_value(fila_total, col_creditos) or 0) if col_creditos is not None else 0
+        (ws.cell_value(fila_total, col_creditos) or 0) if usa_resta_jk else 0
     )
     detalle = [f"  Total 5105: ${total:,.0f}  (celda {col_letra}{fila_total+1})"]
     for codigo in reglas.get('subtract_codes', []):
         if codigo in filas_codigos:
             r   = filas_codigos[codigo]
             v   = (ws.cell_value(r, col_debitos) or 0) - (
-                (ws.cell_value(r, col_creditos) or 0) if col_creditos is not None else 0
+                (ws.cell_value(r, col_creditos) or 0) if usa_resta_jk else 0
             )
             total -= v
             detalle.append(f"  - {codigo}: ${v:,.0f}  (celda {col_letra}{r+1})")

@@ -2,7 +2,7 @@
 Config Builder - Flask backend
 Interfaz visual drag & drop para configurar config_gastos.json
 """
-import os, re, json, warnings, subprocess, shutil, sys
+import os, re, json, warnings, subprocess, shutil, sys, unicodedata
 from datetime import date
 from flask import Flask, render_template, jsonify, request, send_file
 
@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE     = os.environ.get('DATA_DIR', _APP_DIR)
 
-# Al arrancar en Railway, copiar la plantilla al volumen si aÃºn no existe allÃ­
+# Al arrancar en Railway, copiar la plantilla al volumen si aÃƒÂºn no existe allÃƒÂ­
 _TEMPLATE = os.path.join(_APP_DIR, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 _INFORME_EN_BASE = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 if BASE != _APP_DIR and os.path.exists(_TEMPLATE) and not os.path.exists(_INFORME_EN_BASE):
@@ -25,7 +25,7 @@ CONFIG_PATH  = os.path.join(BASE, 'config_gastos.json')
 INFORME_PATH = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 SCRIPT_PATH  = os.path.join(_APP_DIR, 'procesar_todo.py')
 
-# Copiar config al volumen si no existe allÃ­
+# Copiar config al volumen si no existe allÃƒÂ­
 for _cfg in ('config_gastos.json', 'config_5105.json'):
     _src = os.path.join(_APP_DIR, _cfg)
     _dst = os.path.join(BASE, _cfg)
@@ -45,6 +45,13 @@ def celda_str(raw):
     if isinstance(raw, float) and raw == int(raw):
         return str(int(raw))
     return str(raw).strip()
+
+
+def norm_text(s):
+    """Normaliza texto para búsquedas tolerantes a acentos y mojibake."""
+    t = str(s or '').lower().replace('ã©', 'e')
+    t = unicodedata.normalize('NFKD', t)
+    return ''.join(ch for ch in t if not unicodedata.combining(ch))
 
 
 def leer_todos_codigos(filepath):
@@ -67,15 +74,21 @@ def leer_todos_codigos(filepath):
         es_7105      = nombre.startswith('7105_')
         es_seccionado = es_7205 or es_7105  # misma estructura de secciones por contrato
 
-        # Detectar columna de valor (Debitos/Neto) y columna de Creditos
+        # Detectar columna de valor (Debitos o Netos) y columna de Creditos
         col_val = 9
         col_credito = None
+        modo_valor = 'debito'  # 'debito' | 'netos'
         _found_col = False
         for r in range(min(25, ws.nrows)):
             for c in range(ws.ncols):
-                txt = str(ws.cell_value(r, c)).lower().replace('é', 'e')
-                if 'debito' in txt or 'netos' in txt:
+                txt = norm_text(ws.cell_value(r, c))
+                if 'debito' in txt:
                     col_val = c
+                    modo_valor = 'debito'
+                    _found_col = True
+                elif 'netos' in txt and not _found_col:
+                    col_val = c
+                    modo_valor = 'netos'
                     _found_col = True
                 if 'credito' in txt:
                     col_credito = c
@@ -111,8 +124,8 @@ def leer_todos_codigos(filepath):
                         en_5105 = False  # reiniciar para detectar el siguiente bloque
 
         # Para archivos 7205 y 7105: detectar secciones por contrato.
-        # Cabeceras de sección: filas sin espacio inicial en col A que no son un código
-        # puro de dígitos (ej: "99 GENERAL", "PAECAL20 CONTR. CONSORCIO...").
+        # Cabeceras de secciÃ³n: filas sin espacio inicial en col A que no son un cÃ³digo
+        # puro de dÃ­gitos (ej: "99 GENERAL", "PAECAL20 CONTR. CONSORCIO...").
         secciones_seccionado = set()
         if es_seccionado:
             for r in range(ws.nrows):
@@ -122,11 +135,35 @@ def leer_todos_codigos(filepath):
                         and not _re.match(r'^\d{3,8}$', a_str)):
                     secciones_seccionado.add(r)
 
+        # Para ESTADO DE RESULTADOS: detectar cabeceras de U.N. por contrato/unidad.
+        # Regla: filas sin espacio inicial en col A, no numÃ©ricas, y sin texto genÃ©rico
+        # de encabezado/metadata (U.N., Cuentas, etc.).
+        secciones_er = set()
+        if es_er:
+            omitir_exactos = {
+                'U.N.', 'CUENTAS', '001 PRINCIPAL', '99 GENERAL',
+                'LIBRO:', 'DIFERENCIA POR CUENTAS DE RESULTADO:'
+            }
+            for r in range(ws.nrows):
+                a_raw = str(ws.cell_value(r, 0))
+                a_str = a_raw.strip()
+                if not a_str:
+                    continue
+                if a_str.upper() in omitir_exactos:
+                    continue
+                # Evitar metadatos del encabezado del reporte
+                if ('CORPORACION' in a_str.upper() or 'CIFRAS EN' in a_str.upper()):
+                    continue
+                # Cabecera de secciÃ³n: sin sangrÃ­a y no numÃ©rico puro
+                if (a_raw and not a_raw[0].isspace()
+                        and not _re.match(r'^\d+(\.0)?$', a_str)):
+                    secciones_er.add(r)
+
         items        = []
-        seccion_actual = None  # sección activa (None = sección inicial del archivo)
+        seccion_actual = None  # secciÃ³n activa (None = secciÃ³n inicial del archivo)
 
         for r in range(inicio, ws.nrows):
-            # Insertar separador de sección para archivos 7205/7105
+            # Insertar separador de secciÃ³n para archivos 7205/7105
             if es_seccionado and r in secciones_seccionado:
                 a_sep = str(ws.cell_value(r, 0)).strip()
                 seccion_actual = a_sep
@@ -141,10 +178,28 @@ def leer_todos_codigos(filepath):
                 })
                 continue
 
+            # Insertar separador de secciÃ³n para ESTADO DE RESULTADOS
+            if es_er and r in secciones_er:
+                a_sep = str(ws.cell_value(r, 0)).strip()
+                seccion_actual = a_sep
+                items.append({
+                    'codigo'     : '',
+                    'descripcion': a_sep,
+                    'valor'      : 0,
+                    'debito'     : 0,
+                    'credito'    : 0,
+                    'op_jk'      : False,
+                    'celda'      : '',
+                    'negrita'    : False,
+                    'indent'     : 0,
+                    'separador'  : True,
+                })
+                continue
+
             # Insertar separador de seccion para archivos 5105 y saltar la fila como dato
             if es_5105 and r in secciones_5105:
                 a_sep = str(ws.cell_value(r, 0)).strip()
-                seccion_actual = a_sep  # actualizar sección activa
+                seccion_actual = a_sep  # actualizar secciÃ³n activa
                 items.append({
                     'codigo'     : '',
                     'descripcion': a_sep,
@@ -180,7 +235,8 @@ def leer_todos_codigos(filepath):
                     credito = float(raw_k) if raw_k else 0.0
                 except (ValueError, TypeError):
                     credito = 0.0
-            val = debito - credito
+            usa_resta_jk = (modo_valor == 'debito' and col_credito is not None)
+            val = (debito - credito) if usa_resta_jk else debito
 
             # Codigo y descripcion
             # Archivos 5105: col A puede ser " 010102           GERENCIA" (todo junto)
@@ -236,7 +292,7 @@ def leer_todos_codigos(filepath):
                     'valor'      : val,
                     'debito'     : debito,
                     'credito'    : credito,
-                    'op_jk'      : abs(credito) > 0,
+                    'op_jk'      : bool(usa_resta_jk and abs(credito) > 0),
 
                     'celda'      : f'{col_letra}{r + 1}',
                     'negrita'    : negrita,
@@ -266,13 +322,13 @@ def api_sheets():
         config = json.load(open(CONFIG_PATH, encoding='utf-8'))
         config_map = {item['codigo_a']: item['sources'] for item in config['items']}
 
-        # Cargar tambiÃÂ©n el Excel con fÃÂ³rmulas para detectar SUMs internos
+        # Cargar tambiÃƒÂƒÃ‚Â©n el Excel con fÃƒÂƒÃ‚Â³rmulas para detectar SUMs internos
         wb_f = openpyxl.load_workbook(INFORME_PATH, data_only=False)
 
         sheets = []
         HOJAS_EXCLUIR  = {'%DIST C', '%DIST C '}
         # Hojas con 3 cols/mes: solo cols 3,6,9,12... son columnas de valor
-        # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fÃÂ³rmula
+        # Las intermedias (4,5,7,8...) son ratios/presupuesto y no deben detectarse como fÃƒÂƒÃ‚Â³rmula
         HOJAS_3COL = {
             'CASINO', 'CALI', 'YUMBO', 'BUGA',
             'COMEDORES CALI', 'COMEDORES PALMIRA', 'COMEDORES VALLE',
@@ -290,10 +346,10 @@ def api_sheets():
         # Filas a excluir por hoja (col B) - titulos sin valor
         FILAS_EXCLUIR = {
             'GASTOS OPERATIVOS': {
-                'CUOTA DE APOYO Y SOSTENIMIENTO',  # tÃÂ­tulo sin valor configurable
-                'GASTOS DE PERSONAL',               # fÃÂ³rmula interna: suma filas 6-10
-                'DIVERSOS',                         # fÃÂ³rmula interna: suma filas 13-16
-                'TOTAL GASTOS',                     # fÃÂ³rmula interna: suma totales
+                'CUOTA DE APOYO Y SOSTENIMIENTO',  # tÃƒÂƒÃ‚Â­tulo sin valor configurable
+                'GASTOS DE PERSONAL',               # fÃƒÂƒÃ‚Â³rmula interna: suma filas 6-10
+                'DIVERSOS',                         # fÃƒÂƒÃ‚Â³rmula interna: suma filas 13-16
+                'TOTAL GASTOS',                     # fÃƒÂƒÃ‚Â³rmula interna: suma totales
             },
             'CASINO': {
                 'Intereses', 'Descuentos Comerciales', 'otros', 'Flete',
@@ -302,7 +358,7 @@ def api_sheets():
                 'Flete Preparados TERCEROS', 'Material de empaque'
             },
             'YUMBO': {
-                # Totales y fÃÂ³rmulas internas
+                # Totales y fÃƒÂƒÃ‚Â³rmulas internas
                 'TOTAL RACIONES', 'INGRESOS BRUTOS', 'OPERACIONALES',
                 'INDUSTRIAS MANUFACTURERAS', 'NO OPERACIONALES', 'FINANCIEROS',
                 'DESCUENTOS - GASTO OPERACIONAL', 'OTROS', 'TOTAL INGRESOS NETOS',
@@ -312,7 +368,7 @@ def api_sheets():
                 'ADECUACIONES E INSTALACIONES', 'DIVERSOS', 'UTILIDAD BRUTA',
                 'GASTOS ADMINISTRATIVOS Y NO OPERACI', 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
-                # Descuentos automÃÂ¡ticos por porcentaje
+                # Descuentos automÃƒÂƒÃ‚Â¡ticos por porcentaje
                 'Procultura 0,5%', 'Prohospitales 1%', 'Rete Ica 0,6%',
                 'Adulto Mayor 2%', 'Prodeporte 2,5%', '2% Juzgado de Familia',
                 '0,5% Propacifico',
@@ -336,7 +392,7 @@ def api_sheets():
                 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
                 'PREPARADOS PROPIOS',               # calculado: GASTOS VEHICULOS * %DIST
-                # Cross-sheet: se calculan automÃÂ¡ticamente desde otras hojas del libro
+                # Cross-sheet: se calculan automÃƒÂƒÃ‚Â¡ticamente desde otras hojas del libro
                 'Costos Indirectos de Personal',
                 # Cross-sheet: se muestran como es_interno en la UI (tarjeta morada)
                 '2% Estampillas Prounivalle',
@@ -347,7 +403,7 @@ def api_sheets():
                 '2% Juzgado de Familia',
             },
             'BUGA': {
-                # Totales y fÃÂ³rmulas internas
+                # Totales y fÃƒÂƒÃ‚Â³rmulas internas
                 'TOTAL RACIONES', 'INGRESOS BRUTOS', 'OPERACIONALES',
                 'INDUSTRIAS MANUFACTURERAS', 'NO OPERACIONALES', 'FINANCIEROS',
                 'DESCUENTOS - GASTO OPERACIONAL', 'OTROS', 'TOTAL INGRESOS NETOS',
@@ -360,7 +416,7 @@ def api_sheets():
                 'UTILIDAD BRUTA', 'GASTOS ADMINISTRATIVOS Y NO OPERACIONALES',
                 'TOTAL AJUSTES', 'UTILIDAD NETA',
                 'MANO DE OBRA DIRECTA',
-                # Nota: filas (Fac) visibles para configuraciÃÂ³n manual en UI
+                # Nota: filas (Fac) visibles para configuraciÃƒÂƒÃ‚Â³n manual en UI
                 # Porcentajes auto-calculados sobre ingresos
                 '1% Estampilla Prohospital', '2,5% Estampilla Pro Deporte',
                 '1% Estampilla Pro Univalle', '3% Estampilla Adulto Mayor',
@@ -373,7 +429,7 @@ def api_sheets():
                 'INDUSTRIALIZADOS TERCEROS',
             },
             'RECREARTE': {
-                # Totales y subtotales (fÃÂ³rmulas internas)
+                # Totales y subtotales (fÃƒÂƒÃ‚Â³rmulas internas)
                 'TOTAL RACIONES', 'INGRESOS BRUTOS',
                 'OPERACIONALES', 'INDUSTRIAS MANUFACTURERAS',
                 'NO OPERACIONALES', 'FINANCIEROS',
@@ -388,14 +444,14 @@ def api_sheets():
             }
         }
 
-        # Filas que se muestran como tÃ­tulo de secciÃ³n (separador visual, no editables)
+        # Filas que se muestran como tÃƒÂ­tulo de secciÃƒÂ³n (separador visual, no editables)
         TITULOS_SECCION = {
             'GASTOS ADMINISTRATIVOS': {
                 'GASTOS DE PERSONAL', 'HONORARIOS', 'IMPUESTOS', 'ARRENDAMIENTOS',
                 'SEGUROS', 'SERVICIOS', 'GASTOS LEGALES', 'MANTENIMIENTO Y REPARACIONES',
                 'ADECUACIONES E INSTALACIONES', 'GASTOS DE VIAJE', 'DIVERSOS',
                 'OTROS GASTOS DIVERSOS', 'FINANCIEROS',
-                # CASINO y RECREARTE son referencias internas, NO tÃ­tulos de secciÃ³n
+                # CASINO y RECREARTE son referencias internas, NO tÃƒÂ­tulos de secciÃƒÂ³n
             },
             'GASTOS VEHICULOS': {
                 'GASTOS DE PERSONAL', 'IMPUESTOS', 'SEGUROS', 'SERVICIOS',
@@ -476,19 +532,19 @@ def api_sheets():
                 a = str(row[0].value or '').strip()
                 b = str(row[1].value or '').strip() if len(row) > 1 else ''
 
-                # Incluir si col A tiene cÃÂ³digo numÃÂ©rico O si col B tiene texto descriptivo
+                # Incluir si col A tiene cÃƒÂƒÃ‚Â³digo numÃƒÂƒÃ‚Â©rico O si col B tiene texto descriptivo
                 tiene_codigo = bool(a and re.match(r'^\d', a))
                 if not tiene_codigo and not b:
-                    continue  # fila vacÃÂ­a
+                    continue  # fila vacÃƒÂƒÃ‚Â­a
 
-                # Excluir filas globales y especÃÂ­ficas por hoja
+                # Excluir filas globales y especÃƒÂƒÃ‚Â­ficas por hoja
                 if b in FILAS_EXCLUIR_GLOBAL:
                     continue
                 hoja_limpia = sh_name.strip()
                 if b in FILAS_EXCLUIR.get(hoja_limpia, set()):
                     continue
 
-                # Detectar fÃÂ³rmula interna: referencia otras filas de la MISMA hoja
+                # Detectar fÃƒÂƒÃ‚Â³rmula interna: referencia otras filas de la MISMA hoja
                 # Solo se revisan las columnas de valor (no las de ratio/presupuesto)
                 es_formula = False
                 es_interno  = False
@@ -562,7 +618,7 @@ def api_folders():
 
 @app.route('/api/files/<path:folder>')
 def api_files(folder):
-    """Lee todos los XLS de la carpeta y extrae cÃÂ³digos por archivo."""
+    """Lee todos los XLS de la carpeta y extrae cÃƒÂƒÃ‚Â³digos por archivo."""
     carpeta = os.path.join(BASE, folder) if not os.path.isabs(folder) else folder
     if not os.path.isdir(carpeta):
         return jsonify({'error': f'Carpeta no encontrada: {carpeta}'}), 404
@@ -626,7 +682,7 @@ def api_upload(folder):
     """Sube archivos XLS a una carpeta mensual en el servidor."""
     folder_clean = folder.upper().replace('-DL', '').replace('-', '')
     if folder_clean not in MES_NOMBRES:
-        return jsonify({'error': f'Nombre de carpeta invÃ¡lido: {folder}'}), 400
+        return jsonify({'error': f'Nombre de carpeta invÃƒÂ¡lido: {folder}'}), 400
     carpeta = os.path.join(BASE, folder)
     os.makedirs(carpeta, exist_ok=True)
     # Limpiar archivos XLS previos para evitar mezclar con carga anterior
@@ -672,6 +728,7 @@ if __name__ == '__main__':
     if debug:
         print(f'  Abre http://localhost:{port} en tu navegador\n')
     app.run(debug=debug, host='0.0.0.0', port=port)
+
 
 
 
