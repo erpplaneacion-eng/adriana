@@ -199,7 +199,7 @@ def detectar_col_creditos(ws, max_filas=25):
 # ---------------------------------------------------------------------------
 # Lectura ESTADO DE RESULTADOS
 # ---------------------------------------------------------------------------
-def leer_er(filepath, codigos_buscar, sin_filtro=False):
+def leer_er(filepath, codigos_buscar, sin_filtro=False, seccion=None):
     """
     Suma los debitos de los codigos indicados dentro de la seccion U.N. 99 GENERAL.
     Si sin_filtro=True, busca en todo el archivo.
@@ -211,15 +211,37 @@ def leer_er(filepath, codigos_buscar, sin_filtro=False):
 
     inicio_99 = None
     fin_99    = ws.nrows
-    for r in range(ws.nrows):
-        a = str(ws.cell_value(r, 0)).strip()
-        if inicio_99 is None:
-            if '99' in a and 'GENERAL' in a.upper():
+
+    # Si viene seccion explicita del chip/config, usar ese bloque.
+    if seccion:
+        en_seccion = False
+        inicio_99 = ws.nrows
+        for r in range(ws.nrows):
+            a_raw = str(ws.cell_value(r, 0))
+            a_str = a_raw.strip()
+            if a_str == seccion:
                 inicio_99 = r + 1
-        else:
-            if a and not re.match(r'^[\d\s]', a) and a not in ('Cuentas',):
-                fin_99 = r
-                break
+                en_seccion = True
+                continue
+            if en_seccion:
+                # Nueva cabecera de seccion: texto sin sangria, no codigo numerico puro
+                if (a_raw and not a_raw[0].isspace() and a_str
+                        and not re.match(r'^\d+(\.0)?$', a_str)):
+                    fin_99 = r
+                    break
+        if inicio_99 == ws.nrows:
+            inicio_99, fin_99 = 0, ws.nrows
+    else:
+        # Modo legado: U.N. 99 GENERAL
+        for r in range(ws.nrows):
+            a = str(ws.cell_value(r, 0)).strip()
+            if inicio_99 is None:
+                if '99' in a and 'GENERAL' in a.upper():
+                    inicio_99 = r + 1
+            else:
+                if a and not re.match(r'^[\d\s]', a) and a not in ('Cuentas',):
+                    fin_99 = r
+                    break
 
     if sin_filtro:
         inicio_99, fin_99 = 0, ws.nrows
@@ -553,7 +575,12 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
                 try:
                     prefijo = file_sources[key]['prefijo']
                     if prefijo == 'ESTADO DE RESULTADOS':
-                        v, celdas = leer_er(ruta, set(codes), sin_filtro=src.get('sin_filtro', False))
+                        v, celdas = leer_er(
+                            ruta,
+                            set(codes),
+                            sin_filtro=src.get('sin_filtro', False),
+                            seccion=src.get('seccion')
+                        )
                     else:
                         v, celdas = leer_aux(ruta, set(codes), seccion=src.get('seccion'))
                     op_src = src.get('op', '+')
