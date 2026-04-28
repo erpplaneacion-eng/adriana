@@ -69,12 +69,12 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 Todos los archivos auxiliares (7205, 7105, 51355001) tienen 4 columnas de valor:
 - **Col I** (idx 8): Saldo inicial
 - **Col J** (idx 9): Débitos ← columna principal (`col_val`)
-- **Col K** (idx 10): Créditos — cuando es distinto de cero, el valor neto es **J − K**
+- **Col K** (idx 10): Créditos (no se resta; se usa solo col J)
 - **Col L** (idx 11): Saldo final
 
-`leer_aux()` y `leer_er()` calculan siempre `J − K`. Los archivos ER y 51355001 tienen K=0, por lo que no se ven afectados.
+`leer_aux()` y `leer_er()` leen únicamente la columna `col_val` (col J, Débitos). No se aplica resta J−K.
 
-Los chips en la UI muestran el valor neto (J−K). Cuando K>0 aparece un badge naranja **`−K $X`** tanto en la tabla del panel derecho como en el chip configurado, indicando que el valor ya tiene créditos descontados.
+Los chips en la UI muestran el valor de col J tal como está en el archivo.
 
 ### Estructura de columnas en el INFORME REAL
 

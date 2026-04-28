@@ -69,12 +69,16 @@ def leer_todos_codigos(filepath):
 
         # Detectar columna de valor (Debitos/Neto)
         col_val = 9
+        _found_col = False
         for r in range(min(25, ws.nrows)):
             for c in range(ws.ncols):
-                txt = str(ws.cell_value(r, c)).lower()
-                if 'debito' in txt or 'neto' in txt:
+                txt = str(ws.cell_value(r, c)).lower().replace('é', 'e')
+                if 'debito' in txt or 'netos' in txt:
                     col_val = c
+                    _found_col = True
                     break
+            if _found_col:
+                break
         col_letra = chr(65 + col_val)
 
         # Inicio: primera fila con valor != 0 (salta filas de encabezado del reporte)
