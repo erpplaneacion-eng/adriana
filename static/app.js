@@ -12,10 +12,13 @@ let filesData     = {};   // { nombre_archivo: { tipo, items } }
 let configRaw     = null; // config_gastos.json completo
 let folders       = [];
 let selectedChips = new Map(); // chipId → dragData (selección múltiple)
+let isDirty       = false; // cambios pendientes por guardar
 
 // ── Utilidades ──────────────────────────────────────────────
 const fmt = v => v == null ? '' : '$' + Number(v).toLocaleString('es-CO', {maximumFractionDigits: 0});
 const norm = s => s.replace(/\s+/g, ' ').trim();
+const markDirty = () => { isDirty = true; };
+const clearDirty = () => { isDirty = false; };
 
 function makeRowKey(sheetName, codeKey, filaNum) {
   if (sheetName && filaNum) return `${sheetName}::${codeKey}|${filaNum}`;
@@ -105,6 +108,7 @@ async function init() {
   // Cargar primera hoja
   if (sheetsData.length > 0) selectSheet(0);
 
+  clearDirty();
   hideLog();
   updateStats();
 }
@@ -334,6 +338,7 @@ function renderManualOps(rowKey, container) {
       if (!manualValues[rowKey]) manualValues[rowKey] = [];
       if (!manualValues[rowKey][idx]) manualValues[rowKey][idx] = { op: '+', valor: 0 };
       manualValues[rowKey][idx].op = sel.value;
+      markDirty();
       // Re-renderizar chips para actualizar el total sin tocar el DOM del manual
       const safeKey  = rowKey.replace(/[^a-z0-9]/gi, '_');
       const dropZone = document.getElementById(`sources-${safeKey}`);
@@ -349,9 +354,11 @@ function renderManualOps(rowKey, container) {
       const v = parseFloat(input.value);
       if (!isNaN(v) && v !== 0) {
         manualValues[rowKey][idx].valor = v;
+        markDirty();
       } else {
         manualValues[rowKey].splice(idx, 1);
         if (manualValues[rowKey].length === 0) delete manualValues[rowKey];
+        markDirty();
         refreshRow(rowKey);
       }
       updateStats();
@@ -359,6 +366,7 @@ function renderManualOps(rowKey, container) {
     btnDel.addEventListener('click', () => {
       manualValues[rowKey].splice(idx, 1);
       if (manualValues[rowKey].length === 0) delete manualValues[rowKey];
+      markDirty();
       refreshRow(rowKey);
       updateStats();
     });
@@ -374,6 +382,7 @@ function renderManualOps(rowKey, container) {
     if (!manualValues[rowKey]) manualValues[rowKey] = [];
     manualValues[rowKey].push({ op: '+', valor: 0 });
     if (currentSheet) mappingSheets[rowKey] = currentSheet.nombre;
+    markDirty();
     refreshRow(rowKey);
   });
   container.appendChild(btnAdd);
@@ -402,6 +411,7 @@ function renderChips(rowKey, sources, container) {
     opBtn.addEventListener('click', e => {
       e.stopPropagation();
       mappings[rowKey][idx].op = op === '-' ? '+' : '-';
+      markDirty();
       refreshRow(rowKey);
       updateStats();
     });
@@ -496,6 +506,7 @@ function addSourceToRow(rowKey, chipData) {
   });
 
   // Re-renderizar la fila
+  markDirty();
   refreshRow(rowKey);
   updateStats();
 }
@@ -504,6 +515,7 @@ function removeSource(rowKey, idx) {
   if (!mappings[rowKey]) return;
   mappings[rowKey].splice(idx, 1);
   if (mappings[rowKey].length === 0) delete mappings[rowKey];
+  markDirty();
   refreshRow(rowKey);
   updateStats();
 }
@@ -815,10 +827,14 @@ async function saveConfig() {
   btn.textContent = '💾 Guardar config';
 
   if (res.ok) {
+    clearDirty();
+    updateStats();
     showLog(`✅ Config guardado. Backup en: ${res.backup}`, true);
     setTimeout(hideLog, 4000);
+    return true;
   } else {
     showLog(`❌ Error: ${res.error}`, true);
+    return false;
   }
 }
 
@@ -885,6 +901,15 @@ async function runMes() {
   const folder = document.getElementById('run-folder').value;
   if (!folder) { alert('Selecciona una carpeta de mes primero.'); return; }
 
+  if (isDirty) {
+    showLog('ℹ️ Cambios sin guardar detectados. Guardando antes de ejecutar...', true);
+    const okSave = await saveConfig();
+    if (!okSave) {
+      showLog('❌ No se pudo guardar la configuración. Ejecución cancelada.', false);
+      return;
+    }
+  }
+
   const btn = document.getElementById('btn-run');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Ejecutando...';
@@ -919,7 +944,10 @@ function updateStats() {
   const total       = Object.values(sheetsData).reduce((a, s) => a + s.filas.length, 0);
   const configurados = Object.keys(mappings).length;
   const el = document.getElementById('stats');
-  if (el) el.textContent = `${configurados} / ${total} ítems configurados`;
+  if (el) {
+    const dirtyTxt = isDirty ? ' • cambios sin guardar' : '';
+    el.textContent = `${configurados} / ${total} ítems configurados${dirtyTxt}`;
+  }
 }
 
 // ── Subida de archivos al servidor ──────────────────────────────
