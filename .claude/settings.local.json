@@ -10,7 +10,14 @@
       "Bash(py -c ' *)",
       "Bash(python -c ' *)",
       "Bash(dir /b *.xls)",
-      "Bash(ls *.xls)"
+      "Bash(ls *.xls)",
+      "Bash(python *)",
+      "Bash(py *)",
+      "PowerShell(Rename-Item *)",
+      "Bash(git reset *)",
+      "Bash(git restore *)",
+      "Bash(git push *)",
+      "Bash(git commit *)"
     ]
   }
 }
