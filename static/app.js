@@ -591,11 +591,10 @@ function actualizarValoresEnMappings(data) {
     });
   });
 
-  // Alias: claves cortas del config (ej. "ER_BUGA26") → datos del fileKey() real.
-  // Necesario para chips cargados desde config cuya key no coincide con fileKey().
+  // Alias 1: claves cortas del config (ej. "ER_BUGA26") → datos del fileKey() real.
   if (configRaw && configRaw.file_sources) {
     Object.entries(configRaw.file_sources).forEach(([shortKey, info]) => {
-      if (lookup[shortKey]) return; // ya coincide exactamente
+      if (lookup[shortKey]) return;
       const pref = (info.prefijo || '').toUpperCase();
       const ent  = (info.entidad || '').toUpperCase();
       for (const nombre of Object.keys(data)) {
@@ -611,6 +610,21 @@ function actualizarValoresEnMappings(data) {
       }
     });
   }
+
+  // Alias 2: claves sin año (ej. "7205_UT_ALIM_YUMBO") → archivo con año más reciente.
+  // Cubre chips arrastrados desde archivos con nombre distinto en sesiones anteriores.
+  const allLookupKeys = Object.keys(lookup);
+  Object.values(mappings).forEach(sources => {
+    sources.forEach(src => {
+      if (lookup[src.key]) return; // ya resuelto
+      const matches = allLookupKeys.filter(k => k.startsWith(src.key));
+      if (matches.length) {
+        const best = matches.sort().reverse()[0]; // año más reciente primero
+        lookup[src.key]    = lookup[best];
+        lookupSec[src.key] = lookupSec[best] || {};
+      }
+    });
+  });
 
   // Actualizar valor, debito, credito y op_jk en cada source
   Object.values(mappings).forEach(sources => {
