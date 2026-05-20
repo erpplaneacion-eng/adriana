@@ -34,7 +34,7 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 | Archivo | Rol |
 |---|---|
 | `app.py` | Flask backend del Config Builder. Sirve la UI y expone los endpoints API. |
-| `procesar_todo.py` | Script principal. 4 pasos: salarios (5105), gastos (ER + aux), fórmulas cross-sheet en GASTOS ADMIN, fórmulas cross-sheet en hojas 3-col/mes. |
+| `procesar_todo.py` | Script principal. 4 pasos: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. |
 | `procesar_gastos.py` | Script standalone de gastos (**legado**). BASE hardcodeada, apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
 | `procesar_5105.py` | Script standalone de nómina (**legado**). BASE hardcodeada. |
 | `config_gastos.json` | Mapeo principal. Cada item: `codigo_a`, `sources`, `hoja`, `fila_dest`, `buscar_por`, `valor_fijo`. Se respalda automáticamente al guardar. |
@@ -66,15 +66,11 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 
 ### Estructura de columnas en archivos XLS fuente
 
-Todos los archivos auxiliares (7205, 7105, 51355001) tienen 4 columnas de valor:
-- **Col I** (idx 8): Saldo inicial
-- **Col J** (idx 9): Débitos ← columna principal (`col_val`)
-- **Col K** (idx 10): Créditos (no se resta; se usa solo col J)
-- **Col L** (idx 11): Saldo final
+`detectar_col_valor()` busca en las primeras 25 filas el encabezado "Debitos" (modo `debito`) o "Netos" (modo `netos`, fallback). `detectar_col_creditos()` busca "Creditos" en las mismas filas.
 
-`leer_aux()` y `leer_er()` leen únicamente la columna `col_val` (col J, Débitos). No se aplica resta J−K.
+`leer_aux()` y `leer_er()` **aplican resta J−K** (`Débitos - Créditos`) cuando encuentran ambas columnas en modo `debito`. Si no hay columna de Créditos, usan solo Débitos. El campo `op_jk: true` en los items del panel derecho indica que esa fila tuvo resta aplicada.
 
-Los chips en la UI muestran el valor de col J tal como está en el archivo.
+Los chips en la UI muestran el valor neto (J−K o solo J) según lo detectado en el archivo.
 
 ### Estructura de columnas en el INFORME REAL
 
@@ -96,7 +92,8 @@ Los chips en la UI muestran el valor de col J tal como está en el archivo.
     {
       "key": "ER_CHVS",
       "codes": ["51055101"],
-      "op": "-",          // opcional: "+" (default) o "-" para restar este chip al total
+      "op": "-",          // opcional: "+" (default), "-", "*", "/" sobre el acumulado
+      "sin_filtro": true, // opcional: suma todos los valores del archivo (ignora codes)
       "seccion": "PAECAL20 CONTR. CONSORCIO ALIMENTANDO  CALI 2026"  // opcional: sección del archivo
     }
   ],
@@ -105,6 +102,21 @@ Los chips en la UI muestran el valor de col J tal como está en el archivo.
 ```
 
 `file_sources` mapea cada `key` a `{ "prefijo": "ESTADO DE RESULTADOS", "entidad": "CHVS" }` para que `encontrar_archivo()` localice el XLS en la carpeta del mes.
+
+### config_5105.json — estructura por entidad
+
+```json
+{
+  "CHVS":           { "subtract_codes": ["010103", "010303", "010501"] },
+  "UT ALIM BUGA2026": { "subtract_codes": [] },
+  "UT BUGA2025":    { "only_code": "010403" }
+}
+```
+
+- `subtract_codes`: toma el total del código `5105` en la sección "99 GENERAL" y resta los subcódigos indicados.
+- `only_code`: usa solo el valor de ese código (ignora el total 5105).
+- La clave de cada entidad es el nombre extraído del nombre de archivo: `5105_<entidad>_<mes>_<año>.xls`.
+- Si la entidad no aparece en el config, el archivo se omite (`[OMITIDO]` en el log).
 
 **Claves `key` generadas por `fileKey()` en app.js:**
 - `ER_<ENTIDAD>` → archivos ESTADO DE RESULTADOS
@@ -154,8 +166,8 @@ En todos los casos:
 
 Cada chip en el panel izquierdo tiene un botón `+` (verde) o `−` (rojo). Al hacer clic alterna entre sumar y restar ese chip al total de la fila.
 
-- El campo `op` se guarda en `config_gastos.json` dentro de cada source (solo se escribe si es `"-"`; el `"+"` es el default para no inflar el JSON).
-- `procesar_todo.py` aplica el `op` de cada source al calcular `valor_total`.
+- El campo `op` se guarda en `config_gastos.json` dentro de cada source (solo se escribe si no es `"+"`; el `"+"` es el default para no inflar el JSON).
+- `procesar_todo.py` aplica el `op` de cada source al calcular `valor_total`. Soporta `+`, `-`, `*`, `/`.
 - El `Σ` del total en la UI refleja las restas en tiempo real.
 - Retrocompatibilidad: sources sin campo `op` se tratan como `"+"`.
 

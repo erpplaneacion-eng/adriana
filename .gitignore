@@ -5,3 +5,27 @@ __pycache__/
 
 # Backups automáticos del config (generados al guardar desde la UI)
 config_gastos_backup_*.json
+
+# Carpetas mensuales con archivos XLS fuente
+ENERO/
+FEBRERO/
+FEBRERO-DL/
+MARZO/
+ABRIL/
+ABRIL-DL/
+MAYO/
+MAYO-DL/
+JUNIO/
+JUNIO-DL/
+JULIO/
+JULIO-DL/
+AGOSTO/
+AGOSTO-DL/
+SEPTIEMBRE/
+SEPTIEMBRE-DL/
+OCTUBRE/
+OCTUBRE-DL/
+NOVIEMBRE/
+NOVIEMBRE-DL/
+DICIEMBRE/
+DICIEMBRE-DL/

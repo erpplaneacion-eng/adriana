@@ -571,8 +571,8 @@ async function loadFolder(folderName) {
 }
 
 function actualizarValoresEnMappings(data) {
-  // lookup simple: { fileKey: { codigo: valor } } — primera aparición gana (evita sobrescritura entre secciones)
-  // lookupSec: { fileKey: { "seccion::codigo": valor } } — valor exacto por sección
+  // lookup: { fileKey: { codigo: { valor, debito, credito, op_jk } } }
+  // lookupSec: { fileKey: { "seccion::codigo": { ... } } }
   const lookup = {};
   const lookupSec = {};
   Object.entries(data).forEach(([nombre, info]) => {
@@ -581,40 +581,76 @@ function actualizarValoresEnMappings(data) {
     if (!lookupSec[fk]) lookupSec[fk] = {};
     (info.items || []).forEach(item => {
       if (!item.error && !item.separador && item.codigo) {
-        const cod = String(item.codigo).trim();
-        // Simple: primera ocurrencia gana (99 GENERAL aparece primero en el archivo)
-        if (!(cod in lookup[fk])) lookup[fk][cod] = item.valor;
+        const cod   = String(item.codigo).trim();
+        const entry = { valor: item.valor, debito: item.debito || 0, credito: item.credito || 0, op_jk: !!item.op_jk };
+        // Primera ocurrencia gana (99 GENERAL aparece primero en el archivo)
+        if (!(cod in lookup[fk])) lookup[fk][cod] = entry;
         // Con sección: siempre guardar para acceso preciso
-        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = item.valor;
+        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = entry;
       }
     });
   });
 
-  // Para cada source en todos los mappings, calcular el valor sumando los códigos
+  // Alias: claves cortas del config (ej. "ER_BUGA26") → datos del fileKey() real.
+  // Necesario para chips cargados desde config cuya key no coincide con fileKey().
+  if (configRaw && configRaw.file_sources) {
+    Object.entries(configRaw.file_sources).forEach(([shortKey, info]) => {
+      if (lookup[shortKey]) return; // ya coincide exactamente
+      const pref = (info.prefijo || '').toUpperCase();
+      const ent  = (info.entidad || '').toUpperCase();
+      for (const nombre of Object.keys(data)) {
+        const f = nombre.toUpperCase();
+        if (f.startsWith(pref + '_') && f.includes('_' + ent + '_')) {
+          const fk = fileKey(nombre);
+          if (lookup[fk]) {
+            lookup[shortKey]    = lookup[fk];
+            lookupSec[shortKey] = lookupSec[fk] || {};
+          }
+          break;
+        }
+      }
+    });
+  }
+
+  // Actualizar valor, debito, credito y op_jk en cada source
   Object.values(mappings).forEach(sources => {
     sources.forEach(src => {
       const fileData = lookup[src.key];
       if (!fileData) return; // archivo no está en esta carpeta, no tocar
       if (src.sin_filtro) {
-        src.valor = Object.values(fileData).reduce((a, v) => a + (Number(v) || 0), 0);
+        const vals = Object.values(fileData);
+        src.valor   = vals.reduce((a, e) => a + (Number(e.valor)   || 0), 0);
+        src.debito  = vals.reduce((a, e) => a + (Number(e.debito)  || 0), 0);
+        src.credito = vals.reduce((a, e) => a + (Number(e.credito) || 0), 0);
+        src.op_jk   = vals.some(e => e.op_jk);
       } else {
         const fileDataSec = lookupSec[src.key] || {};
-        src.valor = (src.codigos || []).reduce((sum, cod) => {
+        let totalValor = 0, totalDebito = 0, totalCredito = 0, anyOpJk = false;
+        (src.codigos || []).forEach(cod => {
           const codStr = String(cod).trim();
-          let v;
-          // Prioridad: sección específica > código simple (evita colisión entre secciones)
-          if (src.seccion) v = fileDataSec[`${src.seccion}::${codStr}`];
-          if (v == null) v = fileData[codStr];
+          let entry;
+          // Prioridad: sección específica > código simple
+          if (src.seccion) entry = fileDataSec[`${src.seccion}::${codStr}`];
+          if (entry == null) entry = fileData[codStr];
           // Retrocompatibilidad: código con formato antiguo "010102           GERENCIA"
-          if (v == null) {
+          if (entry == null) {
             const numPart = codStr.match(/^(\d+)/);
             if (numPart) {
-              if (src.seccion) v = fileDataSec[`${src.seccion}::${numPart[1]}`];
-              if (v == null) v = fileData[numPart[1]];
+              if (src.seccion) entry = fileDataSec[`${src.seccion}::${numPart[1]}`];
+              if (entry == null) entry = fileData[numPart[1]];
             }
           }
-          return sum + (v != null ? Number(v) : 0);
-        }, 0);
+          if (entry != null) {
+            totalValor   += Number(entry.valor)   || 0;
+            totalDebito  += Number(entry.debito)  || 0;
+            totalCredito += Number(entry.credito) || 0;
+            if (entry.op_jk) anyOpJk = true;
+          }
+        });
+        src.valor   = totalValor;
+        src.debito  = totalDebito;
+        src.credito = totalCredito;
+        src.op_jk   = anyOpJk;
       }
     });
   });
