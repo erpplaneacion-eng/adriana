@@ -16,14 +16,17 @@ from datetime import date
 import xlrd, openpyxl
 from openpyxl.comments import Comment
 from openpyxl.utils import get_column_letter
+import db as _db
 
 warnings.filterwarnings('ignore')
 
 # ---------------------------------------------------------------------------
 BASE              = os.environ.get('CHVS_BASE', os.path.dirname(os.path.abspath(__file__)))
 ARCHIVO_PRINCIPAL = os.path.join(BASE, 'INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
-CONFIG_GASTOS     = os.path.join(BASE, 'config_gastos.json')
-CONFIG_5105       = os.path.join(BASE, 'config_5105.json')
+
+# Inicializar DB (por si el script se ejecuta directamente sin haber pasado por app.py)
+_db.init_db()
+_db.migrate_from_json()
 
 # Columna por mes para hojas con 1 col por mes (ENE=3, FEB=4 ...)
 MES_COLUMNA = {
@@ -146,13 +149,18 @@ def norm_text(s):
 
 
 def encontrar_archivo(carpeta, prefijo, entidad, mes_abrev, anio):
-    """Busca archivo con patron: {prefijo}_{entidad}_{mes}_{anio}*.xls"""
-    patron = re.compile(
-        rf'^{re.escape(prefijo)}_{re.escape(entidad)}_{mes_abrev}_{anio}.*\.xls$',
-        re.IGNORECASE
-    )
-    for f in os.listdir(carpeta):
-        if patron.match(f) and os.path.isfile(os.path.join(carpeta, f)):
+    """Busca archivo con patron: {prefijo}_{entidad}_{mes}_{anio}*.xls
+    Primero intenta con el año exacto; si no encuentra, acepta cualquier año de 4 dígitos.
+    """
+    p = rf'^{re.escape(prefijo)}_{re.escape(entidad)}_{mes_abrev}_'
+    patron_exact = re.compile(p + rf'{anio}.*\.xls$', re.IGNORECASE)
+    patron_flex  = re.compile(p + r'\d{4}.*\.xls$',   re.IGNORECASE)
+    archivos = os.listdir(carpeta)
+    for f in archivos:
+        if patron_exact.match(f) and os.path.isfile(os.path.join(carpeta, f)):
+            return os.path.join(carpeta, f)
+    for f in archivos:
+        if patron_flex.match(f) and os.path.isfile(os.path.join(carpeta, f)):
             return os.path.join(carpeta, f)
     return None
 
@@ -404,8 +412,7 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
     print(f"PASO 1 - SALARIOS (5105)")
     print(f"{'='*65}")
 
-    with open(CONFIG_5105, 'r', encoding='utf-8') as f:
-        config = json.load(f)
+    config = _db.load_config_5105()
 
     archivos = sorted([
         f for f in os.listdir(carpeta_mes)
@@ -420,6 +427,7 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
 
     total_general    = 0.0
     detalle_entidades = []
+    fuentes_log       = []
     for nombre in archivos:
         patron = r'^5105_(.+?)_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_'
         m = re.search(patron, nombre, re.IGNORECASE)
@@ -432,10 +440,13 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
         valor, detalle = leer_5105(os.path.join(carpeta_mes, nombre), config[entidad])
         total_general += valor
         detalle_entidades.append(f"Archivo: {nombre}\n" + "\n".join(detalle))
+        fuentes_log.append({'file_key': f'5105_{entidad}', 'codigo': '5105',
+                            'seccion': '99 GENERAL', 'op': '+', 'valor': valor})
         print(f"  {entidad:<40} ${valor:>16,.0f}")
 
     print(f"  {'TOTAL 5105':<40} ${total_general:>16,.0f}")
 
+    fila_escrita = None
     # Escribir en destino con comentario de trazabilidad
     for row in hoja_dest.iter_rows():
         if str(row[0].value or '').strip() == '5105':
@@ -454,8 +465,17 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
             comentario.width  = 350
             comentario.height = 80 + 20 * len(detalle_entidades)
             celda.comment = comentario
+            fila_escrita = fila_5105
             print(f"  -> Escrito en fila {row[0].row}, columna {chr(64+columna_xlsx)}")
             break
+
+    return {
+        'hoja'       : 'GASTOS ADMINISTRATIVOS',
+        'fila'       : fila_escrita or 0,
+        'codigo_a'   : '5105',
+        'valor_total': total_general,
+        'fuentes'    : fuentes_log,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -466,11 +486,11 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
     print(f"PASO 2 - GASTOS (todas las hojas)")
     print(f"{'='*65}")
 
-    with open(CONFIG_GASTOS, 'r', encoding='utf-8') as f:
-        config = json.load(f)
+    config = _db.load_config()
 
     file_sources = config['file_sources']
     items        = config['items']
+    valores_log  = []
 
     # Localizar archivos fuente declarados en file_sources
     archivos_cache = {}
@@ -492,8 +512,9 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
         _fpath = os.path.join(carpeta_mes, _fname)
         if not os.path.isfile(_fpath):
             continue
-        _auto_key = _RE_MES_STRIP.sub('', os.path.splitext(_fname)[0]).replace(' ', '_')
-        if _auto_key not in archivos_cache:
+        _base = _RE_MES_STRIP.sub('', os.path.splitext(_fname)[0])
+        _auto_key = re.sub(r'\s+', ' ', _base).strip().replace(' ', '_')
+        if not archivos_cache.get(_auto_key):   # override si None o ausente
             archivos_cache[_auto_key] = _fpath
 
     print()
@@ -576,10 +597,11 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
         print(f"  {'-'*65}")
 
         for item in hoja_items:
-            codigo_a     = item['codigo_a']
-            valor_total  = 0.0
-            advertencias = []
+            codigo_a          = item['codigo_a']
+            valor_total       = 0.0
+            advertencias      = []
             lineas_comentario = []
+            fuentes_item_log  = []
 
             for src in item.get('sources', []):
                 key   = src['key']
@@ -609,6 +631,13 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
                     elif op_src == '-': valor_total -= v
                     elif op_src == '*': valor_total *= v
                     elif op_src == '/': valor_total = valor_total / v if v != 0 else valor_total
+                    fuentes_item_log.append({
+                        'file_key': key,
+                        'codigo'  : ', '.join(codes),
+                        'seccion' : src.get('seccion'),
+                        'op'      : op_src,
+                        'valor'   : v,
+                    })
                     lineas_comentario.append(
                         f"Archivo: {os.path.basename(ruta)}\n"
                         f"  Op:      {op_src}\n"
@@ -672,6 +701,15 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
             comentario.height = 100 + 20 * len(lineas_comentario)
             celda.comment = comentario
 
+            # Guardar en log de ejecución
+            valores_log.append({
+                'hoja'       : hoja_nombre,
+                'fila'       : fila_real,
+                'codigo_a'   : codigo_a,
+                'valor_total': valor_total,
+                'fuentes'    : fuentes_item_log,
+            })
+
             actualizados += 1
             adv = '  ' + ' '.join(advertencias) if advertencias else ''
             print(f"  {codigo_a:<32} {valor_total:>18,.2f}   fila {fila}{adv}")
@@ -679,6 +717,8 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
         print(f"\n  Items actualizados : {actualizados}")
         if no_encontrados:
             print(f"  Sin fila destino   : {no_encontrados}")
+
+    return valores_log
 
 
 # ---------------------------------------------------------------------------
@@ -728,11 +768,12 @@ def procesar_mes(carpeta_mes):
     )
 
     # Paso 1: Gastos (todas las hojas según config)
-    procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
+    log_gastos = procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
 
     # Paso 2: Salarios 5105 → corre DESPUÉS de gastos para no ser pisado por items del config
+    log_5105 = None
     if hoja_admin:
-        procesar_5105(carpeta_mes, hoja_admin, columna_xlsx, mes_nombre)
+        log_5105 = procesar_5105(carpeta_mes, hoja_admin, columna_xlsx, mes_nombre)
     else:
         print("ADVERTENCIA: No se encontro hoja de Gastos Administrativos para 5105.")
 
@@ -777,8 +818,14 @@ def procesar_mes(carpeta_mes):
     try:
         wb_dest.save(ARCHIVO_PRINCIPAL)
         print(f"[OK] Archivo guardado: {ARCHIVO_PRINCIPAL}")
+        # Registrar ejecución exitosa en la DB
+        todos_log = (log_gastos or []) + ([log_5105] if log_5105 else [])
+        _db.log_ejecucion(mes_nombre, exito=True, valores=todos_log)
+        print(f"[DB] Ejecución registrada para {mes_nombre}")
     except PermissionError:
         print(f"[ERROR] Cierre el archivo en Excel y vuelva a ejecutar.")
+        _db.log_ejecucion(mes_nombre, exito=False, valores=[],
+                          notas="PermissionError al guardar el archivo")
 
 
 # ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ Interfaz visual drag & drop para configurar config_gastos.json
 import os, re, json, warnings, subprocess, shutil, sys, unicodedata
 from datetime import date
 from flask import Flask, render_template, jsonify, request, send_file
+import db as _db
 
 warnings.filterwarnings('ignore')
 
@@ -31,6 +32,10 @@ for _cfg in ('config_gastos.json', 'config_5105.json'):
     _dst = os.path.join(BASE, _cfg)
     if BASE != _APP_DIR and os.path.exists(_src) and not os.path.exists(_dst):
         shutil.copy2(_src, _dst)
+
+# Inicializar DB y migrar desde JSON si es la primera vez
+_db.init_db()
+_db.migrate_from_json()
 
 MES_NOMBRES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
                'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE']
@@ -636,21 +641,26 @@ def api_files(folder):
 
 @app.route('/api/config')
 def api_config():
-    with open(CONFIG_PATH, encoding='utf-8') as f:
-        return jsonify(json.load(f))
+    return jsonify(_db.load_config())
 
 
 @app.route('/api/config/save', methods=['POST'])
 def api_config_save():
-    """Recibe el nuevo config y lo guarda."""
+    """Recibe el nuevo config y lo guarda en la DB."""
     try:
         nuevo_config = request.get_json()
-        # Backup del config anterior
-        backup = CONFIG_PATH.replace('.json', f'_backup_{date.today()}.json')
-        shutil.copy2(CONFIG_PATH, backup)
-        with open(CONFIG_PATH, 'w', encoding='utf-8') as f:
-            json.dump(nuevo_config, f, ensure_ascii=False, indent=2)
-        return jsonify({'ok': True, 'backup': backup})
+        _db.save_config(nuevo_config)
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/historial')
+@app.route('/api/historial/<mes>')
+def api_historial(mes=None):
+    """Retorna el historial de ejecuciones, opcionalmente filtrado por mes."""
+    try:
+        return jsonify(_db.get_historial(mes))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
