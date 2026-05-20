@@ -472,13 +472,29 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
     file_sources = config['file_sources']
     items        = config['items']
 
-    # Localizar archivos fuente
+    # Localizar archivos fuente declarados en file_sources
     archivos_cache = {}
     for key, info in file_sources.items():
         ruta = encontrar_archivo(carpeta_mes, info['prefijo'], info['entidad'], mes_abrev, anio)
         archivos_cache[key] = ruta
         estado = "OK" if ruta else "NO ENCONTRADO"
         print(f"  [{estado}] {key:<20} -> {os.path.basename(ruta) if ruta else '-'}")
+
+    # Auto-descubrir archivos no declarados en file_sources.
+    # Espejo de fileKey() en app.js: quita _MES_YYYY al final y reemplaza espacios con _
+    _RE_MES_STRIP = re.compile(
+        r'_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_\d{4}$',
+        re.IGNORECASE
+    )
+    for _fname in sorted(os.listdir(carpeta_mes)):
+        if not _fname.lower().endswith('.xls'):
+            continue
+        _fpath = os.path.join(carpeta_mes, _fname)
+        if not os.path.isfile(_fpath):
+            continue
+        _auto_key = _RE_MES_STRIP.sub('', os.path.splitext(_fname)[0]).replace(' ', '_')
+        if _auto_key not in archivos_cache:
+            archivos_cache[_auto_key] = _fpath
 
     print()
 
@@ -573,7 +589,12 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
                     advertencias.append(f"[NO ENCONTRADO: {key}]")
                     continue
                 try:
-                    prefijo = file_sources[key]['prefijo']
+                    if key in file_sources:
+                        prefijo = file_sources[key]['prefijo']
+                    else:
+                        prefijo = ('ESTADO DE RESULTADOS'
+                                   if os.path.basename(ruta).upper().startswith('ESTADO')
+                                   else 'AUX')
                     if prefijo == 'ESTADO DE RESULTADOS':
                         v, celdas = leer_er(
                             ruta,
