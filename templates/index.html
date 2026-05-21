@@ -84,6 +84,9 @@
   <select id="run-folder">
     <option value="">-- Selecciona --</option>
   </select>
+  <button class="btn btn-preview" id="btn-preview" onclick="previewMes()">
+    🔍 Vista previa
+  </button>
   <button class="btn btn-success" id="btn-run" onclick="runMes()">
     ▶ Ejecutar mes
   </button>
@@ -99,6 +102,25 @@
 
 <!-- ═══════════════════════════ LOG ══════════════════════════════ -->
 <div class="log-panel" id="log-panel"></div>
+
+<!-- ═══════════════════════ HISTORIAL ══════════════════════════ -->
+<div class="hist-panel">
+  <div class="hist-header" onclick="toggleHistorial()">
+    📋 Historial de ejecuciones <span id="hist-arrow">▶</span>
+  </div>
+  <div id="hist-body" style="display:none"></div>
+</div>
+
+<!-- ═══════════════════════ MODAL PREVIEW ══════════════════════ -->
+<div id="prev-modal" class="prev-overlay" style="display:none" onclick="if(event.target===this)closePrevModal()">
+  <div class="prev-modal">
+    <div id="prev-body"></div>
+    <div class="prev-footer">
+      <button class="btn btn-success" onclick="confirmarEjecutar()">▶ Ejecutar mes</button>
+      <button class="btn" style="background:#6c757d;color:#fff" onclick="closePrevModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <script src="/static/app.js"></script>
 </body>

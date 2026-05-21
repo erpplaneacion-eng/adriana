@@ -665,6 +665,33 @@ def api_historial(mes=None):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/historial/diff')
+def api_historial_diff():
+    """Compara dos ejecuciones. ?a=<id>&b=<id>"""
+    try:
+        id_a = request.args.get('a', type=int)
+        id_b = request.args.get('b', type=int)
+        if not id_a or not id_b:
+            return jsonify({'error': 'Parámetros a y b requeridos'}), 400
+        return jsonify(_db.diff_ejecuciones(id_a, id_b))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/preview/<path:folder>')
+def api_preview(folder):
+    """Calcula los valores que se escribirían sin modificar el Excel."""
+    try:
+        import procesar_todo as _pt
+        carpeta = folder if os.path.isabs(folder) else os.path.join(BASE, folder)
+        if not os.path.isdir(carpeta):
+            return jsonify({'ok': False, 'error': f'Carpeta no encontrada: {folder}'}), 404
+        items = _pt.calcular_preview(carpeta)
+        return jsonify({'ok': True, 'items': items})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
 @app.route('/api/run/<path:folder>', methods=['POST'])
 def api_run(folder):
     """Ejecuta procesar_todo.py para la carpeta indicada."""

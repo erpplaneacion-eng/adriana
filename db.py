@@ -376,3 +376,37 @@ def get_historial(mes=None):
             })
 
         return result
+
+
+def diff_ejecuciones(id_a, id_b):
+    """
+    Compara dos ejecuciones por (hoja, fila).
+    Retorna lista de {hoja, fila, codigo_a, valor_a, valor_b, delta}.
+    """
+    with get_conn() as conn:
+        def _get(ejec_id):
+            rows = conn.execute(
+                "SELECT hoja, fila, codigo_a, valor_total FROM valores_escritos "
+                "WHERE ejecucion_id=?", (ejec_id,)
+            ).fetchall()
+            return {(r['hoja'], r['fila']): dict(r) for r in rows}
+
+        mapa_a = _get(id_a)
+        mapa_b = _get(id_b)
+        todas  = sorted(set(mapa_a) | set(mapa_b))
+
+        result = []
+        for key in todas:
+            ra = mapa_a.get(key)
+            rb = mapa_b.get(key)
+            va = ra['valor_total'] if ra else None
+            vb = rb['valor_total'] if rb else None
+            result.append({
+                'hoja'    : key[0],
+                'fila'    : key[1],
+                'codigo_a': (ra or rb)['codigo_a'],
+                'valor_a' : va,
+                'valor_b' : vb,
+                'delta'   : (vb - va) if (va is not None and vb is not None) else None,
+            })
+        return result

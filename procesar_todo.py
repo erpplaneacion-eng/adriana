@@ -479,6 +479,132 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
 
 
 # ---------------------------------------------------------------------------
+# Helper: construir mapa key → ruta de archivo
+# ---------------------------------------------------------------------------
+_RE_MES_STRIP = re.compile(
+    r'_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_\d{4}$',
+    re.IGNORECASE
+)
+
+def _construir_archivos_cache(carpeta_mes, file_sources, mes_abrev, anio):
+    """Construye {key: ruta} con file_sources + auto-discovery + alias sin año."""
+    cache = {}
+    for key, info in file_sources.items():
+        cache[key] = encontrar_archivo(carpeta_mes, info['prefijo'], info['entidad'], mes_abrev, anio)
+
+    for _fname in sorted(os.listdir(carpeta_mes)):
+        if not _fname.lower().endswith('.xls'):
+            continue
+        _fpath = os.path.join(carpeta_mes, _fname)
+        if not os.path.isfile(_fpath):
+            continue
+        _base = _RE_MES_STRIP.sub('', os.path.splitext(_fname)[0])
+        _auto_key = re.sub(r'\s+', ' ', _base).strip().replace(' ', '_')
+        if not cache.get(_auto_key):
+            cache[_auto_key] = _fpath
+
+    _keys_con_ruta = [k for k, v in cache.items() if v]
+    for _src_key in list(cache.keys()):
+        if cache.get(_src_key):
+            continue
+        _matches = sorted([k for k in _keys_con_ruta if k.startswith(_src_key)])
+        if _matches:
+            cache[_src_key] = cache[_matches[-1]]
+
+    return cache
+
+
+# ---------------------------------------------------------------------------
+# Preview: calcular valores sin escribir en el Excel
+# ---------------------------------------------------------------------------
+def calcular_preview(carpeta_mes):
+    """
+    Calcula todos los valores que se escribirían sin modificar el Excel.
+    Retorna lista de {hoja, fila, codigo_a, valor_total, advertencias, fuentes}.
+    """
+    nombre_carpeta = os.path.basename(carpeta_mes.rstrip('/\\'))
+    mes_nombre     = nombre_carpeta.replace('-DL', '').upper()
+    if mes_nombre not in MES_COLUMNA:
+        raise ValueError(f"Mes '{mes_nombre}' no reconocido.")
+
+    mes_abrev = next((k for k, v in MES_ABREV.items() if v == mes_nombre), None)
+    anio = None
+    for f in os.listdir(carpeta_mes):
+        m = re.search(r'_(\d{4})[-\.]', f)
+        if m:
+            anio = m.group(1)
+            break
+    if not anio:
+        raise ValueError("No se pudo detectar el año desde los nombres de archivo.")
+
+    config       = _db.load_config()
+    file_sources = config['file_sources']
+    items        = config['items']
+    cache        = _construir_archivos_cache(carpeta_mes, file_sources, mes_abrev, anio)
+
+    resultado = []
+    for item in items:
+        codigo_a  = item.get('codigo_a', '')
+        hoja      = item.get('hoja', 'GASTOS ADMINISTRATIVOS').strip()
+        fila_dest = item.get('fila_dest')
+
+        valor_total  = 0.0
+        advertencias = []
+        fuentes_log  = []
+
+        for src in item.get('sources', []):
+            key   = src['key']
+            codes = src.get('codes', [])
+            ruta  = cache.get(key)
+            if not ruta:
+                advertencias.append(f"NO ENCONTRADO: {key}")
+                continue
+            try:
+                prefijo = file_sources.get(key, {}).get('prefijo') or (
+                    'ESTADO DE RESULTADOS'
+                    if os.path.basename(ruta).upper().startswith('ESTADO') else 'AUX'
+                )
+                if prefijo == 'ESTADO DE RESULTADOS':
+                    v, _ = leer_er(ruta, set(codes),
+                                   sin_filtro=src.get('sin_filtro', False),
+                                   seccion=src.get('seccion'))
+                else:
+                    v, _ = leer_aux(ruta, set(codes), seccion=src.get('seccion'))
+                op = src.get('op', '+')
+                if   op == '+': valor_total += v
+                elif op == '-': valor_total -= v
+                elif op == '*': valor_total *= v
+                elif op == '/': valor_total = valor_total / v if v != 0 else valor_total
+                fuentes_log.append({'file_key': key, 'codigo': ', '.join(codes),
+                                    'seccion': src.get('seccion'), 'op': op, 'valor': v})
+            except Exception as e:
+                advertencias.append(f"ERROR {key}: {e}")
+
+        valor_fijo = item.get('valor_fijo')
+        if valor_fijo:
+            ops = valor_fijo if isinstance(valor_fijo, list) else [valor_fijo]
+            for op_item in ops:
+                op  = op_item.get('op', '+')
+                val = float(op_item.get('valor', 0))
+                if   op == '+': valor_total += val
+                elif op == '-': valor_total -= val
+                elif op == '*': valor_total *= val
+                elif op == '/': valor_total = valor_total / val if val != 0 else valor_total
+
+        if fila_dest or valor_total != 0 or advertencias:
+            resultado.append({
+                'hoja'       : hoja,
+                'fila'       : fila_dest,
+                'codigo_a'   : codigo_a,
+                'valor_total': valor_total,
+                'advertencias': advertencias,
+                'fuentes'    : fuentes_log,
+            })
+
+    return resultado
+
+
+# ---------------------------------------------------------------------------
 # PASO 2: Gastos varios
 # ---------------------------------------------------------------------------
 def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre=None):
@@ -492,41 +618,12 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
     items        = config['items']
     valores_log  = []
 
-    # Localizar archivos fuente declarados en file_sources
-    archivos_cache = {}
-    for key, info in file_sources.items():
-        ruta = encontrar_archivo(carpeta_mes, info['prefijo'], info['entidad'], mes_abrev, anio)
-        archivos_cache[key] = ruta
-        estado = "OK" if ruta else "NO ENCONTRADO"
-        print(f"  [{estado}] {key:<20} -> {os.path.basename(ruta) if ruta else '-'}")
+    archivos_cache = _construir_archivos_cache(carpeta_mes, file_sources, mes_abrev, anio)
 
-    # Auto-descubrir archivos no declarados en file_sources.
-    # Espejo de fileKey() en app.js: quita _MES_YYYY al final y reemplaza espacios con _
-    _RE_MES_STRIP = re.compile(
-        r'_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_\d{4}$',
-        re.IGNORECASE
-    )
-    for _fname in sorted(os.listdir(carpeta_mes)):
-        if not _fname.lower().endswith('.xls'):
-            continue
-        _fpath = os.path.join(carpeta_mes, _fname)
-        if not os.path.isfile(_fpath):
-            continue
-        _base = _RE_MES_STRIP.sub('', os.path.splitext(_fname)[0])
-        _auto_key = re.sub(r'\s+', ' ', _base).strip().replace(' ', '_')
-        if not archivos_cache.get(_auto_key):   # override si None o ausente
-            archivos_cache[_auto_key] = _fpath
-
-    # Alias: claves sin año (ej. "7205_CONS_ALIM_CALI") → archivo con año más reciente.
-    # Espeja el Alias 2 de actualizarValoresEnMappings en app.js para que el script
-    # y la UI muestren el mismo valor cuando el nombre del archivo cambió entre meses.
-    _keys_con_ruta = [k for k, v in archivos_cache.items() if v]
-    for _src_key in list(archivos_cache.keys()):
-        if archivos_cache.get(_src_key):
-            continue  # ya tiene ruta
-        _matches = sorted([k for k in _keys_con_ruta if k.startswith(_src_key)])
-        if _matches:
-            archivos_cache[_src_key] = archivos_cache[_matches[-1]]  # año más reciente
+    for key, ruta in archivos_cache.items():
+        if key in file_sources:
+            estado = "OK" if ruta else "NO ENCONTRADO"
+            print(f"  [{estado}] {key:<20} -> {os.path.basename(ruta) if ruta else '-'}")
 
     print()
 

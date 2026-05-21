@@ -942,8 +942,13 @@ function inferPrefijo(archivo) {
 }
 
 function inferEntidad(archivo) {
-  const m = (archivo || '').match(/^[^_]+_(.+?)_[A-Z]{3}_/i);
-  return m ? m[1] : '';
+  // Caso normal: filename con _MES_YYYY (ej: "7205_CONS ALIM CALI_MAR_2026.xls")
+  const m = (archivo || '').match(/^[^_]+_(.+?)_[A-Z]{3}_\d{4}/i);
+  if (m) return m[1];
+  // Fallback: chip key sin mes (ej: "7205_CONS_ALIM_CALI2026") → convierte _ a espacios
+  const m2 = (archivo || '').match(/^(?:ER|AUX|5105|7205|7105|51355001)_(.+)$/i);
+  if (m2) return m2[1].replace(/_/g, ' ');
+  return '';
 }
 
 // ── Ejecutar mes ─────────────────────────────────────────────
@@ -1072,6 +1077,181 @@ async function subirInformeBase(input) {
     alert('❌ Error de red: ' + e.message);
   }
   input.value = '';
+}
+
+// ── Preview antes de ejecutar ────────────────────────────────
+async function previewMes() {
+  const folder = document.getElementById('run-folder').value;
+  if (!folder) { alert('Selecciona una carpeta de mes primero.'); return; }
+
+  const btn = document.getElementById('btn-preview');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const res = await fetch(`/api/preview/${encodeURIComponent(folder)}`).then(r => r.json());
+    btn.disabled = false;
+    btn.textContent = '🔍 Vista previa';
+
+    if (!res.ok) { alert('Error al calcular preview: ' + (res.error || 'desconocido')); return; }
+
+    const items = res.items || [];
+    const advertencias = items.filter(i => i.advertencias && i.advertencias.length > 0);
+
+    // Agrupar por hoja
+    const porHoja = {};
+    items.forEach(i => {
+      if (!porHoja[i.hoja]) porHoja[i.hoja] = [];
+      porHoja[i.hoja].push(i);
+    });
+
+    let html = `<div class="prev-header">
+      <strong>Vista previa — ${folder}</strong>
+      <span class="prev-stats">${items.length} ítems · ${advertencias.length > 0 ? `<span class="prev-warn">⚠️ ${advertencias.length} advertencias</span>` : '✅ sin advertencias'}</span>
+    </div>`;
+
+    for (const [hoja, filas] of Object.entries(porHoja)) {
+      html += `<div class="prev-hoja">${hoja}</div>`;
+      html += `<table class="prev-table"><thead><tr><th>Fila</th><th>Código</th><th>Valor</th><th></th></tr></thead><tbody>`;
+      filas.forEach(f => {
+        const warn = f.advertencias && f.advertencias.length > 0;
+        const cls  = warn ? ' class="prev-row-warn"' : '';
+        const adv  = warn ? `<span title="${f.advertencias.join(', ')}">⚠️</span>` : '';
+        html += `<tr${cls}><td>${f.fila || '—'}</td><td>${f.codigo_a}</td>
+          <td class="prev-val">$${(f.valor_total||0).toLocaleString('es-CO')}</td>
+          <td>${adv}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+
+    document.getElementById('prev-body').innerHTML = html;
+    document.getElementById('prev-modal').style.display = 'flex';
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = '🔍 Vista previa';
+    alert('Error de red: ' + e.message);
+  }
+}
+
+function closePrevModal() {
+  document.getElementById('prev-modal').style.display = 'none';
+}
+
+async function confirmarEjecutar() {
+  closePrevModal();
+  await runMes();
+}
+
+// ── Historial ─────────────────────────────────────────────────
+let historialData = [];
+
+async function loadHistorial() {
+  try {
+    historialData = await fetch('/api/historial').then(r => r.json());
+    renderHistorial();
+  } catch (e) {
+    document.getElementById('hist-body').textContent = 'Error cargando historial.';
+  }
+}
+
+function toggleHistorial() {
+  const body  = document.getElementById('hist-body');
+  const arrow = document.getElementById('hist-arrow');
+  const open  = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  arrow.textContent  = open ? '▶' : '▼';
+  if (!open && historialData.length === 0) loadHistorial();
+}
+
+function renderHistorial() {
+  const el = document.getElementById('hist-body');
+  if (!historialData.length) { el.innerHTML = '<p style="padding:8px;color:#888">Sin ejecuciones registradas.</p>'; return; }
+
+  let html = `<table class="hist-table"><thead><tr>
+    <th>Fecha</th><th>Mes</th><th>Estado</th><th>Ítems</th><th></th>
+  </tr></thead><tbody>`;
+
+  historialData.slice(0, 10).forEach((ej, idx) => {
+    const estado = ej.exito ? '✅' : '❌';
+    const fecha  = ej.fecha ? ej.fecha.slice(0, 16) : '';
+    html += `<tr>
+      <td>${fecha}</td>
+      <td>${ej.mes}</td>
+      <td>${estado}</td>
+      <td>${ej.valores ? ej.valores.length : 0}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="toggleDetalle(${idx})">Detalle</button>
+        ${idx < historialData.length - 1
+          ? `<button class="btn btn-sm" style="background:#6c757d;color:#fff;margin-left:4px"
+               onclick="compararEjecuciones(${historialData[idx].id},${historialData[idx+1].id},'${historialData[idx].mes}','${historialData[idx+1].mes}')">Comparar</button>`
+          : ''}
+      </td>
+    </tr>
+    <tr id="det-${idx}" style="display:none">
+      <td colspan="5"><div class="hist-detail">${renderDetalle(ej)}</div></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function toggleDetalle(idx) {
+  const row = document.getElementById(`det-${idx}`);
+  row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+function renderDetalle(ej) {
+  if (!ej.valores || !ej.valores.length) return '<em>Sin datos</em>';
+  const porHoja = {};
+  ej.valores.forEach(v => { if (!porHoja[v.hoja]) porHoja[v.hoja] = []; porHoja[v.hoja].push(v); });
+  let html = '';
+  for (const [hoja, vals] of Object.entries(porHoja)) {
+    html += `<strong>${hoja}</strong><table class="prev-table" style="margin-bottom:6px"><thead><tr><th>Fila</th><th>Código</th><th>Valor</th></tr></thead><tbody>`;
+    vals.forEach(v => {
+      html += `<tr><td>${v.fila}</td><td>${v.codigo_a}</td><td class="prev-val">$${(v.valor_total||0).toLocaleString('es-CO')}</td></tr>`;
+    });
+    html += '</tbody></table>';
+  }
+  return html;
+}
+
+async function compararEjecuciones(idA, idB, mesA, mesB) {
+  try {
+    const diff = await fetch(`/api/historial/diff?a=${idA}&b=${idB}`).then(r => r.json());
+    if (diff.error) { alert('Error: ' + diff.error); return; }
+
+    const cambios = diff.filter(d => d.delta !== null && Math.abs(d.delta) > 0.01);
+    const soloA   = diff.filter(d => d.valor_b === null);
+    const soloB   = diff.filter(d => d.valor_a === null);
+
+    let html = `<div class="prev-header"><strong>Comparación: ${mesA} vs ${mesB}</strong>
+      <span class="prev-stats">${cambios.length} diferencias · ${soloA.length} solo en ${mesA} · ${soloB.length} solo en ${mesB}</span>
+    </div>`;
+
+    if (cambios.length) {
+      html += `<div class="prev-hoja">Valores cambiados</div>
+        <table class="prev-table"><thead><tr><th>Hoja</th><th>Código</th>
+          <th>${mesA}</th><th>${mesB}</th><th>Delta</th></tr></thead><tbody>`;
+      cambios.forEach(d => {
+        const pos = d.delta > 0;
+        html += `<tr>
+          <td>${d.hoja}</td><td>${d.codigo_a}</td>
+          <td class="prev-val">$${d.valor_a.toLocaleString('es-CO')}</td>
+          <td class="prev-val">$${d.valor_b.toLocaleString('es-CO')}</td>
+          <td class="${pos ? 'delta-pos' : 'delta-neg'}">${pos ? '▲' : '▼'} $${Math.abs(d.delta).toLocaleString('es-CO')}</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+    } else {
+      html += '<p style="padding:12px;color:#28a745">✅ Los valores son idénticos entre ambas ejecuciones.</p>';
+    }
+
+    document.getElementById('prev-body').innerHTML = html;
+    document.getElementById('prev-modal').style.display = 'flex';
+  } catch (e) {
+    alert('Error de red: ' + e.message);
+  }
 }
 
 // ── Evento cambio de carpeta ─────────────────────────────────
