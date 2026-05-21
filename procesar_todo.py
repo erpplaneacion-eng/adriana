@@ -517,6 +517,17 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
         if not archivos_cache.get(_auto_key):   # override si None o ausente
             archivos_cache[_auto_key] = _fpath
 
+    # Alias: claves sin año (ej. "7205_CONS_ALIM_CALI") → archivo con año más reciente.
+    # Espeja el Alias 2 de actualizarValoresEnMappings en app.js para que el script
+    # y la UI muestren el mismo valor cuando el nombre del archivo cambió entre meses.
+    _keys_con_ruta = [k for k, v in archivos_cache.items() if v]
+    for _src_key in list(archivos_cache.keys()):
+        if archivos_cache.get(_src_key):
+            continue  # ya tiene ruta
+        _matches = sorted([k for k in _keys_con_ruta if k.startswith(_src_key)])
+        if _matches:
+            archivos_cache[_src_key] = archivos_cache[_matches[-1]]  # año más reciente
+
     print()
 
     def normalizar(texto):
