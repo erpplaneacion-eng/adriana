@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué hace este proyecto
 
-Sistema para llenar automáticamente el **INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx** (multi-hoja) con datos contables mensuales extraídos de archivos XLS fuente. El mapeo fuente→destino vive en `config_gastos.json` y se edita visualmente con el Config Builder (Flask).
+Sistema para llenar automáticamente el **INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx** (multi-hoja) con datos contables mensuales extraídos de archivos XLS fuente. El mapeo fuente→destino vive en `chvs.db` (SQLite) y se edita visualmente con el Config Builder (Flask). `config_gastos.json` y `config_5105.json` solo se usan como fuente de migración inicial; la DB es la fuente de verdad en producción.
 
 ## Comandos principales
 
@@ -34,12 +34,13 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 | Archivo | Rol |
 |---|---|
 | `app.py` | Flask backend del Config Builder. Sirve la UI y expone los endpoints API. |
-| `procesar_todo.py` | Script principal. 4 pasos: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. |
+| `db.py` | Capa de acceso a `chvs.db` (SQLite). `save_config/load_config`, `save_config_5105/load_config_5105`, `log_ejecucion`, `get_historial`, `diff_ejecuciones`. **`save_config()` NO borra `fuentes_valor`/`valores_escritos`** (son tablas de auditoría, no de config). |
+| `procesar_todo.py` | Script principal. 4 pasos: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. También expone `calcular_preview()` y `_construir_archivos_cache()`. |
 | `procesar_gastos.py` | Script standalone de gastos (**legado**). BASE hardcodeada, apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
 | `procesar_5105.py` | Script standalone de nómina (**legado**). BASE hardcodeada. |
-| `config_gastos.json` | Mapeo principal. Cada item: `codigo_a`, `sources`, `hoja`, `fila_dest`, `buscar_por`, `valor_fijo`. Se respalda automáticamente al guardar. |
-| `config_5105.json` | Reglas para archivos de nómina 5105 por entidad |
-| `static/app.js` | Toda la lógica frontend: drag & drop, `mappings`, `buildConfig`, `renderChips` |
+| `config_gastos.json` | Solo para migración inicial a `chvs.db`. No es la fuente de verdad en producción. |
+| `config_5105.json` | Solo para migración inicial a `chvs.db`. |
+| `static/app.js` | Toda la lógica frontend: drag & drop, `mappings`, `buildConfig`, `renderChips`, modal de preview, panel de historial. |
 | `INFORME REAL_2026...xlsx` | Plantilla/destino. **Nunca abrir mientras corre el script.** |
 
 ### Endpoints API (app.py)
@@ -49,12 +50,63 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 | `/api/sheets` | GET | Hojas del INFORME REAL con filas (col A + B), filtrando fórmulas internas |
 | `/api/folders` | GET | Carpetas mensuales disponibles en BASE con conteo de XLS |
 | `/api/files/<folder>` | GET | Códigos extraídos de todos los XLS en la carpeta |
-| `/api/config` | GET | Lee config_gastos.json |
-| `/api/config/save` | POST | Guarda config (hace backup automático por fecha) |
+| `/api/config` | GET | Lee config desde `chvs.db` |
+| `/api/config/save` | POST | Guarda config en `chvs.db` (reemplaza tablas de config, preserva historial) |
 | `/api/run/<folder>` | POST | Ejecuta procesar_todo.py para la carpeta indicada |
+| `/api/preview/<folder>` | GET | Calcula todos los valores sin escribir en el Excel; retorna `{ok, items}` |
+| `/api/historial` | GET | Últimas 50 ejecuciones desde `chvs.db` |
+| `/api/historial/<mes>` | GET | Ejecuciones filtradas por mes |
+| `/api/historial/diff` | GET | Compara dos ejecuciones: `?a=<id>&b=<id>` → lista de deltas por (hoja, fila) |
 | `/api/upload/<folder>` | POST | Sube archivos XLS a una carpeta mensual en el servidor |
 | `/api/upload/informe` | POST | Reemplaza el INFORME REAL base con el archivo subido |
 | `/api/download/informe` | GET | Descarga el INFORME REAL actualizado |
+
+### Persistencia — SQLite (`db.py`)
+
+La config vive en `chvs.db` con 8 tablas:
+
+| Tabla | Contenido |
+|---|---|
+| `file_sources` | Mapa `key → {prefijo, entidad}` |
+| `dest_rows` | Cada ítem destino: `hoja, codigo_a, fila_dest, buscar_por` |
+| `sources` | Sources por dest_row: `file_key, codes, op, sin_filtro, seccion, orden` |
+| `valor_fijo` | Operaciones hardcodeadas por dest_row |
+| `config_5105` | Reglas por entidad 5105: `only_code, subtract_codes` |
+| `ejecuciones` | Log de cada corrida: `mes, fecha, exito, notas` |
+| `valores_escritos` | Valores escritos por ejecución: `hoja, fila, codigo_a, valor_total` |
+| `fuentes_valor` | Desglose de fuentes por valor escrito |
+
+`init_db()` crea el schema. `migrate_from_json()` migra los JSON legacy la primera vez. `save_config()` solo borra `file_sources`, `dest_rows`, `sources`, `valor_fijo` — **nunca** `ejecuciones`, `valores_escritos` ni `fuentes_valor`.
+
+### Resolución de archivos — `_construir_archivos_cache()` (procesar_todo.py)
+
+Helper que construye `{key: ruta_absoluta}` en 3 etapas, en orden:
+
+1. **file_sources lookup**: para cada key en config, llama `encontrar_archivo(carpeta, prefijo, entidad, mes, anio)`.
+2. **Auto-discovery**: escanea todos los `.xls` de la carpeta → genera key a partir del nombre sin `_MES_YYYY` normalizando espacios dobles (`re.sub(r'\s+', ' ', base).replace(' ', '_')`). Solo registra si el key aún no tiene ruta.
+3. **Alias sin año**: para keys que siguen sin ruta, busca keys existentes que empiecen con ese prefijo y asigna la ruta del que queda último en orden alfabético (i.e., el año más reciente).
+
+`encontrar_archivo()` intenta primero patrón con año exacto; si no encuentra, acepta cualquier año de 4 dígitos. Esto cubre archivos de contratos anteriores (e.g., `7205_UT_BUGA2025_MAR_2025.xls`) presentes en carpetas de 2026.
+
+Tanto `procesar_gastos()` como `calcular_preview()` llaman a `_construir_archivos_cache()` — garantiza que ambas rutas producen resultados idénticos para los mismos archivos.
+
+### Preview sin escritura — `calcular_preview()` (procesar_todo.py)
+
+```python
+items = calcular_preview(carpeta_mes)
+# items: [{hoja, fila, codigo_a, valor_total, advertencias, fuentes}]
+```
+
+Reutiliza `_construir_archivos_cache()`, `leer_er()` y `leer_aux()` sin abrir ni guardar el Excel destino. Útil para validar valores antes de ejecutar. Llamado por `/api/preview/<folder>`.
+
+### `inferEntidad()` en app.js
+
+Extrae la entidad de un nombre de archivo o chip key. Tiene dos ramas:
+
+1. **Normal** (`_MES_YYYY` presente): `^[^_]+_(.+?)_[A-Z]{3}_\d{4}` → captura la entidad del nombre de archivo.
+2. **Fallback** (chip key sin mes, p.ej. `7205_CONS_ALIM_CALI`): `^(?:ER|AUX|5105|7205|7105|51355001)_(.+)$` → convierte `_` a espacios.
+
+Sin este fallback, `file_sources` almacenaba `entidad=''` → `encontrar_archivo` construía patrón con doble guion bajo → archivo nunca encontrado.
 
 ### Tipos de archivos XLS fuente (en carpetas mensuales)
 
@@ -242,6 +294,14 @@ Las columnas en estas fórmulas usan tres patrones distintos:
 
 En `procesar_gastos` y `procesar_5105`, antes de escribir se detecta si la celda pertenece a un rango fusionado y se redirige a `min_row/min_col` del rango.
 
+### Preview modal (app.js / index.html)
+
+Botón **"🔍 Vista previa"** en el footer llama `GET /api/preview/<folder>`. Muestra un modal con una tabla agrupada por hoja: columnas **Fila | Código | Valor**. Filas con advertencias (archivo no encontrado, error de lectura) se resaltan en rojo. El modal incluye botón "▶ Ejecutar mes" que dispara el flujo normal sin cerrar y reabrir. `confirmarEjecutar()` cierra el modal y llama `runMes()`.
+
+### Panel historial (app.js / index.html)
+
+Sección colapsable debajo del panel de log (`.hist-panel`). Al expandir carga `GET /api/historial` y muestra las últimas ejecuciones en tabla: **Fecha | Mes | Estado | Items**. Click en una fila expande el detalle de valores escritos. Botón "Comparar con anterior" llama `GET /api/historial/diff?a=N&b=N-1` y muestra tabla de diferencias con indicadores ▲/▼ coloreados (`delta-pos`/`delta-neg`).
+
 ## Rutas — desarrollo vs. Railway
 
 `BASE` ya **no** está hardcodeada. Ambos scripts la resuelven dinámicamente:
@@ -290,7 +350,7 @@ En `procesar_todo.py`: `BASE = os.environ.get('CHVS_BASE', os.path.dirname(__fil
 4. Seleccionar `ABRIL` en el selector de carpeta para ver los códigos disponibles
 5. Configurar/verificar los mapeos con drag & drop
 6. Clic **Guardar config**
-7. En el footer → seleccionar `ABRIL` → clic **▶ Ejecutar mes**
+7. En el footer → seleccionar `ABRIL` → clic **🔍 Vista previa** para verificar los valores antes de escribir, luego **▶ Ejecutar mes** (o ejecutar directamente desde el modal de preview)
    - El servidor corre `procesar_todo.py ABRIL` y escribe en `/data/INFORME REAL_2026...xlsx`
 8. Clic **⬇ Descargar INFORME REAL** para bajar el Excel actualizado
 
