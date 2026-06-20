@@ -665,11 +665,16 @@ function actualizarValoresEnMappings(data) {
     });
   });
 
+  // Resetear: evita que el mes anterior contamine el Σ cuando se cambia de carpeta
+  Object.values(mappings).forEach(sources => {
+    sources.forEach(src => { src.valor = 0; src.debito = 0; src.credito = 0; src.op_jk = false; });
+  });
+
   // Actualizar valor, debito, credito y op_jk en cada source
   Object.values(mappings).forEach(sources => {
     sources.forEach(src => {
       const fileData = lookup[src.key];
-      if (!fileData) return; // archivo no está en esta carpeta, no tocar
+      if (!fileData) return; // archivo no está en esta carpeta
       if (src.sin_filtro) {
         const vals = Object.values(fileData);
         src.valor   = vals.reduce((a, e) => a + (Number(e.valor)   || 0), 0);
