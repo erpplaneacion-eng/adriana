@@ -517,7 +517,11 @@ function addSourceToRow(rowKey, chipData) {
     op      : '+'
   });
 
-  // Re-renderizar la fila
+  // Limpiar override del preview para que el chip nuevo se refleje en el Σ
+  const _filaAdd = rowKey.split('|')[1];
+  const _hojaAdd = rowKey.split('::')[0];
+  if (_filaAdd != null) delete previewOverrides[`${_hojaAdd}::${_filaAdd}`];
+
   markDirty();
   refreshRow(rowKey);
   updateStats();
@@ -527,6 +531,10 @@ function removeSource(rowKey, idx) {
   if (!mappings[rowKey]) return;
   mappings[rowKey].splice(idx, 1);
   if (mappings[rowKey].length === 0) delete mappings[rowKey];
+  // Limpiar override para que el Σ refleje la eliminación del chip
+  const _filaRem = rowKey.split('|')[1];
+  const _hojaRem = rowKey.split('::')[0];
+  if (_filaRem != null) delete previewOverrides[`${_hojaRem}::${_filaRem}`];
   markDirty();
   refreshRow(rowKey);
   updateStats();
@@ -581,8 +589,8 @@ async function loadFolder(folderName) {
       if (document.getElementById('folder-select').value !== capturedFolder) return;
       previewOverrides = {};
       (prevData.items || []).forEach(it => {
-        // valor_base_5105: total 5105 sin valor_fijo (el UI suma sus manualValues encima)
-      previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105 ?? it.valor_total;
+        if (it.fila != null)
+          previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105 ?? it.valor_total;
       });
       if (currentSheet) renderDestRows();
     })
