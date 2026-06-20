@@ -39,27 +39,29 @@ function parseRowKey(rowKey) {
 }
 
 
+// MES_RE: 3-letter abbreviation OR full Spanish month name
+const _MES_RE = '[A-Z]{3,13}';
 function fileKey(filename) {
-  // Genera una clave corta a partir del nombre de archivo
   const f = filename.toUpperCase();
+  const re = (pfx) => new RegExp(`${pfx}_(.+?)_${_MES_RE}_`);
   if (f.includes('ESTADO DE RESULTADOS')) {
-    const m = f.match(/ESTADO DE RESULTADOS_(.+?)_[A-Z]{3}_/);
+    const m = f.match(/ESTADO DE RESULTADOS_(.+?)_[A-Z]{3,13}_/);
     return m ? 'ER_' + m[1].replace(/\s+/g,'_') : 'ER';
   }
   if (f.startsWith('51355001')) {
-    const m = f.match(/51355001_(.+?)_[A-Z]{3}_/);
+    const m = f.match(re('51355001'));
     return m ? 'AUX_' + m[1].replace(/\s+/g,'_') : 'AUX';
   }
   if (f.startsWith('5105')) {
-    const m = f.match(/5105_(.+?)_[A-Z]{3}_/);
+    const m = f.match(re('5105'));
     return m ? '5105_' + m[1].replace(/\s+/g,'_') : '5105';
   }
   if (f.startsWith('7205')) {
-    const m = f.match(/7205_(.+?)_[A-Z]{3}_/);
+    const m = f.match(re('7205'));
     return m ? '7205_' + m[1].replace(/\s+/g,'_') : '7205';
   }
   if (f.startsWith('7105')) {
-    const m = f.match(/7105_(.+?)_[A-Z]{3}_/);
+    const m = f.match(re('7105'));
     return m ? '7105_' + m[1].replace(/\s+/g,'_') : '7105';
   }
   return filename.split('.')[0].replace(/\s+/g,'_');
@@ -965,7 +967,7 @@ function inferPrefijo(archivo) {
 
 function inferEntidad(archivo) {
   // Caso normal: filename con _MES_YYYY (ej: "7205_CONS ALIM CALI_MAR_2026.xls")
-  const m = (archivo || '').match(/^[^_]+_(.+?)_[A-Z]{3}_\d{4}/i);
+  const m = (archivo || '').match(/^[^_]+_(.+?)_[A-Z]{3,13}_\d{4}/i);
   if (m) return m[1];
   // Fallback: chip key sin mes (ej: "7205_CONS_ALIM_CALI2026") → convierte _ a espacios
   const m2 = (archivo || '').match(/^(?:ER|AUX|5105|7205|7105|51355001)_(.+)$/i);

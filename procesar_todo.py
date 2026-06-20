@@ -495,7 +495,9 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
 # Helper: construir mapa key → ruta de archivo
 # ---------------------------------------------------------------------------
 _RE_MES_STRIP = re.compile(
-    r'_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_\d{4}$',
+    r'_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC'
+    r'|ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO'
+    r'|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE)_\d{4}$',
     re.IGNORECASE
 )
 
