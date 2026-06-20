@@ -471,13 +471,14 @@ function renderChips(rowKey, sources, container) {
     else if (mv.op === '/') total = mv.valor !== 0 ? total / mv.valor : total;
   });
 
-  if (total !== 0) {
+  const hoja     = rowKey.split('::')[0];
+  const fila     = rowKey.split('|')[1];
+  const override = fila != null ? previewOverrides[`${hoja}::${fila}`] : undefined;
+  const display  = override != null ? override : total;
+  if (display !== 0) {
     const tot = document.createElement('span');
     tot.className = 'chip-total';
-    const hoja = rowKey.split('::')[0];
-    const fila = rowKey.split('|')[1];
-    const override = fila != null ? previewOverrides[`${hoja}::${fila}`] : undefined;
-    tot.textContent = `Σ ${fmt(override != null ? override : total)}`;
+    tot.textContent = `Σ ${fmt(display)}`;
     container.appendChild(tot);
   }
 }
@@ -558,19 +559,26 @@ async function loadFolder(folderName) {
   const accordion = document.getElementById('accordion-wrap');
   accordion.innerHTML = '<p style="padding:20px;color:#888;font-size:.85rem;">Cargando archivos...</p>';
 
-  const [data, prevData] = await Promise.all([
-    fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json()),
-    fetch(`/api/preview/${encodeURIComponent(folderName)}`).then(r => r.json()).catch(() => null),
-  ]);
+  const data = await fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json());
   filesData = data;
-  if (prevData && prevData.ok) {
-    (prevData.items || []).forEach(it => {
-      previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_total;
-    });
-  }
 
   // Actualizar src.valor en los mappings guardados usando los datos recién cargados
   actualizarValoresEnMappings(data);
+
+  // Preview en background: actualiza el Σ cuando termina sin bloquear la UI
+  const capturedFolder = folderName;
+  fetch(`/api/preview/${encodeURIComponent(folderName)}`)
+    .then(r => r.json())
+    .then(prevData => {
+      if (!prevData || !prevData.ok) return;
+      if (document.getElementById('folder-select').value !== capturedFolder) return;
+      previewOverrides = {};
+      (prevData.items || []).forEach(it => {
+        previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_total;
+      });
+      if (currentSheet) renderDestRows();
+    })
+    .catch(() => {});
 
   accordion.innerHTML = '';
   Object.entries(data).forEach(([nombre, info]) => {
