@@ -403,8 +403,17 @@ function renderChips(rowKey, sources, container) {
     else if (op === '*') total *= val;
     else if (op === '/') total = val !== 0 ? total / val : total;
 
+    // Detectar duplicado: mismo archivo resuelto + mismos códigos + misma sección que un chip anterior
+    const isDup = src._resolvedKey != null && sources.some((other, oi) =>
+      oi < idx
+      && other._resolvedKey === src._resolvedKey
+      && (other.codigos || []).join(',') === (src.codigos || []).join(',')
+      && (other.seccion || null) === (src.seccion || null)
+    );
+
     const chip = document.createElement('span');
-    chip.className = 'source-chip';
+    chip.className = 'source-chip' + (isDup ? ' chip-duplicate' : '');
+    if (isDup) chip.title = '⚠ Duplicado: mismo archivo y código que otro chip en esta fila';
     const codigos = Array.isArray(src.codigos) ? src.codigos.join(', ') : (src.codigo || '');
 
     // Botón de operador (+/−) — solo visible si hay más de un chip o si ya es −
@@ -645,9 +654,13 @@ function actualizarValoresEnMappings(data) {
     });
   });
 
+  // Mapa objeto-lookup → clave canónica (para detectar chips duplicados)
+  const lookupToKey = new Map();
+  Object.entries(lookup).forEach(([k, v]) => { if (!lookupToKey.has(v)) lookupToKey.set(v, k); });
+
   // Resetear: evita que el mes anterior contamine el Σ cuando se cambia de carpeta
   Object.values(mappings).forEach(sources => {
-    sources.forEach(src => { src.valor = 0; src.debito = 0; src.credito = 0; src.op_jk = false; });
+    sources.forEach(src => { src.valor = 0; src.debito = 0; src.credito = 0; src.op_jk = false; src._resolvedKey = null; });
   });
 
   // Actualizar valor, debito, credito y op_jk en cada source
@@ -655,6 +668,7 @@ function actualizarValoresEnMappings(data) {
     sources.forEach(src => {
       const fileData = lookup[src.key];
       if (!fileData) return; // archivo no está en esta carpeta
+      src._resolvedKey = lookupToKey.get(fileData) || src.key;
       if (src.sin_filtro) {
         const vals = Object.values(fileData);
         src.valor   = vals.reduce((a, e) => a + (Number(e.valor)   || 0), 0);

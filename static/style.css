@@ -225,6 +225,18 @@ header .actions { display: flex; gap: 10px; }
 }
 .source-chip .chip-remove:hover { color: #a00; }
 
+.source-chip.chip-duplicate {
+  border: 2px solid #f59e0b;
+  background: #fffbeb;
+  position: relative;
+}
+.source-chip.chip-duplicate::before {
+  content: '⚠';
+  font-size: .75rem;
+  color: #b45309;
+  margin-right: 3px;
+}
+
 .chip-total {
   display: inline-flex;
   align-items: center;
