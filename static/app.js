@@ -562,29 +562,24 @@ async function loadFolder(folderName) {
   const accordion = document.getElementById('accordion-wrap');
   accordion.innerHTML = '<p style="padding:20px;color:#888;font-size:.85rem;">Cargando archivos...</p>';
 
-  const data = await fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json());
+  // Cargar archivos y preview en paralelo; previewOverrides debe estar listo ANTES de renderizar
+  // para que el Σ de salarios (5105) muestre el valor correcto desde el primer render.
+  const [data, prevData] = await Promise.all([
+    fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json()),
+    fetch(`/api/preview/${encodeURIComponent(folderName)}`).then(r => r.json()).catch(() => ({}))
+  ]);
+
+  if (document.getElementById('folder-select').value !== folderName) return;
+
   filesData = data;
 
-  // Actualizar src.valor en los mappings guardados usando los datos recién cargados
-  actualizarValoresEnMappings(data);
+  // Solo 5105: su valor real viene de leer_5105 (multi-entidad), no de chips.
+  (prevData.items || []).forEach(it => {
+    if (it.fila != null && it.valor_base_5105 != null)
+      previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105;
+  });
 
-  // Preview en background: actualiza el Σ cuando termina sin bloquear la UI
-  const capturedFolder = folderName;
-  fetch(`/api/preview/${encodeURIComponent(folderName)}`)
-    .then(r => r.json())
-    .then(prevData => {
-      if (!prevData || !prevData.ok) return;
-      if (document.getElementById('folder-select').value !== capturedFolder) return;
-      previewOverrides = {};
-      (prevData.items || []).forEach(it => {
-        // Solo 5105: su valor real viene de leer_5105 (multi-entidad), no de chips.
-        // Para otras filas, el Σ se calcula directo desde los chips en la UI.
-        if (it.fila != null && it.valor_base_5105 != null)
-          previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105;
-      });
-      if (currentSheet) renderDestRows();
-    })
-    .catch(() => {});
+  actualizarValoresEnMappings(data);
 
   accordion.innerHTML = '';
   Object.entries(data).forEach(([nombre, info]) => {
@@ -608,12 +603,18 @@ function actualizarValoresEnMappings(data) {
     if (!lookupSec[fk]) lookupSec[fk] = {};
     (info.items || []).forEach(item => {
       if (!item.error && !item.separador && item.codigo) {
-        const cod   = String(item.codigo).trim();
-        const entry = { valor: item.valor, debito: item.debito || 0, credito: item.credito || 0, op_jk: !!item.op_jk };
-        // Primera ocurrencia gana (99 GENERAL aparece primero en el archivo)
-        if (!(cod in lookup[fk])) lookup[fk][cod] = entry;
+        const cod = String(item.codigo).trim();
+        // Acumular (sumar) para igualar leer_aux que suma todas las ocurrencias del mismo código
+        if (lookup[fk][cod]) {
+          lookup[fk][cod].valor   += Number(item.valor)   || 0;
+          lookup[fk][cod].debito  += Number(item.debito)  || 0;
+          lookup[fk][cod].credito += Number(item.credito) || 0;
+          if (item.op_jk) lookup[fk][cod].op_jk = true;
+        } else {
+          lookup[fk][cod] = { valor: Number(item.valor) || 0, debito: Number(item.debito) || 0, credito: Number(item.credito) || 0, op_jk: !!item.op_jk };
+        }
         // Con sección: siempre guardar para acceso preciso
-        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = entry;
+        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = { valor: Number(item.valor) || 0, debito: Number(item.debito) || 0, credito: Number(item.credito) || 0, op_jk: !!item.op_jk };
       }
     });
   });
