@@ -356,6 +356,10 @@ function renderManualOps(rowKey, container) {
       if (!isNaN(v) && v !== 0) {
         manualValues[rowKey][idx].valor = v;
         markDirty();
+        const safeKey  = rowKey.replace(/[^a-z0-9]/gi, '_');
+        const dropZone = document.getElementById(`sources-${safeKey}`);
+        const sources  = mappings[rowKey] || [];
+        if (dropZone && sources.length > 0) renderChips(rowKey, sources, dropZone);
       } else {
         manualValues[rowKey].splice(idx, 1);
         if (manualValues[rowKey].length === 0) delete manualValues[rowKey];
@@ -456,25 +460,28 @@ function renderChips(rowKey, sources, container) {
     container.appendChild(chip);
   });
 
-  // Aplicar operaciones fijas encadenadas
+  // Aplicar operaciones fijas encadenadas (rastrear por separado para el override)
   const ops = manualValues[rowKey] || [];
   const opLabel = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+  let manualTotal = 0;
   ops.forEach(mv => {
     if (!mv.valor) return;
     const chipFijo = document.createElement('span');
     chipFijo.className = 'source-chip chip-fijo';
     chipFijo.innerHTML = `<span class="chip-code">${opLabel[mv.op]} Fijo</span><span class="chip-val">${fmt(mv.valor)}</span>`;
     container.appendChild(chipFijo);
-    if      (mv.op === '+') total = total + mv.valor;
-    else if (mv.op === '-') total = total - mv.valor;
-    else if (mv.op === '*') total = total * mv.valor;
-    else if (mv.op === '/') total = mv.valor !== 0 ? total / mv.valor : total;
+    if      (mv.op === '+') manualTotal += mv.valor;
+    else if (mv.op === '-') manualTotal -= mv.valor;
+    else if (mv.op === '*') manualTotal *= mv.valor;
+    else if (mv.op === '/') manualTotal = mv.valor !== 0 ? manualTotal / mv.valor : manualTotal;
   });
+  total += manualTotal;
 
-  const hoja     = rowKey.split('::')[0];
-  const fila     = rowKey.split('|')[1];
-  const override = fila != null ? previewOverrides[`${hoja}::${fila}`] : undefined;
-  const display  = override != null ? override : total;
+  // Si hay un valor base de preview (5105 multi-entidad), usarlo + manualValues actuales del UI
+  const hoja      = rowKey.split('::')[0];
+  const fila      = rowKey.split('|')[1];
+  const prevBase  = fila != null ? previewOverrides[`${hoja}::${fila}`] : undefined;
+  const display   = prevBase != null ? prevBase + manualTotal : total;
   if (display !== 0) {
     const tot = document.createElement('span');
     tot.className = 'chip-total';
@@ -574,7 +581,8 @@ async function loadFolder(folderName) {
       if (document.getElementById('folder-select').value !== capturedFolder) return;
       previewOverrides = {};
       (prevData.items || []).forEach(it => {
-        previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_total;
+        // valor_base_5105: total 5105 sin valor_fijo (el UI suma sus manualValues encima)
+      previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105 ?? it.valor_total;
       });
       if (currentSheet) renderDestRows();
     })

@@ -651,14 +651,15 @@ def calcular_preview(carpeta_mes):
                 elif op == '/' and val: vf /= val
         for item in resultado:
             if item['hoja'] == 'GASTOS ADMINISTRATIVOS' and item['codigo_a'] == '5105':
-                item['valor_total'] = vf
-                item['fuentes']     = fuentes_5105
+                item['valor_total']    = vf          # con valor_fijo → para el modal de preview
+                item['valor_base_5105'] = total_5105  # sin valor_fijo → UI lo suma con manualValues actuales
+                item['fuentes']        = fuentes_5105
                 item['advertencias'].extend(adv_5105)
                 break
         else:
             resultado.append({'hoja': 'GASTOS ADMINISTRATIVOS', 'fila': 6, 'codigo_a': '5105',
-                               'valor_total': vf, 'advertencias': adv_5105,
-                               'fuentes': fuentes_5105})
+                               'valor_total': vf, 'valor_base_5105': total_5105,
+                               'advertencias': adv_5105, 'fuentes': fuentes_5105})
 
     return resultado
 
