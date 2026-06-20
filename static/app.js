@@ -506,8 +506,14 @@ function addSourceToRow(rowKey, chipData) {
   );
   if (existe) return;
 
+  // Corregir clave: si el archivo es un filename completo, reconstruir desde inferEntidad+inferPrefijo
+  const _ref      = chipData.archivo || chipData.key;
+  const _entidad  = inferEntidad(_ref);
+  const _prefijo  = inferPrefijo(_ref);
+  const _savedKey = _entidad ? `${_prefijo}_${_entidad.replace(/\s+/g,'_')}` : chipData.key;
+
   mappings[rowKey].push({
-    key     : chipData.key,
+    key     : _savedKey,
     archivo : chipData.archivo,
     codigos : chipData.codigos || [chipData.codigo],
     valor   : chipData.valor,
@@ -948,10 +954,15 @@ function buildConfig() {
     const filaNum = parsed.filaNum;
 
     const configSources = sources.map(src => {
-      if (!fileSources[src.key]) {
-        fileSources[src.key] = { prefijo: inferPrefijo(src.archivo || src.key), entidad: inferEntidad(src.archivo || src.key) };
+      // Reconstruir clave con entidad desde el archivo completo (evita fallbacks genéricos como "5105" sin entidad)
+      const ref     = src.archivo || src.key;
+      const entidad = inferEntidad(ref);
+      const prefijo = inferPrefijo(ref);
+      const savedKey = entidad ? `${prefijo}_${entidad.replace(/\s+/g,'_')}` : src.key;
+      if (!fileSources[savedKey]) {
+        fileSources[savedKey] = { prefijo, entidad };
       }
-      const entry = { key: src.key, codes: src.codigos || [src.codigo] };
+      const entry = { key: savedKey, codes: src.codigos || [src.codigo] };
       if (src.sin_filtro)           entry.sin_filtro = true;
       if (src.seccion)              entry.seccion    = src.seccion;
       if (src.op && src.op !== '+') entry.op         = src.op;
