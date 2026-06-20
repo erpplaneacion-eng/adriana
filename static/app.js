@@ -13,7 +13,7 @@ let configRaw     = null; // config_gastos.json completo
 let folders       = [];
 let selectedChips   = new Map(); // chipId → dragData (selección múltiple)
 let isDirty         = false; // cambios pendientes por guardar
-let previewOverrides = {};   // { "hoja::fila": valor_total } — valores de procesar_5105 para Σ correcto
+// ponytail: previewOverrides eliminado — Σ = chips + valor_fijo siempre
 
 // ── Utilidades ──────────────────────────────────────────────
 const fmt = v => v == null ? '' : '$' + Number(v).toLocaleString('es-CO', {maximumFractionDigits: 0});
@@ -474,15 +474,10 @@ function renderChips(rowKey, sources, container) {
   });
   total += manualTotal;
 
-  // Si hay un valor base de preview (5105 multi-entidad), usarlo + manualValues actuales del UI
-  const hoja      = rowKey.split('::')[0];
-  const fila      = rowKey.split('|')[1];
-  const prevBase  = fila != null ? previewOverrides[`${hoja}::${fila}`] : undefined;
-  const display   = prevBase != null ? prevBase + manualTotal : total;
-  if (display !== 0) {
+  if (total !== 0) {
     const tot = document.createElement('span');
     tot.className = 'chip-total';
-    tot.textContent = `Σ ${fmt(display)}`;
+    tot.textContent = `Σ ${fmt(total)}`;
     container.appendChild(tot);
   }
 }
@@ -558,27 +553,14 @@ function refreshRow(rowKey) {
 async function loadFolder(folderName) {
   if (!folderName) return;
   clearChipSelection();
-  previewOverrides = {};
   const accordion = document.getElementById('accordion-wrap');
   accordion.innerHTML = '<p style="padding:20px;color:#888;font-size:.85rem;">Cargando archivos...</p>';
 
-  // Cargar archivos y preview en paralelo; previewOverrides debe estar listo ANTES de renderizar
-  // para que el Σ de salarios (5105) muestre el valor correcto desde el primer render.
-  const [data, prevData] = await Promise.all([
-    fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json()),
-    fetch(`/api/preview/${encodeURIComponent(folderName)}`).then(r => r.json()).catch(() => ({}))
-  ]);
+  const data = await fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json());
 
   if (document.getElementById('folder-select').value !== folderName) return;
 
   filesData = data;
-
-  // Solo 5105: su valor real viene de leer_5105 (multi-entidad), no de chips.
-  (prevData.items || []).forEach(it => {
-    if (it.fila != null && it.valor_base_5105 != null)
-      previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105;
-  });
-
   actualizarValoresEnMappings(data);
 
   accordion.innerHTML = '';

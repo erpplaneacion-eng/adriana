@@ -614,53 +614,6 @@ def calcular_preview(carpeta_mes):
                 'fuentes'    : fuentes_log,
             })
 
-    # Incluir el cálculo de procesar_5105 (reemplaza el item de Salarios basado en chips)
-    config_5105 = _db.load_config_5105()
-    archivos_5105 = sorted([
-        f for f in os.listdir(carpeta_mes)
-        if re.match(r'^5105_', f, re.IGNORECASE) and f.lower().endswith('.xls')
-        and os.path.isfile(os.path.join(carpeta_mes, f))
-    ])
-    if archivos_5105 and config_5105:
-        total_5105, fuentes_5105, adv_5105 = 0.0, [], []
-        for nombre in archivos_5105:
-            m = re.search(
-                r'^5105_(.+?)_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_',
-                nombre, re.IGNORECASE)
-            entidad = m.group(1) if m else None
-            if not entidad or entidad not in config_5105:
-                adv_5105.append(f'[OMITIDO] {nombre}')
-                continue
-            try:
-                valor, _ = leer_5105(os.path.join(carpeta_mes, nombre), config_5105[entidad])
-                total_5105 += valor
-                fuentes_5105.append({'file_key': f'5105_{entidad}', 'codigo': '5105',
-                                     'seccion': '99 GENERAL', 'op': '+', 'valor': valor})
-            except Exception as e:
-                adv_5105.append(f'ERROR {nombre}: {e}')
-        # Aplicar valor_fijo del config sobre el total 5105 (igual que procesar_5105)
-        vf = total_5105
-        cfg_5105 = next((c for c in items
-                         if c.get('hoja', '').strip() == 'GASTOS ADMINISTRATIVOS'
-                         and c.get('codigo_a') == '5105'), None)
-        if cfg_5105:
-            for op_item in (cfg_5105.get('valor_fijo') or []):
-                op, val = op_item.get('op', '+'), float(op_item.get('valor', 0))
-                if   op == '+': vf += val
-                elif op == '-': vf -= val
-                elif op == '*': vf *= val
-                elif op == '/' and val: vf /= val
-        for item in resultado:
-            if item['hoja'] == 'GASTOS ADMINISTRATIVOS' and item['codigo_a'] == '5105':
-                item['valor_total']    = vf          # con valor_fijo → para el modal de preview
-                item['valor_base_5105'] = total_5105  # sin valor_fijo → UI lo suma con manualValues actuales
-                item['fuentes']        = fuentes_5105
-                item['advertencias'].extend(adv_5105)
-                break
-        else:
-            resultado.append({'hoja': 'GASTOS ADMINISTRATIVOS', 'fila': 6, 'codigo_a': '5105',
-                               'valor_total': vf, 'valor_base_5105': total_5105,
-                               'advertencias': adv_5105, 'fuentes': fuentes_5105})
 
     return resultado
 
@@ -939,12 +892,6 @@ def procesar_mes(carpeta_mes):
     # Paso 1: Gastos (todas las hojas según config)
     log_gastos = procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nombre)
 
-    # Paso 2: Salarios 5105 → corre DESPUÉS de gastos para no ser pisado por items del config
-    log_5105 = None
-    if hoja_admin:
-        log_5105 = procesar_5105(carpeta_mes, hoja_admin, columna_xlsx, mes_nombre)
-    else:
-        print("ADVERTENCIA: No se encontro hoja de Gastos Administrativos para 5105.")
 
     # Paso 3: Fórmulas internas cross-sheet en GASTOS ADMINISTRATIVOS
     # F89  = CASINO!{col_casino}$144  (col_casino = mes_num * 3)
@@ -988,7 +935,7 @@ def procesar_mes(carpeta_mes):
         wb_dest.save(ARCHIVO_PRINCIPAL)
         print(f"[OK] Archivo guardado: {ARCHIVO_PRINCIPAL}")
         # Registrar ejecución exitosa en la DB
-        todos_log = (log_gastos or []) + ([log_5105] if log_5105 else [])
+        todos_log = (log_gastos or [])
         _db.log_ejecucion(mes_nombre, exito=True, valores=todos_log)
         print(f"[DB] Ejecución registrada para {mes_nombre}")
     except PermissionError:
