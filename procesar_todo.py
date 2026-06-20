@@ -458,9 +458,21 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
                     col_5105  = rango.min_col
                     break
             celda = hoja_dest.cell(row=fila_5105, column=col_5105)
-            celda.value = total_general
+            valor_a_escribir = total_general
+            cfg_items = _db.load_config().get('items', [])
+            cfg_5105 = next((c for c in cfg_items
+                             if c.get('hoja', '').strip() == 'GASTOS ADMINISTRATIVOS'
+                             and c.get('codigo_a') == '5105'), None)
+            if cfg_5105:
+                for op_item in (cfg_5105.get('valor_fijo') or []):
+                    op, val = op_item.get('op', '+'), float(op_item.get('valor', 0))
+                    if   op == '+': valor_a_escribir += val
+                    elif op == '-': valor_a_escribir -= val
+                    elif op == '*': valor_a_escribir *= val
+                    elif op == '/' and val: valor_a_escribir /= val
+            celda.value = valor_a_escribir
             texto = "\n".join(detalle_entidades)
-            texto += f"\n{'-'*30}\nTotal: ${total_general:,.0f}\nGenerado: {date.today()}"
+            texto += f"\n{'-'*30}\nTotal: ${valor_a_escribir:,.0f}\nGenerado: {date.today()}"
             comentario = Comment(texto, "Script")
             comentario.width  = 350
             comentario.height = 80 + 20 * len(detalle_entidades)
@@ -625,15 +637,27 @@ def calcular_preview(carpeta_mes):
                                      'seccion': '99 GENERAL', 'op': '+', 'valor': valor})
             except Exception as e:
                 adv_5105.append(f'ERROR {nombre}: {e}')
+        # Aplicar valor_fijo del config sobre el total 5105 (igual que procesar_5105)
+        vf = total_5105
+        cfg_5105 = next((c for c in items
+                         if c.get('hoja', '').strip() == 'GASTOS ADMINISTRATIVOS'
+                         and c.get('codigo_a') == '5105'), None)
+        if cfg_5105:
+            for op_item in (cfg_5105.get('valor_fijo') or []):
+                op, val = op_item.get('op', '+'), float(op_item.get('valor', 0))
+                if   op == '+': vf += val
+                elif op == '-': vf -= val
+                elif op == '*': vf *= val
+                elif op == '/' and val: vf /= val
         for item in resultado:
             if item['hoja'] == 'GASTOS ADMINISTRATIVOS' and item['codigo_a'] == '5105':
-                item['valor_total'] = total_5105
+                item['valor_total'] = vf
                 item['fuentes']     = fuentes_5105
                 item['advertencias'].extend(adv_5105)
                 break
         else:
             resultado.append({'hoja': 'GASTOS ADMINISTRATIVOS', 'fila': 6, 'codigo_a': '5105',
-                               'valor_total': total_5105, 'advertencias': adv_5105,
+                               'valor_total': vf, 'advertencias': adv_5105,
                                'fuentes': fuentes_5105})
 
     return resultado
