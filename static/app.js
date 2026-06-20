@@ -413,9 +413,6 @@ function renderChips(rowKey, sources, container) {
     opBtn.addEventListener('click', e => {
       e.stopPropagation();
       mappings[rowKey][idx].op = op === '-' ? '+' : '-';
-      const _filaOp = rowKey.split('|')[1];
-      const _hojaOp = rowKey.split('::')[0];
-      if (_filaOp != null) delete previewOverrides[`${_hojaOp}::${_filaOp}`];
       markDirty();
       refreshRow(rowKey);
       updateStats();
@@ -517,11 +514,6 @@ function addSourceToRow(rowKey, chipData) {
     op      : '+'
   });
 
-  // Limpiar override del preview para que el chip nuevo se refleje en el Σ
-  const _filaAdd = rowKey.split('|')[1];
-  const _hojaAdd = rowKey.split('::')[0];
-  if (_filaAdd != null) delete previewOverrides[`${_hojaAdd}::${_filaAdd}`];
-
   markDirty();
   refreshRow(rowKey);
   updateStats();
@@ -531,10 +523,6 @@ function removeSource(rowKey, idx) {
   if (!mappings[rowKey]) return;
   mappings[rowKey].splice(idx, 1);
   if (mappings[rowKey].length === 0) delete mappings[rowKey];
-  // Limpiar override para que el Σ refleje la eliminación del chip
-  const _filaRem = rowKey.split('|')[1];
-  const _hojaRem = rowKey.split('::')[0];
-  if (_filaRem != null) delete previewOverrides[`${_hojaRem}::${_filaRem}`];
   markDirty();
   refreshRow(rowKey);
   updateStats();
@@ -923,7 +911,7 @@ async function saveConfig() {
   if (res.ok) {
     clearDirty();
     updateStats();
-    showLog(`✅ Config guardado. Backup en: ${res.backup}`, true);
+    showLog('✅ Config guardado correctamente.', true);
     setTimeout(hideLog, 4000);
     return true;
   } else {
