@@ -11,8 +11,9 @@ let mappingSheets = {};   // { key: 'GASTOS OPERATIVOS' }  — hoja destino de c
 let filesData     = {};   // { nombre_archivo: { tipo, items } }
 let configRaw     = null; // config_gastos.json completo
 let folders       = [];
-let selectedChips = new Map(); // chipId → dragData (selección múltiple)
-let isDirty       = false; // cambios pendientes por guardar
+let selectedChips   = new Map(); // chipId → dragData (selección múltiple)
+let isDirty         = false; // cambios pendientes por guardar
+let previewOverrides = {};   // { "hoja::fila": valor_total } — valores de procesar_5105 para Σ correcto
 
 // ── Utilidades ──────────────────────────────────────────────
 const fmt = v => v == null ? '' : '$' + Number(v).toLocaleString('es-CO', {maximumFractionDigits: 0});
@@ -473,7 +474,10 @@ function renderChips(rowKey, sources, container) {
   if (total !== 0) {
     const tot = document.createElement('span');
     tot.className = 'chip-total';
-    tot.textContent = `Σ ${fmt(total)}`;
+    const hoja = rowKey.split('::')[0];
+    const fila = rowKey.split('|')[1];
+    const override = fila != null ? previewOverrides[`${hoja}::${fila}`] : undefined;
+    tot.textContent = `Σ ${fmt(override != null ? override : total)}`;
     container.appendChild(tot);
   }
 }
@@ -550,11 +554,20 @@ function refreshRow(rowKey) {
 async function loadFolder(folderName) {
   if (!folderName) return;
   clearChipSelection();
+  previewOverrides = {};
   const accordion = document.getElementById('accordion-wrap');
   accordion.innerHTML = '<p style="padding:20px;color:#888;font-size:.85rem;">Cargando archivos...</p>';
 
-  const data = await fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json());
-  filesData  = data;
+  const [data, prevData] = await Promise.all([
+    fetch(`/api/files/${encodeURIComponent(folderName)}`).then(r => r.json()),
+    fetch(`/api/preview/${encodeURIComponent(folderName)}`).then(r => r.json()).catch(() => null),
+  ]);
+  filesData = data;
+  if (prevData && prevData.ok) {
+    (prevData.items || []).forEach(it => {
+      previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_total;
+    });
+  }
 
   // Actualizar src.valor en los mappings guardados usando los datos recién cargados
   actualizarValoresEnMappings(data);

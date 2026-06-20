@@ -601,6 +601,41 @@ def calcular_preview(carpeta_mes):
                 'fuentes'    : fuentes_log,
             })
 
+    # Incluir el cálculo de procesar_5105 (reemplaza el item de Salarios basado en chips)
+    config_5105 = _db.load_config_5105()
+    archivos_5105 = sorted([
+        f for f in os.listdir(carpeta_mes)
+        if re.match(r'^5105_', f, re.IGNORECASE) and f.lower().endswith('.xls')
+        and os.path.isfile(os.path.join(carpeta_mes, f))
+    ])
+    if archivos_5105 and config_5105:
+        total_5105, fuentes_5105, adv_5105 = 0.0, [], []
+        for nombre in archivos_5105:
+            m = re.search(
+                r'^5105_(.+?)_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)_',
+                nombre, re.IGNORECASE)
+            entidad = m.group(1) if m else None
+            if not entidad or entidad not in config_5105:
+                adv_5105.append(f'[OMITIDO] {nombre}')
+                continue
+            try:
+                valor, _ = leer_5105(os.path.join(carpeta_mes, nombre), config_5105[entidad])
+                total_5105 += valor
+                fuentes_5105.append({'file_key': f'5105_{entidad}', 'codigo': '5105',
+                                     'seccion': '99 GENERAL', 'op': '+', 'valor': valor})
+            except Exception as e:
+                adv_5105.append(f'ERROR {nombre}: {e}')
+        for item in resultado:
+            if item['hoja'] == 'GASTOS ADMINISTRATIVOS' and item['codigo_a'] == '5105':
+                item['valor_total'] = total_5105
+                item['fuentes']     = fuentes_5105
+                item['advertencias'].extend(adv_5105)
+                break
+        else:
+            resultado.append({'hoja': 'GASTOS ADMINISTRATIVOS', 'fila': 6, 'codigo_a': '5105',
+                               'valor_total': total_5105, 'advertencias': adv_5105,
+                               'fuentes': fuentes_5105})
+
     return resultado
 
 
