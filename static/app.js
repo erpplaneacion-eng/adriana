@@ -571,6 +571,10 @@ async function loadFolder(folderName) {
 
   if (document.getElementById('folder-select').value !== folderName) return;
 
+  mappings     = {};
+  manualValues = {};
+  clearDirty();
+
   filesData = data;
   actualizarValoresEnMappings(data);
 
