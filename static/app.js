@@ -257,7 +257,7 @@ function renderDestRows() {
     const key = makeRowKey(currentSheet.nombre, codeKey, fila.fila);
 
     const sources = mappings[key] || mappings[`${codeKey}|${fila.fila}`] || [];
-    const hasData = sources.length > 0;
+    const hasData = sources.length > 0 || !!(manualValues[key] && manualValues[key].length > 0);
 
     const div = document.createElement('div');
     div.className   = `dest-row ${hasData ? 'has-sources' : 'no-sources'}`;
@@ -340,13 +340,10 @@ function renderManualOps(rowKey, container) {
       if (!manualValues[rowKey][idx]) manualValues[rowKey][idx] = { op: '+', valor: 0 };
       manualValues[rowKey][idx].op = sel.value;
       markDirty();
-      // Re-renderizar chips para actualizar el total sin tocar el DOM del manual
       const safeKey  = rowKey.replace(/[^a-z0-9]/gi, '_');
       const dropZone = document.getElementById(`sources-${safeKey}`);
       const sources  = mappings[rowKey] || [];
-      if (dropZone) {
-        if (sources.length > 0) renderChips(rowKey, sources, dropZone);
-      }
+      if (dropZone) renderChips(rowKey, sources, dropZone);
       updateStats();
     });
 
@@ -359,7 +356,7 @@ function renderManualOps(rowKey, container) {
         const safeKey  = rowKey.replace(/[^a-z0-9]/gi, '_');
         const dropZone = document.getElementById(`sources-${safeKey}`);
         const sources  = mappings[rowKey] || [];
-        if (dropZone && sources.length > 0) renderChips(rowKey, sources, dropZone);
+        if (dropZone) renderChips(rowKey, sources, dropZone);
       } else {
         manualValues[rowKey].splice(idx, 1);
         if (manualValues[rowKey].length === 0) delete manualValues[rowKey];
@@ -416,6 +413,9 @@ function renderChips(rowKey, sources, container) {
     opBtn.addEventListener('click', e => {
       e.stopPropagation();
       mappings[rowKey][idx].op = op === '-' ? '+' : '-';
+      const _filaOp = rowKey.split('|')[1];
+      const _hojaOp = rowKey.split('::')[0];
+      if (_filaOp != null) delete previewOverrides[`${_hojaOp}::${_filaOp}`];
       markDirty();
       refreshRow(rowKey);
       updateStats();
@@ -548,7 +548,7 @@ function refreshRow(rowKey) {
   if (!dropZone || !destRow) return;
 
   const sources = mappings[rowKey] || [];
-  const hasData = sources.length > 0;
+  const hasData = sources.length > 0 || !!(manualValues[rowKey] && manualValues[rowKey].length > 0);
   destRow.className = `dest-row ${hasData ? 'has-sources' : 'no-sources'}`;
 
   const statusDot = destRow.querySelector('.dest-status');
@@ -589,8 +589,10 @@ async function loadFolder(folderName) {
       if (document.getElementById('folder-select').value !== capturedFolder) return;
       previewOverrides = {};
       (prevData.items || []).forEach(it => {
-        if (it.fila != null)
-          previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105 ?? it.valor_total;
+        // Solo 5105: su valor real viene de leer_5105 (multi-entidad), no de chips.
+        // Para otras filas, el Σ se calcula directo desde los chips en la UI.
+        if (it.fila != null && it.valor_base_5105 != null)
+          previewOverrides[`${it.hoja}::${it.fila}`] = it.valor_base_5105;
       });
       if (currentSheet) renderDestRows();
     })

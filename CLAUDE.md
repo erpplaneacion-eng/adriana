@@ -35,7 +35,7 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 |---|---|
 | `app.py` | Flask backend del Config Builder. Sirve la UI y expone los endpoints API. |
 | `db.py` | Capa de acceso a `chvs.db` (SQLite). `save_config/load_config`, `save_config_5105/load_config_5105`, `log_ejecucion`, `get_historial`, `diff_ejecuciones`. **`save_config()` NO borra `fuentes_valor`/`valores_escritos`** (son tablas de auditoría, no de config). |
-| `procesar_todo.py` | Script principal. 4 pasos: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. También expone `calcular_preview()` y `_construir_archivos_cache()`. |
+| `procesar_todo.py` | Script principal. 4 pasos en `procesar_mes()`: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. También expone `calcular_preview()` y `_construir_archivos_cache()`. **Nota**: el docstring de nivel de módulo del archivo lista el orden al revés (5105 primero) — ignorarlo, `procesar_mes()` es la fuente de verdad. |
 | `procesar_gastos.py` | Script standalone de gastos (**legado**). BASE hardcodeada, apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
 | `procesar_5105.py` | Script standalone de nómina (**legado**). BASE hardcodeada. |
 | `config_gastos.json` | Solo para migración inicial a `chvs.db`. No es la fuente de verdad en producción. |
@@ -129,6 +129,7 @@ Los chips en la UI muestran el valor neto (J−K o solo J) según lo detectado e
 - **Hojas estándar** (GASTOS ADMINISTRATIVOS, GASTOS OPERATIVOS, GASTOS VEHICULOS, etc.): columna = `MES_COLUMNA[mes]` → ENE=3, FEB=4, MAR=5 ... DIC=14
 - **Hojas con 3 cols/mes**: columna = `mes_num * 3` → ENE=3, FEB=6, MAR=9...
   - Lista completa: CASINO, CALI, YUMBO, BUGA, COMEDORES CALI, COMEDORES PALMIRA, COMEDORES VALLE, CTAS EN PPACION, PYG TOTAL, RECREARTE
+  - **`COMEDORES VALLE`** está en `COLUMNA_HOJA` (usa patrón 3-cols) pero **no** tiene entrada en `FORMULAS_CROSS_SHEET` — sus filas 148-151 no se escriben automáticamente.
   - En estas hojas, las columnas intermedias (4,5,7,8...) son de ratio/presupuesto, NO de valor mensual.
 - Añadir una hoja al patrón 3-cols: agregar en `COLUMNA_HOJA` en `procesar_todo.py` y en `HOJAS_3COL` en `app.py`.
 
@@ -264,7 +265,7 @@ Las filas cross-sheet que deben excluirse pero no son detectadas automáticament
 
 `HOJAS_EXCLUIR` = hojas que no se muestran en la UI (`%DIST C`, `%DIST C `).
 `FILAS_EXCLUIR_GLOBAL` = filas excluidas en todas las hojas (encabezados corporativos: CORPORACIÓN HACIA UN VALLE SOLIDARIO, DIAS DE ATENCIÓN).
-`TITULOS_SECCION` = filas de fórmula que se renderizan como **separador visual de sección** (barra azul con el nombre en mayúsculas, sin chips ni operaciones). Las filas de totales (TOTAL..., UTILIDAD..., COSTO NETO, etc.) de esas mismas hojas siguen ocultas. Para agregar una hoja: añadir entrada en `TITULOS_SECCION` en `app.py`.
+`TITULOS_SECCION` = filas de fórmula que se renderizan como **separador visual de sección** (barra azul con el nombre en mayúsculas, sin chips ni operaciones). Las filas de totales (TOTAL..., UTILIDAD..., COSTO NETO, etc.) de esas mismas hojas siguen ocultas. Actualmente cubre: GASTOS ADMINISTRATIVOS, GASTOS VEHICULOS, CASINO, CALI, YUMBO, COMEDORES CALI, COMEDORES PALMIRA, CTAS EN PPACION, PYG TOTAL. Para agregar una hoja: añadir entrada en `TITULOS_SECCION` en `app.py`.
 
 ### Limpieza de columna antes de escribir (procesar_todo.py)
 

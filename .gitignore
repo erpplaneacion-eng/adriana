@@ -6,6 +6,11 @@ __pycache__/
 AGENTS.md
 .claude/
 
+# Archivos de runtime / datos de usuario
+chvs.db
+*.xlsx
+PROCESAR_MES.bat
+
 # Backups automáticos del config (generados al guardar desde la UI)
 config_gastos_backup_*.json
 
