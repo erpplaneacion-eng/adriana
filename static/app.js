@@ -601,20 +601,27 @@ function actualizarValoresEnMappings(data) {
     const fk = fileKey(nombre);
     if (!lookup[fk]) lookup[fk] = {};
     if (!lookupSec[fk]) lookupSec[fk] = {};
+    // ER: leer_er() solo lee "99 GENERAL" (primera sección) → primera ocurrencia gana.
+    // Resto (5105, 7205, 7105, AUX): leer_aux() suma todas las ocurrencias → acumular.
+    const esER = nombre.toUpperCase().startsWith('ESTADO DE RESULTADOS');
     (info.items || []).forEach(item => {
       if (!item.error && !item.separador && item.codigo) {
-        const cod = String(item.codigo).trim();
-        // Acumular (sumar) para igualar leer_aux que suma todas las ocurrencias del mismo código
-        if (lookup[fk][cod]) {
-          lookup[fk][cod].valor   += Number(item.valor)   || 0;
-          lookup[fk][cod].debito  += Number(item.debito)  || 0;
-          lookup[fk][cod].credito += Number(item.credito) || 0;
-          if (item.op_jk) lookup[fk][cod].op_jk = true;
+        const cod   = String(item.codigo).trim();
+        const entry = { valor: Number(item.valor) || 0, debito: Number(item.debito) || 0, credito: Number(item.credito) || 0, op_jk: !!item.op_jk };
+        if (esER) {
+          if (!(cod in lookup[fk])) lookup[fk][cod] = entry;
         } else {
-          lookup[fk][cod] = { valor: Number(item.valor) || 0, debito: Number(item.debito) || 0, credito: Number(item.credito) || 0, op_jk: !!item.op_jk };
+          if (lookup[fk][cod]) {
+            lookup[fk][cod].valor   += entry.valor;
+            lookup[fk][cod].debito  += entry.debito;
+            lookup[fk][cod].credito += entry.credito;
+            if (entry.op_jk) lookup[fk][cod].op_jk = true;
+          } else {
+            lookup[fk][cod] = entry;
+          }
         }
-        // Con sección: siempre guardar para acceso preciso
-        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = { valor: Number(item.valor) || 0, debito: Number(item.debito) || 0, credito: Number(item.credito) || 0, op_jk: !!item.op_jk };
+        // Con sección: siempre guardar para acceso preciso (sin acumular — sección:código es única)
+        if (item.seccion) lookupSec[fk][`${item.seccion}::${cod}`] = entry;
       }
     });
   });

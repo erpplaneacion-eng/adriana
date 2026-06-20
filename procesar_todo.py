@@ -446,7 +446,8 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
 
     print(f"  {'TOTAL 5105':<40} ${total_general:>16,.0f}")
 
-    fila_escrita = None
+    fila_escrita     = None
+    valor_a_escribir = total_general  # se actualiza con valor_fijo al encontrar la fila
     # Escribir en destino con comentario de trazabilidad
     for row in hoja_dest.iter_rows():
         if str(row[0].value or '').strip() == '5105':
@@ -485,7 +486,7 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
         'hoja'       : 'GASTOS ADMINISTRATIVOS',
         'fila'       : fila_escrita or 0,
         'codigo_a'   : '5105',
-        'valor_total': total_general,
+        'valor_total': valor_a_escribir,
         'fuentes'    : fuentes_log,
     }
 
