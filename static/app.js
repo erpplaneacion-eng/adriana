@@ -577,8 +577,10 @@ async function loadFolder(folderName) {
 
   if (document.getElementById('folder-select').value !== folderName) return;
 
-  mappings     = {};
-  manualValues = {};
+  // Recargar config desde DB para restaurar mappings guardados antes de actualizar valores
+  const configRes = await fetch('/api/config').then(r => r.json());
+  configRaw = configRes;
+  initMappingsFromConfig(configRes);
   clearDirty();
 
   filesData = data;
