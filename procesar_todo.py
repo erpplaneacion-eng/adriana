@@ -288,6 +288,14 @@ def leer_aux(filepath, codigos_buscar, seccion=None):
     nombre       = os.path.basename(filepath).upper()
     es_seccionado = nombre.startswith('7205_') or nombre.startswith('7105_')
 
+    # ponytail: códigos 5105 pueden venir en formato antiguo "010401   PLANEACION"
+    # → normalizar a solo la parte numérica para que startswith funcione
+    if nombre.startswith('5105_'):
+        codigos_buscar = {
+            (re.match(r'^(\d+)\s+', c).group(1) if re.match(r'^(\d+)\s+', c) else c)
+            for c in codigos_buscar
+        }
+
     # Rango de filas a buscar (todo el archivo por defecto)
     fila_min, fila_max = 0, ws.nrows
 
