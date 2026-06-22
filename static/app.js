@@ -964,7 +964,12 @@ function buildConfig() {
       if (!fileSources[savedKey]) {
         fileSources[savedKey] = { prefijo, entidad };
       }
-      const entry = { key: savedKey, codes: src.codigos || [src.codigo] };
+      let codes = src.codigos || [src.codigo];
+      // Normalizar códigos 5105 con formato antiguo "010401   PLANEACION" → "010401"
+      if (prefijo === '5105') {
+        codes = codes.map(c => { const m = String(c).match(/^(\d+)\s+/); return m ? m[1] : c; });
+      }
+      const entry = { key: savedKey, codes };
       if (src.sin_filtro)           entry.sin_filtro = true;
       if (src.seccion)              entry.seccion    = src.seccion;
       if (src.op && src.op !== '+') entry.op         = src.op;
