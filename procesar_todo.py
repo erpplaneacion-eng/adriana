@@ -468,7 +468,7 @@ def procesar_5105(carpeta_mes, hoja_dest, columna_xlsx, mes_nombre):
                     break
             celda = hoja_dest.cell(row=fila_5105, column=col_5105)
             valor_a_escribir = total_general
-            cfg_items = _db.load_config().get('items', [])
+            cfg_items = _db.load_config(mes_nombre).get('items', [])
             cfg_5105 = next((c for c in cfg_items
                              if c.get('hoja', '').strip() == 'GASTOS ADMINISTRATIVOS'
                              and c.get('codigo_a') == '5105'), None)
@@ -560,7 +560,7 @@ def calcular_preview(carpeta_mes):
     if not anio:
         raise ValueError("No se pudo detectar el año desde los nombres de archivo.")
 
-    config       = _db.load_config()
+    config       = _db.load_config(mes_nombre)
     file_sources = config['file_sources']
     items        = config['items']
     cache        = _construir_archivos_cache(carpeta_mes, file_sources, mes_abrev, anio)
@@ -636,7 +636,7 @@ def procesar_gastos(carpeta_mes, wb_dest, columna_xlsx, mes_abrev, anio, mes_nom
     print(f"PASO 2 - GASTOS (todas las hojas)")
     print(f"{'='*65}")
 
-    config = _db.load_config()
+    config = _db.load_config(mes_nombre)
 
     file_sources = config['file_sources']
     items        = config['items']

@@ -641,7 +641,8 @@ def api_files(folder):
 
 @app.route('/api/config')
 def api_config():
-    return jsonify(_db.load_config())
+    mes = request.args.get('mes', '').strip().upper() or None
+    return jsonify(_db.load_config(mes))
 
 
 @app.route('/api/config/save', methods=['POST'])
@@ -649,7 +650,8 @@ def api_config_save():
     """Recibe el nuevo config y lo guarda en la DB."""
     try:
         nuevo_config = request.get_json()
-        _db.save_config(nuevo_config)
+        mes = (nuevo_config.pop('mes', None) or '').strip().upper() or None
+        _db.save_config(nuevo_config, mes)
         return jsonify({'ok': True})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

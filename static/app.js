@@ -577,9 +577,13 @@ async function loadFolder(folderName) {
 
   if (document.getElementById('folder-select').value !== folderName) return;
 
-  // Recargar config desde DB para restaurar mappings guardados antes de actualizar valores
-  const configRes = await fetch('/api/config').then(r => r.json());
+  // Cargar config del mes seleccionado (vacío si nunca se configuró)
+  const mesSel = folderName.replace(/-DL$/i, '').toUpperCase();
+  const configRes = await fetch(`/api/config?mes=${encodeURIComponent(mesSel)}`).then(r => r.json());
   configRaw = configRes;
+  mappings      = {};
+  manualValues  = {};
+  mappingSheets = {};
   initMappingsFromConfig(configRes);
   clearDirty();
 
@@ -914,8 +918,10 @@ async function saveConfig() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Guardando...';
 
-  // Construir nuevo config
+  // Construir nuevo config (incluye mes para guardar por separado)
   const newConfig = buildConfig();
+  const folderSel = document.getElementById('folder-select').value;
+  if (folderSel) newConfig.mes = folderSel.replace(/-DL$/i, '').toUpperCase();
 
   const res = await fetch('/api/config/save', {
     method : 'POST',

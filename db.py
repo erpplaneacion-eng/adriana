@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS dest_rows (
     hoja       TEXT NOT NULL,
     codigo_a   TEXT NOT NULL,
     fila_dest  INTEGER,
-    buscar_por TEXT NOT NULL DEFAULT 'A'
+    buscar_por TEXT NOT NULL DEFAULT 'A',
+    mes        TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sources (
@@ -109,6 +110,10 @@ def init_db():
     """Crea el schema si no existe."""
     with get_conn() as conn:
         conn.executescript(_SCHEMA)
+        try:
+            conn.execute("ALTER TABLE dest_rows ADD COLUMN mes TEXT")
+        except Exception:
+            pass  # columna ya existe
 
 
 def _ya_migrado():
@@ -145,20 +150,28 @@ def migrate_from_json():
 # Guardar / cargar config_gastos
 # ---------------------------------------------------------------------------
 
-def save_config(cfg):
-    """Guarda el dict config (formato config_gastos.json) en la DB (reemplaza todo)."""
+def save_config(cfg, mes=None):
+    """Guarda config en la DB.
+    mes=None  → reemplaza todo (legado).
+    mes='MAYO' → reemplaza solo los items de ese mes; file_sources siempre global.
+    """
+    mes_key = mes.upper() if mes else None
     with get_conn() as conn:
-        # Borrar solo tablas de config (respetar FK; fuentes_valor/valores_escritos son historial)
-        conn.execute("DELETE FROM valor_fijo")
-        conn.execute("DELETE FROM sources")
-        conn.execute("DELETE FROM dest_rows")
+        # file_sources siempre globales
         conn.execute("DELETE FROM file_sources")
-
         for key, info in cfg.get('file_sources', {}).items():
             conn.execute(
                 "INSERT INTO file_sources (key,prefijo,entidad) VALUES (?,?,?)",
                 (key, info['prefijo'], info['entidad'])
             )
+
+        # dest_rows: solo borrar el mes indicado (CASCADE elimina sources/valor_fijo)
+        if mes_key:
+            conn.execute("DELETE FROM dest_rows WHERE mes=?", (mes_key,))
+        else:
+            conn.execute("DELETE FROM valor_fijo")
+            conn.execute("DELETE FROM sources")
+            conn.execute("DELETE FROM dest_rows")
 
         for item in cfg.get('items', []):
             hoja       = item.get('hoja', 'GASTOS ADMINISTRATIVOS')
@@ -167,8 +180,8 @@ def save_config(cfg):
             buscar_por = item.get('buscar_por', 'A')
 
             cur = conn.execute(
-                "INSERT INTO dest_rows (hoja,codigo_a,fila_dest,buscar_por) VALUES (?,?,?,?)",
-                (hoja, codigo_a, fila_dest, buscar_por)
+                "INSERT INTO dest_rows (hoja,codigo_a,fila_dest,buscar_por,mes) VALUES (?,?,?,?,?)",
+                (hoja, codigo_a, fila_dest, buscar_por, mes_key)
             )
             row_id = cur.lastrowid
 
@@ -198,11 +211,13 @@ def save_config(cfg):
                 )
 
 
-def load_config():
+def load_config(mes=None):
     """
-    Lee la config de la DB y la retorna en el mismo formato que config_gastos.json
-    (para compatibilidad con app.js sin cambios en el frontend).
+    Lee la config de la DB.
+    mes='MAYO' → solo items de ese mes (panel vacío si nunca se configuró).
+    mes=None   → todos los items (legado / procesar_todo sin mes especificado).
     """
+    mes_key = mes.upper() if mes else None
     with get_conn() as conn:
         file_sources = {
             r['key']: {'prefijo': r['prefijo'], 'entidad': r['entidad']}
@@ -210,7 +225,10 @@ def load_config():
         }
 
         items = []
-        for dr in conn.execute("SELECT * FROM dest_rows ORDER BY id").fetchall():
+        query = ("SELECT * FROM dest_rows WHERE mes=? ORDER BY id" if mes_key
+                 else "SELECT * FROM dest_rows ORDER BY id")
+        params = (mes_key,) if mes_key else ()
+        for dr in conn.execute(query, params).fetchall():
             item = {
                 'codigo_a'  : dr['codigo_a'],
                 'hoja'      : dr['hoja'],
@@ -410,3 +428,4 @@ def diff_ejecuciones(id_a, id_b):
                 'delta'   : (vb - va) if (va is not None and vb is not None) else None,
             })
         return result
+
