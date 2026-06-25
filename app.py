@@ -6,6 +6,7 @@ import os, re, json, warnings, subprocess, shutil, sys, unicodedata
 from datetime import date
 from flask import Flask, render_template, jsonify, request, send_file
 import db as _db
+import db_postgres as _pgdb
 
 warnings.filterwarnings('ignore')
 
@@ -36,6 +37,7 @@ for _cfg in ('config_gastos.json', 'config_5105.json'):
 # Inicializar DB y migrar desde JSON si es la primera vez
 _db.init_db()
 _db.migrate_from_json()
+_pgdb.init_pg()
 
 MES_NOMBRES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
                'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE']
@@ -621,19 +623,40 @@ def api_folders():
     return jsonify(carpetas)
 
 
+_RE_MES_FILE = re.compile(
+    r'_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC'
+    r'|ENERO|FEBRERO|MARZO|ABRIL|MAYO|JUNIO|JULIO|AGOSTO'
+    r'|SEPTIEMBRE|OCTUBRE|NOVIEMBRE|DICIEMBRE)_\d{4}.*$',
+    re.IGNORECASE
+)
+
+def _nombre_a_key(nombre):
+    base = _RE_MES_FILE.sub('', os.path.splitext(nombre)[0])
+    return re.sub(r'\s+', ' ', base).strip().replace(' ', '_')
+
+
 @app.route('/api/files/<path:folder>')
 def api_files(folder):
-    """Lee todos los XLS de la carpeta y extrae cÃƒÂƒÃ‚Â³digos por archivo."""
+    """Lee XLS de la carpeta; usa caché Postgres si ya fueron leídos."""
     carpeta = os.path.join(BASE, folder) if not os.path.isabs(folder) else folder
     if not os.path.isdir(carpeta):
         return jsonify({'error': f'Carpeta no encontrada: {carpeta}'}), 404
 
+    mes = os.path.basename(carpeta.rstrip('/\\')).replace('-DL', '').upper()
     resultado = {}
     for nombre in sorted(os.listdir(carpeta)):
         if not nombre.lower().endswith('.xls'):
             continue
-        ruta  = os.path.join(carpeta, nombre)
-        items = leer_todos_codigos(ruta)
+        try:
+            if _pgdb.tiene_chips(mes, nombre):
+                items = _pgdb.cargar_chips(mes, nombre)
+            else:
+                ruta  = os.path.join(carpeta, nombre)
+                items = leer_todos_codigos(ruta)
+                _pgdb.guardar_chips(mes, nombre, _nombre_a_key(nombre), items)
+        except Exception:
+            ruta  = os.path.join(carpeta, nombre)
+            items = leer_todos_codigos(ruta)
         resultado[nombre] = {'items': items}
 
     return jsonify(resultado)
