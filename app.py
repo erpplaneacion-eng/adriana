@@ -802,6 +802,21 @@ def api_download_informe():
                      download_name='INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 
 
+@app.route('/api/chips/reset/<mes>', methods=['POST'])
+def api_chips_reset(mes):
+    """Borra el caché de chips XLS para el mes. Al recargar /api/files/<mes> se regenera."""
+    mes = mes.upper()
+    try:
+        import psycopg2, os as _os
+        with psycopg2.connect(_os.environ['DATABASE_URL']) as conn, conn.cursor() as cur:
+            cur.execute("DELETE FROM chips_xls WHERE mes=%s", (mes,))
+            n = cur.rowcount
+            conn.commit()
+        return jsonify({'ok': True, 'borradas': n, 'mes': mes})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
 @app.route('/api/resultados/<mes>')
 def api_resultados(mes):
     """Devuelve los valores escritos al INFORME para el mes (desde Postgres).
