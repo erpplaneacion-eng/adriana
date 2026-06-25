@@ -952,10 +952,18 @@ def procesar_mes(carpeta_mes):
     try:
         wb_dest.save(ARCHIVO_PRINCIPAL)
         print(f"[OK] Archivo guardado: {ARCHIVO_PRINCIPAL}")
-        # Registrar ejecución exitosa en la DB
+        # Registrar ejecución exitosa en SQLite
         todos_log = (log_gastos or [])
         _db.log_ejecucion(mes_nombre, exito=True, valores=todos_log)
         print(f"[DB] Ejecución registrada para {mes_nombre}")
+        # Guardar resultados en Postgres
+        try:
+            import db_postgres as _pgdb
+            items_pg = calcular_preview(carpeta_mes)
+            _pgdb.guardar_resultados_mes(mes_nombre, items_pg)
+            print(f"[PG] {len(items_pg)} resultados guardados en Postgres")
+        except Exception as _pg_err:
+            print(f"[PG] No se pudo guardar en Postgres: {_pg_err}")
     except PermissionError:
         print(f"[ERROR] Cierre el archivo en Excel y vuelva a ejecutar.")
         _db.log_ejecucion(mes_nombre, exito=False, valores=[],

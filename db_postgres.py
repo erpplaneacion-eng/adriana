@@ -1,8 +1,9 @@
 """
-Capa de acceso a Postgres para caché de chips XLS.
-Tabla: chips_xls — una fila por item de cada archivo XLS, indexada por (mes, archivo, idx).
+Capa de acceso a Postgres.
+- chips_xls        : caché de los valores leídos de cada XLS por mes
+- informe_resultados: valores escritos al INFORME REAL por mes (qué quedó en cada celda)
 """
-import os
+import os, json
 import psycopg2
 import psycopg2.extras
 
@@ -12,7 +13,7 @@ def _conn():
 
 
 def init_pg():
-    """Crea la tabla si no existe."""
+    """Crea las tablas si no existen."""
     with _conn() as conn, conn.cursor() as cur:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS chips_xls (
@@ -31,6 +32,18 @@ def init_pg():
                 indent      INTEGER DEFAULT 0,
                 separador   BOOLEAN DEFAULT FALSE,
                 PRIMARY KEY (mes, archivo, idx)
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS informe_resultados (
+                id           BIGSERIAL PRIMARY KEY,
+                mes          TEXT NOT NULL,
+                ejecutado_en TIMESTAMPTZ DEFAULT NOW(),
+                hoja         TEXT NOT NULL,
+                fila         INTEGER NOT NULL,
+                codigo_a     TEXT,
+                valor_total  NUMERIC(18,2),
+                fuentes      JSONB
             )
         """)
         conn.commit()
@@ -91,3 +104,46 @@ def archivos_en_cache(mes):
     with _conn() as conn, conn.cursor() as cur:
         cur.execute("SELECT DISTINCT archivo FROM chips_xls WHERE mes=%s", (mes,))
         return {r[0] for r in cur.fetchall()}
+
+
+# ---------------------------------------------------------------------------
+# informe_resultados — qué quedó escrito en el INFORME REAL por mes
+# ---------------------------------------------------------------------------
+
+def guardar_resultados_mes(mes, items):
+    """Reemplaza los resultados del mes con los valores recién escritos al INFORME."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM informe_resultados WHERE mes=%s", (mes,))
+        psycopg2.extras.execute_batch(cur, """
+            INSERT INTO informe_resultados
+                (mes, hoja, fila, codigo_a, valor_total, fuentes)
+            VALUES (%s,%s,%s,%s,%s,%s)
+        """, [
+            (
+                mes,
+                item['hoja'],
+                int(item['fila']),
+                item.get('codigo_a'),
+                float(item.get('valor_total', 0) or 0),
+                json.dumps(item.get('fuentes', []), ensure_ascii=False),
+            )
+            for item in items
+        ])
+        conn.commit()
+
+
+def cargar_resultados_mes(mes):
+    """Devuelve los valores escritos al INFORME para ese mes."""
+    with _conn() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("""
+            SELECT hoja, fila, codigo_a, valor_total, fuentes, ejecutado_en
+            FROM informe_resultados
+            WHERE mes=%s
+            ORDER BY hoja, fila
+        """, (mes,))
+        rows = []
+        for r in cur.fetchall():
+            d = dict(r)
+            d['fuentes'] = d['fuentes'] if isinstance(d['fuentes'], list) else json.loads(d['fuentes'] or '[]')
+            rows.append(d)
+        return rows
