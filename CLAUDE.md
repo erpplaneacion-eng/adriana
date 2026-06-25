@@ -35,7 +35,8 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 |---|---|
 | `app.py` | Flask backend del Config Builder. Sirve la UI y expone los endpoints API. |
 | `db.py` | Capa de acceso a `chvs.db` (SQLite). `save_config/load_config`, `save_config_5105/load_config_5105`, `log_ejecucion`, `get_historial`, `diff_ejecuciones`. **`save_config()` NO borra `fuentes_valor`/`valores_escritos`** (son tablas de auditoría, no de config). |
-| `procesar_todo.py` | Script principal. 4 pasos en `procesar_mes()`: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. También expone `calcular_preview()` y `_construir_archivos_cache()`. **Nota**: el docstring de nivel de módulo del archivo lista el orden al revés (5105 primero) — ignorarlo, `procesar_mes()` es la fuente de verdad. |
+| `db_postgres.py` | Capa de acceso a Postgres (Railway). Dos tablas: `chips_xls` (caché de datos XLS por mes) e `informe_resultados` (valores escritos al INFORME por mes). Conexión vía `DATABASE_URL`. |
+| `procesar_todo.py` | Script principal. 4 pasos en `procesar_mes()`: (1) gastos ER + aux (todas las hojas), (2) salarios 5105 — corre después para no ser sobreescrito, (3) fórmulas cross-sheet en GASTOS ADMIN filas 89 y 114, (4) fórmulas cross-sheet en hojas 3-col/mes filas 148-151. También expone `calcular_preview()` y `_construir_archivos_cache()`. Al terminar una ejecución exitosa guarda los resultados en Postgres. **Nota**: el docstring de nivel de módulo del archivo lista el orden al revés (5105 primero) — ignorarlo, `procesar_mes()` es la fuente de verdad. |
 | `procesar_gastos.py` | Script standalone de gastos (**legado**). BASE hardcodeada, apunta a `ANALIIS PESTAÑA GASTOS ADMINISTRATIVOS.xlsx`. |
 | `procesar_5105.py` | Script standalone de nómina (**legado**). BASE hardcodeada. |
 | `config_gastos.json` | Solo para migración inicial a `chvs.db`. No es la fuente de verdad en producción. |
@@ -49,7 +50,7 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 |---|---|---|
 | `/api/sheets` | GET | Hojas del INFORME REAL con filas (col A + B), filtrando fórmulas internas |
 | `/api/folders` | GET | Carpetas mensuales disponibles en BASE con conteo de XLS |
-| `/api/files/<folder>` | GET | Códigos extraídos de todos los XLS en la carpeta |
+| `/api/files/<folder>` | GET | Chips de todos los XLS de la carpeta. Usa caché Postgres; si no existe, lee XLS y guarda. |
 | `/api/config` | GET | Lee config desde `chvs.db` |
 | `/api/config/save` | POST | Guarda config en `chvs.db` (reemplaza tablas de config, preserva historial) |
 | `/api/run/<folder>` | POST | Ejecuta procesar_todo.py para la carpeta indicada |
@@ -60,10 +61,12 @@ INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx  (archivo destino, se sobreesc
 | `/api/upload/<folder>` | POST | Sube archivos XLS a una carpeta mensual en el servidor |
 | `/api/upload/informe` | POST | Reemplaza el INFORME REAL base con el archivo subido |
 | `/api/download/informe` | GET | Descarga el INFORME REAL actualizado |
+| `/api/resultados/<mes>` | GET | Valores escritos al INFORME para ese mes desde Postgres. Si no hay datos, calcula preview y los guarda. |
+| `/api/chips/reset/<mes>` | POST | Borra el caché de chips XLS de ese mes en Postgres. Al recargar `/api/files/<mes>` se regenera. |
 
-### Persistencia — SQLite (`db.py`)
+### Persistencia — SQLite (`db.py`) + Postgres (`db_postgres.py`)
 
-La config vive en `chvs.db` con 8 tablas:
+**SQLite `chvs.db`** — config y auditoría. La config vive aquí con 8 tablas:
 
 | Tabla | Contenido |
 |---|---|
@@ -78,6 +81,15 @@ La config vive en `chvs.db` con 8 tablas:
 
 `init_db()` crea el schema. `migrate_from_json()` migra los JSON legacy la primera vez. `save_config()` solo borra `file_sources`, `dest_rows`, `sources`, `valor_fijo` — **nunca** `ejecuciones`, `valores_escritos` ni `fuentes_valor`.
 
+**Postgres (Railway)** — caché de lectura y resultados. Conexión vía env var `DATABASE_URL`. Creado por `init_pg()` al arrancar `app.py`. Dos tablas:
+
+| Tabla | Contenido |
+|---|---|
+| `chips_xls` | Caché de los items leídos de cada XLS: `(mes, archivo, idx)` PK. Campos: `file_key, seccion, codigo, descripcion, valor, debito, credito, op_jk, negrita, indent, separador`. Se puebla la primera vez que se carga la carpeta; se invalida con `POST /api/chips/reset/<mes>`. |
+| `informe_resultados` | Valores escritos al INFORME por ejecución: `mes, hoja, fila, codigo_a, valor_total, fuentes (JSONB), ejecutado_en`. Se reemplaza completo en cada ejecución exitosa del mes. |
+
+`file_key` en `chips_xls` usa el mismo criterio que `fileKey()` en app.js (ver sección abajo) — `ER_CHVS`, `AUX_CHVS`, `7205_UT_VSOL_BUGA2025`, `51055101_DOT_CHVS`, etc. **No** usar el filename raw como clave.
+
 ### Resolución de archivos — `_construir_archivos_cache()` (procesar_todo.py)
 
 Helper que construye `{key: ruta_absoluta}` en 3 etapas, en orden:
@@ -86,7 +98,12 @@ Helper que construye `{key: ruta_absoluta}` en 3 etapas, en orden:
 2. **Auto-discovery**: escanea todos los `.xls` de la carpeta → genera key a partir del nombre sin `_MES_YYYY` normalizando espacios dobles (`re.sub(r'\s+', ' ', base).replace(' ', '_')`). Solo registra si el key aún no tiene ruta.
 3. **Alias sin año**: para keys que siguen sin ruta, busca keys existentes que empiecen con ese prefijo y asigna la ruta del que queda último en orden alfabético (i.e., el año más reciente).
 
-`encontrar_archivo()` intenta primero patrón con año exacto; si no encuentra, acepta cualquier año de 4 dígitos. Esto cubre archivos de contratos anteriores (e.g., `7205_UT_BUGA2025_MAR_2025.xls`) presentes en carpetas de 2026.
+`encontrar_archivo()` intenta tres patrones en orden:
+1. **Exacto**: `^{prefijo}_{entidad}_{mes}_{anio}.*\.xls`
+2. **Flexible** (cualquier año): `^{prefijo}_{entidad}_\d{4}.*\.xls`
+3. **Prefijo parcial** (`\d*` tras la entidad): `^{prefijo}_{entidad}\d*_{mes}_\d{4}.*\.xls` — cubre entidades con año pegado al nombre (ej. `CONS ALIM CALI2026`)
+
+Esto cubre archivos de contratos anteriores (e.g., `7205_UT BUGA2025_MAR_2025.xls`) presentes en carpetas de 2026.
 
 Tanto `procesar_gastos()` como `calcular_preview()` llaman a `_construir_archivos_cache()` — garantiza que ambas rutas producen resultados idénticos para los mismos archivos.
 
@@ -115,6 +132,10 @@ Sin este fallback, `file_sources` almacenaba `entidad=''` → `encontrar_archivo
 - `5105_<entidad>_<mes>_<año>.xls` — nómina. Se lee con `leer_5105()`. Tiene secciones por contrato.
 - `7205_<entidad>_<mes>_<año>.xls` — costos de personal auxiliar, se lee con `leer_aux()`. Tiene secciones por contrato.
 - `7105_<entidad>_<mes>_<año>.xls` — costos de raciones/alimentos, se lee con `leer_aux()`. Tiene secciones por contrato (misma estructura que 7205).
+- `51055101 DOT_<entidad>_<mes>_<año>.xls` — dotación (costo 51055101). Se lee con `leer_aux()`. Prefijo con espacio: `"51055101 DOT"`.
+- `72055101 DOT_<entidad>_<mes>_<año>.xls` — dotación operativa (costo 72055101). Se lee con `leer_aux()`. Prefijo con espacio: `"72055101 DOT"`.
+
+**Importante**: `51055101 DOT` empieza con `5105` y `72055101 DOT` empieza con `7205`. Tanto `fileKey()` como `inferPrefijo()` y `_nombre_a_key()` los detectan **antes** del check genérico de `5105`/`7205` para evitar colisión de prefijo.
 
 ### Estructura de columnas en archivos XLS fuente
 
@@ -171,12 +192,16 @@ Los chips en la UI muestran el valor neto (J−K o solo J) según lo detectado e
 - La clave de cada entidad es el nombre extraído del nombre de archivo: `5105_<entidad>_<mes>_<año>.xls`.
 - Si la entidad no aparece en el config, el archivo se omite (`[OMITIDO]` en el log).
 
-**Claves `key` generadas por `fileKey()` en app.js:**
+**Claves `key` generadas por `fileKey()` en app.js y `_nombre_a_key()` en app.py (idénticas):**
 - `ER_<ENTIDAD>` → archivos ESTADO DE RESULTADOS
 - `AUX_<ENTIDAD>` → archivos 51355001
+- `51055101_DOT_<ENTIDAD>` → archivos 51055101 DOT (detectado antes que 5105)
+- `72055101_DOT_<ENTIDAD>` → archivos 72055101 DOT (detectado antes que 7205)
 - `5105_<ENTIDAD>` → archivos 5105
 - `7205_<ENTIDAD>` → archivos 7205
 - `7105_<ENTIDAD>` → archivos 7105
+
+Espacios en la entidad se convierten a `_`. Ambas funciones deben producir keys idénticos para el mismo archivo — si difieren, los chips del panel izquierdo no mostrarán valores al cargar la carpeta.
 
 ### rowKey en el frontend (app.js)
 
@@ -325,7 +350,7 @@ En `procesar_todo.py`: `BASE = os.environ.get('CHVS_BASE', os.path.dirname(__fil
 
 | Archivo | Propósito |
 |---|---|
-| `requirements.txt` | Dependencias Python (Flask, openpyxl, xlrd, gunicorn) |
+| `requirements.txt` | Dependencias Python (Flask, openpyxl, xlrd, gunicorn, psycopg2-binary) |
 | `Procfile` | Comando de arranque: `gunicorn app:app --bind 0.0.0.0:$PORT` |
 | `.gitignore` | Excluye `__pycache__`, `.env`, backups de config |
 
@@ -361,6 +386,21 @@ En `procesar_todo.py`: `BASE = os.environ.get('CHVS_BASE', os.path.dirname(__fil
 
 | Variable | Valor | Obligatoria |
 |---|---|---|
-| `DATA_DIR` | `/data` | Sí (para persistencia) |
+| `DATA_DIR` | `/data` | Sí (para persistencia del volumen) |
+| `DATABASE_URL` | `postgresql://...` | Sí (inyectada automáticamente por el servicio Postgres de Railway) |
 | `PORT` | asignado por Railway | Auto |
 | `RAILWAY_ENVIRONMENT` | asignado por Railway | Auto (desactiva debug mode) |
+
+### Caché Postgres — operaciones de mantenimiento
+
+```bash
+# Invalidar caché de chips de un mes (p.ej. si se subieron nuevos XLS)
+POST /api/chips/reset/MAYO
+# → luego GET /api/files/MAYO regenera automáticamente
+
+# Ver qué valores quedaron escritos al INFORME para un mes
+GET /api/resultados/MAYO
+# → si no hay datos guardados, calcula preview y los persiste
+```
+
+Si los chips del panel derecho muestran valores incorrectos al cambiar de mes, probablemente el caché tiene datos viejos. Reset + recarga resuelve.
