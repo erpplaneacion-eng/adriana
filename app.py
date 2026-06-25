@@ -783,6 +783,26 @@ def api_download_informe():
                      download_name='INFORME REAL_2026 - FORMATO VERSION ORIGINAL.xlsx')
 
 
+@app.route('/api/resultados/<mes>')
+def api_resultados(mes):
+    """Devuelve los valores escritos al INFORME para el mes (desde Postgres).
+    Si no hay datos guardados, calcula el preview y los guarda primero."""
+    mes = mes.upper()
+    try:
+        rows = _pgdb.cargar_resultados_mes(mes)
+        if not rows:
+            carpeta = os.path.join(BASE, mes)
+            if not os.path.isdir(carpeta):
+                return jsonify({'error': f'No hay resultados guardados ni carpeta para {mes}'}), 404
+            import procesar_todo as _pt
+            items = _pt.calcular_preview(carpeta)
+            _pgdb.guardar_resultados_mes(mes, items)
+            rows = _pgdb.cargar_resultados_mes(mes)
+        return jsonify({'mes': mes, 'total': len(rows), 'items': rows})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('RAILWAY_ENVIRONMENT') is None  # False en Railway
