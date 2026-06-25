@@ -150,18 +150,26 @@ def norm_text(s):
 
 def encontrar_archivo(carpeta, prefijo, entidad, mes_abrev, anio):
     """Busca archivo con patron: {prefijo}_{entidad}_{mes}_{anio}*.xls
-    Primero intenta con el año exacto; si no encuentra, acepta cualquier año de 4 dígitos.
+    1. Entidad exacta + año exacto
+    2. Entidad exacta + cualquier año de 4 dígitos
+    3. Entidad como prefijo (permite dígitos pegados, ej. 'CONS ALIM CALI' → 'CONS ALIM CALI2026')
     """
-    p = rf'^{re.escape(prefijo)}_{re.escape(entidad)}_{mes_abrev}_'
-    patron_exact = re.compile(p + rf'{anio}.*\.xls$', re.IGNORECASE)
-    patron_flex  = re.compile(p + r'\d{4}.*\.xls$',   re.IGNORECASE)
-    archivos = os.listdir(carpeta)
+    p = rf'^{re.escape(prefijo)}_{re.escape(entidad)}'
+    patron_exact   = re.compile(p + rf'_{mes_abrev}_{anio}.*\.xls$',  re.IGNORECASE)
+    patron_flex    = re.compile(p + rf'_\d{{4}}.*\.xls$',              re.IGNORECASE)
+    # ponytail: \d* permite año pegado a entidad (CONS ALIM CALI2026_MAY_*)
+    patron_prefix  = re.compile(p + rf'\d*_{mes_abrev}_\d{{4}}.*\.xls$', re.IGNORECASE)
+    archivos = sorted(os.listdir(carpeta))
     for f in archivos:
         if patron_exact.match(f) and os.path.isfile(os.path.join(carpeta, f)):
             return os.path.join(carpeta, f)
     for f in archivos:
         if patron_flex.match(f) and os.path.isfile(os.path.join(carpeta, f)):
             return os.path.join(carpeta, f)
+    matches = [f for f in archivos
+               if patron_prefix.match(f) and os.path.isfile(os.path.join(carpeta, f))]
+    if matches:
+        return os.path.join(carpeta, sorted(matches)[-1])  # más reciente alfabéticamente
     return None
 
 
