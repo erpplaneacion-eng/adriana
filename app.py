@@ -631,8 +631,27 @@ _RE_MES_FILE = re.compile(
 )
 
 def _nombre_a_key(nombre):
+    """Genera la misma clave que fileKey() en JavaScript para que coincidan."""
     base = _RE_MES_FILE.sub('', os.path.splitext(nombre)[0])
-    return re.sub(r'\s+', ' ', base).strip().replace(' ', '_')
+    b = base.upper()
+    def _ent(s):
+        return re.sub(r'\s+', '_', s.strip())
+    if 'ESTADO DE RESULTADOS' in b:
+        m = re.match(r'ESTADO DE RESULTADOS_(.+)', b)
+        return 'ER_' + _ent(m.group(1)) if m else 'ER'
+    if b.startswith('51355001'):
+        m = re.match(r'51355001_(.+)', b)
+        return 'AUX_' + _ent(m.group(1)) if m else 'AUX'
+    if b.startswith('51055101'):
+        m = re.match(r'51055101[^_]*_(.+)', b)
+        return '51055101_DOT_' + _ent(m.group(1)) if m else '51055101_DOT'
+    if b.startswith('72055101'):
+        m = re.match(r'72055101[^_]*_(.+)', b)
+        return '72055101_DOT_' + _ent(m.group(1)) if m else '72055101_DOT'
+    for pfx in ('5105', '7205', '7105'):
+        if b.startswith(pfx + '_'):
+            return pfx + '_' + _ent(b[len(pfx)+1:])
+    return re.sub(r'\s+', '_', base).strip()
 
 
 @app.route('/api/files/<path:folder>')

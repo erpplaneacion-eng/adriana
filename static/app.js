@@ -43,26 +43,37 @@ function parseRowKey(rowKey) {
 const _MES_RE = '[A-Z]{3,13}';
 function fileKey(filename) {
   const f = filename.toUpperCase();
+  const ent = (s) => s.replace(/\s+/g,'_');
   const re = (pfx) => new RegExp(`${pfx}_(.+?)_${_MES_RE}_`);
   if (f.includes('ESTADO DE RESULTADOS')) {
     const m = f.match(/ESTADO DE RESULTADOS_(.+?)_[A-Z]{3,13}_/);
-    return m ? 'ER_' + m[1].replace(/\s+/g,'_') : 'ER';
+    return m ? 'ER_' + ent(m[1]) : 'ER';
   }
   if (f.startsWith('51355001')) {
     const m = f.match(re('51355001'));
-    return m ? 'AUX_' + m[1].replace(/\s+/g,'_') : 'AUX';
+    return m ? 'AUX_' + ent(m[1]) : 'AUX';
+  }
+  // 51055101 DOT — antes del check genérico de 5105
+  if (f.startsWith('51055101')) {
+    const m = f.match(/51055101[^_]*_(.+?)_[A-Z]{3,13}_/);
+    return m ? '51055101_DOT_' + ent(m[1]) : '51055101_DOT';
+  }
+  // 72055101 DOT — antes del check genérico de 7205
+  if (f.startsWith('72055101')) {
+    const m = f.match(/72055101[^_]*_(.+?)_[A-Z]{3,13}_/);
+    return m ? '72055101_DOT_' + ent(m[1]) : '72055101_DOT';
   }
   if (f.startsWith('5105')) {
     const m = f.match(re('5105'));
-    return m ? '5105_' + m[1].replace(/\s+/g,'_') : '5105';
+    return m ? '5105_' + ent(m[1]) : '5105';
   }
   if (f.startsWith('7205')) {
     const m = f.match(re('7205'));
-    return m ? '7205_' + m[1].replace(/\s+/g,'_') : '7205';
+    return m ? '7205_' + ent(m[1]) : '7205';
   }
   if (f.startsWith('7105')) {
     const m = f.match(re('7105'));
-    return m ? '7105_' + m[1].replace(/\s+/g,'_') : '7105';
+    return m ? '7105_' + ent(m[1]) : '7105';
   }
   return filename.split('.')[0].replace(/\s+/g,'_');
 }
