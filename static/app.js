@@ -1012,6 +1012,9 @@ function inferPrefijo(archivo) {
   const f = (archivo || '').toUpperCase();
   if (f.startsWith('ESTADO DE RESULTADOS')) return 'ESTADO DE RESULTADOS';
   if (f.startsWith('51355001'))              return '51355001';
+  // DOT antes del check genérico de 5-dígitos para evitar colisión de prefijo
+  if (f.startsWith('51055101'))              return archivo.split('_')[0];
+  if (f.startsWith('72055101'))              return archivo.split('_')[0];
   if (f.startsWith('5105'))                  return '5105';
   if (f.startsWith('7205'))                  return '7205';
   if (f.startsWith('7105'))                  return '7105';
